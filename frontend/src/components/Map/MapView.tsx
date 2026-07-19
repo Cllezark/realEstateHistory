@@ -79,10 +79,12 @@ export function MapView({
     // Inline style objects load synchronously during construction.
     // If already loaded, mark ready now; otherwise wait for the event.
     if (map.isStyleLoaded()) {
+      console.debug('[MapView] style already loaded synchronously, setting mapReady');
       styleLoadedRef.current = true;
       setMapReady(true);
     } else {
       map.on('style.load', () => {
+        console.debug('[MapView] style.load event fired asynchronously');
         styleLoadedRef.current = true;
         setMapReady(true);
       });
@@ -124,11 +126,15 @@ export function MapView({
     // Guard: don't add sources/layers if style isn't loaded
     if (!map.isStyleLoaded()) return;
 
+    console.debug('[MapView] geometry effect running — mapReady:', mapReady, 'features:', geometry.features.length, 'styleLoaded:', map.isStyleLoaded(), 'layersAdded:', layersAddedRef.current);
+
     const source = map.getSource('tracts') as maplibregl.GeoJSONSource | undefined;
 
     if (source) {
+      console.debug('[MapView] source exists, calling setData');
       source.setData(geometry as FeatureCollection);
     } else if (!layersAddedRef.current) {
+      console.debug('[MapView] adding tracts source and layers');
       layersAddedRef.current = true;
 
       map.addSource('tracts', {
@@ -136,13 +142,13 @@ export function MapView({
         data: geometry as FeatureCollection,
       });
 
-      // Fill layer (below labels but above basemap)
+      // Fill layer (below labels but above basemap) — bright test color to confirm rendering
       map.addLayer({
         id: 'tracts-fill',
         type: 'fill',
         source: 'tracts',
         paint: {
-          'fill-color': MISSING_COLOR,
+          'fill-color': '#ff6600',  // bright orange for visibility testing
           'fill-opacity': 0.75,
         },
       });
@@ -153,9 +159,9 @@ export function MapView({
         type: 'line',
         source: 'tracts',
         paint: {
-          'line-color': '#666',
-          'line-width': 0.5,
-          'line-opacity': 0.8,
+          'line-color': '#333',
+          'line-width': 1,
+          'line-opacity': 0.9,
         },
       });
 
