@@ -1,0 +1,225 @@
+# St. Petersburg Real Estate ETL Pipeline Configuration
+# All paths are relative to the project root.
+
+# ---------------------------------------------------------------------------
+# Pipeline metadata
+# ---------------------------------------------------------------------------
+pipeline:
+  name: "st-pete-real-estate-etl"
+  version: "1.0.0"
+  description: "Quarterly Census-tract-level housing-market records for St. Petersburg, FL parcels"
+  run_id: null  # Set at runtime via UUID
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+  data_dir: "data"
+  output_dir: "output"
+  reports_dir: "reports"
+
+  # Source files (relative to data_dir)
+  sources:
+    sales: ["RP_SALES.csv"]
+    property_info: ["RP_PROPERTY_INFO.csv"]
+    fhfa_hpi: ["hpi_at_tract.csv"]
+    fred_mortgage: ["MORTGAGE30US.csv"]
+    tiger_tract: "tl_2020_12_tract.shp"
+    tiger_place: "tl_2020_12_place.shp"
+
+  # Output files
+  output:
+    bronze_source_manifest: "bronze_source_manifest.parquet"
+    silver_property_snapshot: "silver_property_snapshot.parquet"
+    silver_property_current: "silver_property_current.parquet"
+    silver_sales: "silver_sales.parquet"
+    silver_fhfa_tract_hpi_annual: "silver_fhfa_tract_hpi_annual.parquet"
+    silver_fred_mortgage_weekly: "silver_fred_mortgage_weekly.parquet"
+    dim_st_petersburg_boundary: "dim_st_petersburg_boundary.parquet"
+    dim_census_tract: "dim_census_tract.parquet"
+    fact_sale_enriched: "fact_sale_enriched.parquet"
+    fact_mortgage_rate_quarter: "fact_mortgage_rate_quarter.parquet"
+    fact_tract_hpi_annual: "fact_tract_hpi_annual.parquet"
+    agg_tract_sale_quarter: "agg_tract_sale_quarter.parquet"
+    dashboard_tract_quarter: "dashboard_tract_quarter.parquet"
+    etl_rejected_records: "etl_rejected_records.parquet"
+    etl_quality_metrics: "etl_quality_metrics.parquet"
+
+# ---------------------------------------------------------------------------
+# Geographic boundaries
+# ---------------------------------------------------------------------------
+geography:
+  state_fips: "12"
+  county_fips: "103"
+  county_name: "Pinellas"
+
+  # 2020 TIGER/Line field names (no vintage suffix in 2020 files)
+  tiger_fields:
+    state_fp: "STATEFP"
+    county_fp: "COUNTYFP"
+    tract_ce: "TRACTCE"
+    geoid: "GEOID"
+    name: "NAME"
+    aland: "ALAND"
+    awater: "AWATER"
+
+  # St. Petersburg place
+  city:
+    place_fips: "63000"
+    place_geoid: "1263000"
+    name: "St. Petersburg"
+
+  # Census tract
+  census_tract:
+    geoid_length: 11
+    vintage: "2020"
+    vintage_description: "2020 TIGER/Line Census tracts (effective January 1, 2020)"
+
+  # Spatial assignment
+  spatial:
+    spatial_predicate: "covers"  # boundary-inclusive predicate
+    lat_min: 24.0
+    lat_max: 32.0
+    lon_min: -88.0
+    lon_max: -80.0
+    output_crs: "EPSG:4326"
+    project_crs: "EPSG:3086"  # Florida East (US Feet) for area calculations
+
+# ---------------------------------------------------------------------------
+# Analytical sale filter
+# ---------------------------------------------------------------------------
+sale_filter:
+  min_sale_date: "2021-01-01"
+  min_price: 1  # Positive price
+  max_price: 1000000000  # Sentinel upper bound
+
+  # Qualified sale codes (arm's-length transactions)
+  qualified_flags: ["Q", "M"]
+
+  # Sale must have a real month (MONTH_REAL)
+  require_real_month: true
+  real_month_code: "Y"
+
+  # Property class inclusion (LAND_USE_CD values for housing universe)
+  property_use_codes: [0, 1, 4, 8]  # 0=Vacant Res, 1=Single Family, 4=Condo, 8=Multi-Family
+
+  # Multi-parcel exclusion
+  exclude_multi_parcel_from_median: true
+
+  # Small-sample threshold
+  small_sample_threshold: 5
+  publish_small_samples: true  # Flag rather than delete
+
+# ---------------------------------------------------------------------------
+# PCPAO field mappings
+# ---------------------------------------------------------------------------
+pcpao:
+  strap_length: 18
+
+  # Property info canonical fields
+  property_canonical:
+    strap: "STRAP"
+    parcel_number: "PARCEL_NUMBER"
+    parcel_type: "PARCEL_TYPE"
+    property_use: "PROPERTY_USE"
+    land_use_code: "LAND_USE_CD"
+    site_address: "SITE_ADDRESS"
+    site_city_zip: "SITE_CITYZIP"
+    tax_district: "TAX_DISTRICT"
+    tax_district_description: "TAX_DIST_DSCR"
+    current_tax_district: "CURRENT_TAX_DISTRICT"
+    current_tax_district_description: "CURRENT_TAX_DIST_DSCR"
+    pcpao_census_tract: "CENSUS"
+    latitude: "LATITUDE"
+    longitude: "LONGITUDE"
+    living_area_sqft: "TOTAL_LIVING_SQFT"
+    living_units: "TOTAL_LIVING_UNITS"
+    year_built: "YEAR_BUILT"
+    parcel_status: "STATUS"
+    roll_year: "ROLL_YEAR"
+    subdivision: "SUBDIVISION"
+    site_city: "STR_CITY"
+    site_zip: "STR_ZIP"
+
+  # Sales canonical fields
+  sales_canonical:
+    strap: "STRAP"
+    parcel_number: "PARCEL_NUMBER"
+    sale_id: "SALE_ID"
+    sale_date: "SALE_DATE"
+    sale_price: "PRICE"
+    qualified_flag: "QUALIFIED_FLG"
+    book_page: "BOOK_PAGE"
+    vacant_improved: "VACANT_IMPROVED"
+    month_real: "MONTH_REAL"
+    day_real: "DAY_REAL"
+    grantee: "GRANTEE"
+    grantor: "GRANTOR"
+    multi_parcel_sale_flag: "MULTI_SALES_YN"
+
+  # Qualified sale codes
+  qualification_codes:
+    Q: "Qualified (arm's-length)"
+    U: "Unqualified"
+    M: "Qualified via other method"
+
+  # Encoding
+  property_encoding: "latin-1"
+  sales_encoding: "utf-8"
+
+# ---------------------------------------------------------------------------
+# FHFA HPI
+# ---------------------------------------------------------------------------
+fhfa:
+  tract_id_prefix: "12103"  # State 12 + County 103
+  tract_id_length: 11
+  vintage_expected: "2020"
+  fields:
+    tract_geoid: "tract"
+    state_abbr: "state_abbr"
+    year: "year"
+    annual_change: "annual_change"
+    hpi: "hpi"
+    hpi1990: "hpi1990"
+    hpi2000: "hpi2000"
+
+# ---------------------------------------------------------------------------
+# FRED mortgage rates
+# ---------------------------------------------------------------------------
+fred:
+  series_id: "MORTGAGE30US"
+  series_description: "30-Year Fixed Rate Mortgage Average in the United States"
+  unit: "percent"
+  frequency: "weekly"
+  seasonal_adjustment: "not seasonally adjusted"
+  methodology_break_date: "2022-11-17"
+  methodology_break_note: "Freddie Mac survey methodology change on November 17, 2022"
+  fields:
+    observation_date: "observation_date"
+    rate: "MORTGAGE30US"
+
+# ---------------------------------------------------------------------------
+# Mortgage payment calculation
+# ---------------------------------------------------------------------------
+mortgage:
+  down_payment_percent: 20.0
+  loan_term_years: 30
+  payment_components: "principal_and_interest"  # PI only, no TI
+
+# ---------------------------------------------------------------------------
+# Validation thresholds
+# ---------------------------------------------------------------------------
+validation:
+  # Warning thresholds (trigger warnings in quality report)
+  warnings:
+    max_null_pct_pinellas_hpi: 10.0
+    max_parcel_no_tract: 5.0       # percent
+    max_sale_no_parcel_match: 2.0   # percent
+    fhfa_tiger_join_min_pct: 80.0   # percent of FHFA tracts matching TIGER
+
+  # Failure thresholds (halt pipeline)
+  failures:
+    min_expected_rows: 100
+    min_pinellas_tracts: 200
+    max_coordinate_oob_pct: 50.0    # percent out-of-bounds
+    required_columns: []

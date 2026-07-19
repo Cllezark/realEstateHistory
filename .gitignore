@@ -1,0 +1,39 @@
+# Large source data files
+/data/MORTGAGE30US.csv
+/data/RP_PROPERTY_INFO.csv
+/data/RP_SALES.csv
+/data/hpi_at_tract.csv
+/data/*.zip
+
+# Python virtual environment
+.venv/
+
+# Pipeline output (generated)
+output/
+reports/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# Temporary
+*.tmp
+*.bak
