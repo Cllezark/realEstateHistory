@@ -62,59 +62,84 @@ export function MapView({
   // Track whether we've already added the tract layers to the map
   const layersAddedRef = useRef(false);
 
-  // Initialize map — check style immediately (inline styles load synchronously)
+  // Initialize map — defer to next frame to avoid WebGL context loss
+  // caused by React StrictMode double-mounting in development
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: BASEMAP_STYLE,
-      center: ST_PETE_CENTER,
-      zoom: ST_PETE_ZOOM,
-      attributionControl: { compact: true },
-    });
+    let cancelled = false;
+    const container = mapContainerRef.current;
 
-    map.addControl(new maplibregl.NavigationControl(), 'top-left');
+    // Defer map creation by one animation frame so the browser can
+    // reclaim the WebGL context from any previously-destroyed map
+    // (critical for React StrictMode double-mount in development)
+    const raf = requestAnimationFrame(() => {
+      if (cancelled || mapRef.current) return;
 
-    // Inline style objects load synchronously during construction.
-    // If already loaded, mark ready now; otherwise wait for the event.
-    if (map.isStyleLoaded()) {
-      console.debug('[MapView] style already loaded synchronously, setting mapReady');
-      styleLoadedRef.current = true;
-      setMapReady(true);
-    } else {
-      map.on('style.load', () => {
-        console.debug('[MapView] style.load event fired asynchronously');
+      const map = new maplibregl.Map({
+        container,
+        style: BASEMAP_STYLE,
+        center: ST_PETE_CENTER,
+        zoom: ST_PETE_ZOOM,
+        attributionControl: { compact: true },
+      });
+
+      map.addControl(new maplibregl.NavigationControl(), 'top-left');
+
+      // Inline style objects load synchronously during construction.
+      // If already loaded, mark ready now; otherwise wait for the event.
+      if (map.isStyleLoaded()) {
+        console.log('[MapView] style already loaded synchronously, setting mapReady');
         styleLoadedRef.current = true;
+        setMapReady(true);
+      } else {
+        console.log('[MapView] style not yet loaded, waiting for style.load event');
+        map.on('style.load', () => {
+          console.log('[MapView] style.load event fired, setting mapReady');
+          styleLoadedRef.current = true;
+          setMapReady(true);
+        });
+      }
+
+      // Handle WebGL context loss — attempt recovery
+      map.on('webglcontextlost', () => {
+        console.warn('[MapView] WebGL context lost');
+      });
+      map.on('webglcontextrestored', () => {
+        console.log('[MapView] WebGL context restored, re-adding layers if needed');
         setMapReady(true);
       });
-    }
 
-    // If the style fails to load (network error for tiles), still
-    // mark ready so GeoJSON overlays render on whatever we have
-    map.on('error', (e) => {
-      if ((e.error?.status === 404 || e.error?.status === 403) && !styleLoadedRef.current) {
-        console.warn('Map tile error (non-fatal):', e.error.message);
-        styleLoadedRef.current = true;
-        setMapReady(true);
-      }
+      // If the style fails to load (network error for tiles), still
+      // mark ready so GeoJSON overlays render on whatever we have
+      map.on('error', (e) => {
+        if ((e.error?.status === 404 || e.error?.status === 403) && !styleLoadedRef.current) {
+          console.warn('Map tile error (non-fatal):', e.error.message);
+          styleLoadedRef.current = true;
+          setMapReady(true);
+        }
+      });
+
+      // Click on empty space to deselect
+      map.on('click', (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ['tracts-fill'] });
+        if (features.length === 0) {
+          onSelectTract(null);
+        }
+      });
+
+      mapRef.current = map;
     });
-
-    // Click on empty space to deselect
-    map.on('click', (e) => {
-      const features = map.queryRenderedFeatures(e.point, { layers: ['tracts-fill'] });
-      if (features.length === 0) {
-        onSelectTract(null);
-      }
-    });
-
-    mapRef.current = map;
 
     return () => {
-      map.remove();
-      mapRef.current = null;
-      styleLoadedRef.current = false;
-      layersAddedRef.current = false;
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        styleLoadedRef.current = false;
+        layersAddedRef.current = false;
+      }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -126,15 +151,15 @@ export function MapView({
     // Guard: don't add sources/layers if style isn't loaded
     if (!map.isStyleLoaded()) return;
 
-    console.debug('[MapView] geometry effect running — mapReady:', mapReady, 'features:', geometry.features.length, 'styleLoaded:', map.isStyleLoaded(), 'layersAdded:', layersAddedRef.current);
+    console.log('[MapView] geometry effect running — mapReady:', mapReady, 'features:', geometry.features.length, 'styleLoaded:', map.isStyleLoaded(), 'layersAdded:', layersAddedRef.current);
 
     const source = map.getSource('tracts') as maplibregl.GeoJSONSource | undefined;
 
     if (source) {
-      console.debug('[MapView] source exists, calling setData');
+      console.log('[MapView] source exists, calling setData');
       source.setData(geometry as FeatureCollection);
     } else if (!layersAddedRef.current) {
-      console.debug('[MapView] adding tracts source and layers');
+      console.log('[MapView] adding tracts source and layers');
       layersAddedRef.current = true;
 
       map.addSource('tracts', {
