@@ -62,7 +62,7 @@ export function MapView({
   // Track whether we've already added the tract layers to the map
   const layersAddedRef = useRef(false);
 
-  // Initialize map — wait for style.load before marking ready
+  // Initialize map — check style immediately (inline styles load synchronously)
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -76,22 +76,25 @@ export function MapView({
 
     map.addControl(new maplibregl.NavigationControl(), 'top-left');
 
-    // Only mark ready after style (basemap tiles) finishes loading
-    map.on('style.load', () => {
+    // Inline style objects load synchronously during construction.
+    // If already loaded, mark ready now; otherwise wait for the event.
+    if (map.isStyleLoaded()) {
       styleLoadedRef.current = true;
       setMapReady(true);
-    });
+    } else {
+      map.on('style.load', () => {
+        styleLoadedRef.current = true;
+        setMapReady(true);
+      });
+    }
 
-    // If the style fails to load (network error, etc.), still allow
-    // the app to function with whatever we have
+    // If the style fails to load (network error for tiles), still
+    // mark ready so GeoJSON overlays render on whatever we have
     map.on('error', (e) => {
-      if (e.error?.status === 404 || e.error?.status === 403) {
+      if ((e.error?.status === 404 || e.error?.status === 403) && !styleLoadedRef.current) {
         console.warn('Map tile error (non-fatal):', e.error.message);
-        // Mark ready anyway so the GeoJSON overlays still render
-        if (!styleLoadedRef.current) {
-          styleLoadedRef.current = true;
-          setMapReady(true);
-        }
+        styleLoadedRef.current = true;
+        setMapReady(true);
       }
     });
 
