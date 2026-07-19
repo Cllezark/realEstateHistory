@@ -116,6 +116,41 @@ Edit `config.yaml` to adjust:
 - Coordinate validation bounds
 - Geographic vintage selection
 
+## Phase 2: Interactive Map Dashboard
+
+A React+TypeScript+Vite frontend application provides an interactive
+choropleth map of St. Petersburg housing market data by Census tract.
+
+```bash
+# Generate web assets from pipeline data
+python pipeline.py --stage publish
+
+# Start development server
+cd frontend
+npm install
+npm run dev
+
+# Run tests
+npm test
+
+# Production build
+npm run build
+```
+
+### Frontend Architecture
+
+See [docs/map-mvp-architecture.md](docs/map-mvp-architecture.md) for the full
+system overview, component tree, and data flow documentation.
+
+### Features
+
+- **Choropleth map** (MapLibre GL JS) with per-tract coloring by 10+ metrics
+- **Quarter timeline** with range slider, keyboard navigation, and play animation
+- **Tract details panel** with full quarterly metrics, warnings, and trend chart
+- **Appreciation comparison mode** with start/end quarter diverging color scale
+- **URL state sync** for shareable views (?tract=...&quarter=...&metric=...)
+- **Accessibility**: WCAG 2.1 AA keyboard navigation, focus indicators, reduced motion
+
 ## Key Design Decisions
 
 1. **2020 TIGER/Line geometry** — Uses 2020 vintage to match FHFA tract HPI
