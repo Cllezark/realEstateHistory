@@ -62,9 +62,11 @@ def assign_city_membership(
     geometry = [Point(lon, lat) for lon, lat in zip(valid_coords["longitude"], valid_coords["latitude"])]
     parcels_gdf = gpd.GeoDataFrame(valid_coords, geometry=geometry, crs="EPSG:4326")
 
-    # Spatial join: point-in-polygon with 'covers'
+    # Spatial join: point-in-polygon with 'within'
+    # Note: gpd.sjoin predicate applies as LEFT.predicate(RIGHT),
+    # so 'within' means the parcel point is within the city polygon.
     joined = gpd.sjoin(parcels_gdf, st_pete[["GEOID", "NAME", "geometry"]],
-                       how="left", predicate="covers")
+                       how="left", predicate="within")
 
     # Mark inside St. Pete
     parcels["inside_st_petersburg"] = False
@@ -77,7 +79,7 @@ def assign_city_membership(
     matched_idx = joined[joined["index_right"].notna()]["strap"]
     parcels.loc[parcels["strap"].isin(matched_idx), "inside_st_petersburg"] = True
     parcels.loc[parcels["strap"].isin(matched_idx), "city_geoid"] = config["geography"]["city"]["place_geoid"]
-    parcels.loc[parcels["strap"].isin(matched_idx), "city_assignment_method"] = "spatial_covers"
+    parcels.loc[parcels["strap"].isin(matched_idx), "city_assignment_method"] = "spatial_within"
 
     # For coord-missing parcels
     parcels.loc[parcels["_coord_missing"], "city_assignment_quality_flag"] = "MISSING_COORDS"

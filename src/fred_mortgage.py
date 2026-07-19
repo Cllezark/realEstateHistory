@@ -78,9 +78,9 @@ def normalize_fred_mortgage(
             "last_week",
         ],
         "value": [
-            len(df),
-            len(weekly),
-            len(quarterly),
+            str(len(df)),
+            str(len(weekly)),
+            str(len(quarterly)),
             str(weekly["observation_date"].min().date()),
             str(weekly["observation_date"].max().date()),
         ],

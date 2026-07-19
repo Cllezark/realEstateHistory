@@ -5,6 +5,17 @@
 /data/hpi_at_tract.csv
 /data/*.zip
 
+# TIGER shapefile data (large binary files)
+/data/*.shp
+/data/*.dbf
+/data/*.shx
+/data/*.prj
+/data/*.cpg
+/data/*.xml
+
+# Project documentation (not code)
+/stPetePropertyETLPrompt.md
+
 # Python virtual environment
 .venv/
 

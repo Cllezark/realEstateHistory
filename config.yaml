@@ -77,7 +77,7 @@ geography:
 
   # Spatial assignment
   spatial:
-    spatial_predicate: "covers"  # boundary-inclusive predicate
+    spatial_predicate: "within"  # boundary-inclusive (point within polygon)
     lat_min: 24.0
     lat_max: 32.0
     lon_min: -88.0

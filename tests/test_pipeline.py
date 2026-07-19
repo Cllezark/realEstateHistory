@@ -8,8 +8,13 @@ import pandas as pd
 import geopandas as gpd
 
 # Ensure src is importable
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.utils import pad_tract_geoid, sha256_hex, load_config
+
+# Project root and output
+PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_CONFIG = PROJECT_ROOT / "config.yaml"
+OUTPUT_DIR = PROJECT_ROOT / "output"
 
 
 class TestUtils:
@@ -38,9 +43,8 @@ class TestUtils:
         assert len(h1) == 64
 
     def test_load_config(self):
-        config_path = Path(__file__).parent / "config.yaml"
-        if config_path.exists():
-            config = load_config(config_path)
+        if PROJECT_CONFIG.exists():
+            config = load_config(PROJECT_CONFIG)
             assert "pipeline" in config
             assert "geography" in config
             assert "sale_filter" in config
@@ -51,7 +55,7 @@ class TestOutputValidation:
 
     @pytest.fixture
     def output_dir(self):
-        d = Path(__file__).parent / "output"
+        d = OUTPUT_DIR
         if not d.exists():
             pytest.skip("Output directory not found. Run pipeline first.")
         return d
@@ -132,22 +136,21 @@ class TestPipelineIntegration:
     """Integration tests for pipeline logic."""
 
     def test_config_integrity(self):
-        config_path = Path(__file__).parent / "config.yaml"
-        if not config_path.exists():
+        if not PROJECT_CONFIG.exists():
             pytest.skip("Config not found")
-        config = load_config(config_path)
+        config = load_config(PROJECT_CONFIG)
         assert config["geography"]["state_fips"] == "12"
         assert config["geography"]["county_fips"] == "103"
         assert config["geography"]["city"]["place_fips"] == "63000"
         assert config["sale_filter"]["min_sale_date"] == "2021-01-01"
 
     def test_fhfa_prefix(self):
-        config = load_config(Path(__file__).parent / "config.yaml")
+        config = load_config(PROJECT_CONFIG)
         prefix = config["fhfa"]["tract_id_prefix"]
         assert prefix == "12103", f"FHFA tract prefix should be 12103, got {prefix}"
 
     def test_pcpao_strap_length(self):
-        config = load_config(Path(__file__).parent / "config.yaml")
+        config = load_config(PROJECT_CONFIG)
         assert config["pcpao"]["strap_length"] == 18
 
 

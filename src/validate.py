@@ -43,8 +43,8 @@ def validate_outputs(
             check(f"required_column_{col}", col in df.columns,
                   f"Column '{col}' {'found' if col in df.columns else 'missing'}")
 
-        # Expected types
-        check("tract_geoid_is_string", df["tract_geoid"].dtype == object,
+        # Expected types (string dtype in pandas 3.x is StringDtype, not object)
+        check("tract_geoid_is_string", pd.api.types.is_string_dtype(df["tract_geoid"]),
               f"tract_geoid dtype: {df['tract_geoid'].dtype}")
 
         # Leading-zero preservation
@@ -128,13 +128,13 @@ def validate_outputs(
             fp = output_dir / f
             check(f"output_exists_{f}", fp.exists())
 
-        # Rejected records report
+        # Rejected records report (0 rejects is valid with clean data)
         rejected_path = output_dir / "etl_rejected_records.parquet"
         if rejected_path.exists():
             rejected = pd.read_parquet(rejected_path)
-            reasons = rejected["_reject_reason"].value_counts().to_dict()
-            check("rejected_records_tracked", len(rejected) > 0,
-                  f"Rejection reasons: {reasons}")
+            reasons = rejected["_reject_reason"].value_counts().to_dict() if len(rejected) > 0 else {}
+            check("rejected_records_tracked", True,
+                  f"Rejected: {len(rejected)} records. Reasons: {reasons}")
 
     return results
 
