@@ -1,0 +1,148 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.noSelection {
+  padding: 1.5rem;
+  text-align: center;
+  color: #555;
+}
+
+.noSelection h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+  color: #222;
+}
+
+.currentQuarter {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.metaInfo {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.header {
+  padding: 1rem 1rem 0.5rem;
+}
+
+.tractName {
+  font-size: 1.15rem;
+  margin: 0;
+  color: #222;
+}
+
+.geoid {
+  font-size: 0.75rem;
+  color: #888;
+  font-family: monospace;
+}
+
+.quarterBadge {
+  padding: 0.25rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2b8cbe;
+}
+
+.warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0.5rem 1rem;
+}
+
+.warning {
+  font-size: 0.8rem;
+  color: #b8860b;
+  background: #fff8e1;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.metricsList {
+  margin: 0;
+  padding: 0.5rem 1rem;
+}
+
+.metricItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.metricItem dt {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.metricItem dd {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.tooltipTrigger {
+  position: relative;
+  cursor: help;
+  font-style: normal;
+  font-size: 0.75rem;
+  color: #888;
+  margin-left: 2px;
+}
+
+.tooltipTrigger .tooltip {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  width: 260px;
+  background: #333;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 8px 10px;
+  border-radius: 4px;
+  line-height: 1.4;
+  z-index: 20;
+  font-weight: 400;
+  text-align: left;
+}
+
+.tooltipTrigger:hover .tooltip,
+.tooltipTrigger:focus .tooltip {
+  display: block;
+}
+
+.chartSection {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #eee;
+  margin-top: 0.5rem;
+}
+
+.chartTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #444;
+}
+
+.disclosures {
+  margin-top: auto;
+  padding: 1rem;
+  font-size: 0.7rem;
+  color: #aaa;
+  border-top: 1px solid #eee;
+}
+
+.disclosures p {
+  margin: 2px 0;
+}

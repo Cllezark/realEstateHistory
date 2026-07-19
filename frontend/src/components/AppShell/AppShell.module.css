@@ -1,0 +1,61 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #f8f8f7;
+  color: #222;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.mainArea {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.mapPanel {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.detailsPanel {
+  width: 320px;
+  min-width: 280px;
+  overflow-y: auto;
+  border-left: 1px solid #ddd;
+  background: #fff;
+  padding: 0;
+}
+
+.timelineArea {
+  height: 80px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Small screens: stack */
+@media (max-width: 768px) {
+  .mainArea {
+    flex-direction: column;
+  }
+  .mapPanel {
+    flex: none;
+    height: 50vh;
+  }
+  .detailsPanel {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    border-left: none;
+    border-top: 1px solid #ddd;
+  }
+  .timelineArea {
+    height: 72px;
+  }
+}

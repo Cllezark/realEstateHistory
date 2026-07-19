@@ -1,0 +1,74 @@
+.controls {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.setup {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.field label {
+  font-size: 0.7rem;
+  color: #777;
+  font-weight: 600;
+}
+
+.field select {
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.enableBtn, .clearBtn {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  border: 1px solid #2b8cbe;
+  border-radius: 4px;
+  background: #2b8cbe;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.enableBtn:disabled, .clearBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.enableBtn:hover:not(:disabled), .clearBtn:hover:not(:disabled) {
+  background: #1a6d9a;
+}
+
+.clearBtn {
+  background: #fff;
+  color: #e31a1c;
+  border-color: #e31a1c;
+}
+
+.clearBtn:hover:not(:disabled) {
+  background: #fef0f0;
+}
+
+.active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comparisonLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
