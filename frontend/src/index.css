@@ -1,0 +1,52 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: #222;
+  background: #f8f8f7;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visible focus for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #2b8cbe;
+  outline-offset: 2px;
+}
+
+/* MapLibre overrides */
+.maplibregl-popup-content {
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 8px 10px;
+  line-height: 1.4;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 0.65rem;
+}
