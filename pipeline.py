@@ -194,8 +194,23 @@ def main():
         print("STAGE 12: Publish Analytical Tables")
         print("=" * 60)
         fhfa_fact = output_dir / "fact_tract_hpi_annual.parquet"
+        dim_tract = output_dir / "dim_census_tract.parquet"
+        web_assets_dir = output_dir.parent / "frontend" / "public" / "data"
+
+        # Resolve dashboard_path: prefer results from stage 11, fall back to default
+        try:
+            resolved_dashboard = dashboard_path
+        except NameError:
+            resolved_dashboard = output_dir / "dashboard_tract_quarter.parquet"
+
         results["publish"] = publish_dashboard(
-            dashboard_path, fhfa_fact, dim_tract, output_dir, config, run_id
+            resolved_dashboard,
+            fhfa_fact,
+            dim_tract,
+            output_dir,
+            config,
+            run_id,
+            web_assets_dir=web_assets_dir,
         )
 
     # --- Stage 13: Validate ---
