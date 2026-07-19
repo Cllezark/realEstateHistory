@@ -73,8 +73,18 @@ export interface Attributions {
 }
 
 /** The active map metric. */
-export type MapMetric = 'medianSalePrice' | 'meanSalePrice' | 'qualifiedSaleCount'
-  | 'averageRatePercent' | 'estimatedMonthlyPrincipalInterest' | 'hpi' | 'annualChange';
+export type MapMetric =
+  | 'medianSalePrice'
+  | 'meanSalePrice'
+  | 'qualifiedSaleCount'
+  | 'p25SalePrice'
+  | 'p75SalePrice'
+  | 'minSalePrice'
+  | 'maxSalePrice'
+  | 'averageRatePercent'
+  | 'estimatedMonthlyPrincipalInterest'
+  | 'hpi'
+  | 'annualChange';
 
 /** Comparison mode metrics. */
 export type ComparisonMetric = 'medianSalePrice' | 'hpi';

@@ -6,6 +6,7 @@ import { MapLegend } from './components/Map/MapLegend';
 import { QuarterTimeline } from './components/Timeline/QuarterTimeline';
 import { TractDetails } from './components/DetailsPanel/TractDetails';
 import { ComparisonControls } from './components/ComparisonMode/ComparisonControls';
+import { MetricSelector } from './components/MetricSelector/MetricSelector';
 import { useMapData } from './hooks/useMapData';
 import { useAppState } from './hooks/useAppState';
 import {
@@ -21,6 +22,7 @@ export default function App() {
     state,
     setSelectedTract,
     setSelectedQuarter,
+    setActiveMetric,
     enableComparison,
     disableComparison,
   } = useAppState(metadata?.dateCoverageEnd ?? '');
@@ -166,6 +168,13 @@ export default function App() {
         }
         detailsPanel={
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ padding: '0.5rem', borderBottom: '1px solid #e0e0e0' }}>
+              <MetricSelector
+                value={state.activeMetric}
+                onChange={setActiveMetric}
+                disabled={loading !== 'loaded'}
+              />
+            </div>
             <ComparisonControls
               marketData={marketData}
               enabled={state.comparisonMode}
