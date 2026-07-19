@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
@@ -22,6 +22,27 @@ interface Props {
 const ST_PETE_CENTER: [number, number] = [-82.66, 27.77];
 const ST_PETE_ZOOM = 11.5;
 
+/** Light basemap style using OpenStreetMap raster tiles (no API key required). */
+const BASEMAP_STYLE: maplibregl.StyleSpecification = {
+  version: 8,
+  sources: {
+    'osm-tiles': {
+      type: 'raster',
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxzoom: 19,
+    },
+  },
+  layers: [
+    {
+      id: 'osm-tiles',
+      type: 'raster',
+      source: 'osm-tiles',
+    },
+  ],
+};
+
 export function MapView({
   geometry,
   marketData,
@@ -36,40 +57,43 @@ export function MapView({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
+  const styleLoadedRef = useRef(false);
+  const [mapReady, setMapReady] = useState(false);
+  // Track whether we've already added the tract layers to the map
+  const layersAddedRef = useRef(false);
 
-  // Initialize map
+  // Initialize map — wait for style.load before marking ready
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          'osm-tiles': {
-            type: 'raster',
-            tiles: ['https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'],
-            tileSize: 256,
-            attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>',
-          },
-        },
-        layers: [
-          {
-            id: 'osm-tiles',
-            type: 'raster',
-            source: 'osm-tiles',
-            minzoom: 0,
-            maxzoom: 20,
-          },
-        ],
-      },
+      style: BASEMAP_STYLE,
       center: ST_PETE_CENTER,
       zoom: ST_PETE_ZOOM,
       attributionControl: { compact: true },
     });
 
     map.addControl(new maplibregl.NavigationControl(), 'top-left');
-    mapRef.current = map;
+
+    // Only mark ready after style (basemap tiles) finishes loading
+    map.on('style.load', () => {
+      styleLoadedRef.current = true;
+      setMapReady(true);
+    });
+
+    // If the style fails to load (network error, etc.), still allow
+    // the app to function with whatever we have
+    map.on('error', (e) => {
+      if (e.error?.status === 404 || e.error?.status === 403) {
+        console.warn('Map tile error (non-fatal):', e.error.message);
+        // Mark ready anyway so the GeoJSON overlays still render
+        if (!styleLoadedRef.current) {
+          styleLoadedRef.current = true;
+          setMapReady(true);
+        }
+      }
+    });
 
     // Click on empty space to deselect
     map.on('click', (e) => {
@@ -79,28 +103,37 @@ export function MapView({
       }
     });
 
+    mapRef.current = map;
+
     return () => {
       map.remove();
       mapRef.current = null;
+      styleLoadedRef.current = false;
+      layersAddedRef.current = false;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Add/update tract geometry source
+  // Add/update tract geometry source — only after style is loaded
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !geometry) return;
+    if (!map || !geometry || !mapReady) return;
+
+    // Guard: don't add sources/layers if style isn't loaded
+    if (!map.isStyleLoaded()) return;
 
     const source = map.getSource('tracts') as maplibregl.GeoJSONSource | undefined;
 
     if (source) {
       source.setData(geometry as FeatureCollection);
-    } else {
+    } else if (!layersAddedRef.current) {
+      layersAddedRef.current = true;
+
       map.addSource('tracts', {
         type: 'geojson',
         data: geometry as FeatureCollection,
       });
 
-      // Fill layer
+      // Fill layer (below labels but above basemap)
       map.addLayer({
         id: 'tracts-fill',
         type: 'fill',
@@ -155,12 +188,13 @@ export function MapView({
         map.getCanvas().style.cursor = '';
       });
     }
-  }, [geometry, onSelectTract]);
+  }, [geometry, onSelectTract, mapReady]);
 
   // Update fill colors when quarter/metric/breaks change
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !marketData || breaks.length === 0) return;
+    if (!map || !marketData || breaks.length === 0 || !mapReady) return;
+    if (!map.isStyleLoaded()) return;
 
     const quarterData = marketData[selectedQuarter];
 
@@ -194,12 +228,13 @@ export function MapView({
     } else {
       map.setLayoutProperty('tracts-highlight', 'visibility', 'none');
     }
-  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, selectedTract]);
+  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, selectedTract, mapReady]);
 
   // Hover tooltip
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !marketData) return;
+    if (!map || !marketData || !mapReady) return;
+    if (!map.isStyleLoaded()) return;
 
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
     popupRef.current = popup;
@@ -236,7 +271,7 @@ export function MapView({
     return () => {
       popup.remove();
     };
-  }, [marketData, selectedQuarter, activeMetric]);
+  }, [marketData, selectedQuarter, activeMetric, mapReady]);
 
   return <div ref={mapContainerRef} className={styles.mapContainer} role="application" aria-label="St. Petersburg Census tract map" />;
 }
