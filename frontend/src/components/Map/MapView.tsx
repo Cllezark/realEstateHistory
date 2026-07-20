@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
 import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
-import { getTractRecord, formatCurrency, formatRate, formatHpi } from '../../data/formatters';
+import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
 import styles from './MapView.module.css';
 
 interface Props {
@@ -308,16 +308,20 @@ export function MapView({
     const map = mapRef.current;
     if (!map || !mapReady || !map.getLayer('tracts-hatch')) return;
 
-    const empty: maplibregl.Expression = ['in', ['get', 'tract_geoid'], ['literal', []]];
+    // MapLibre v5 setFilter expects FilterSpecification; cast through unknown
+    // since the expression array syntax is valid at runtime but not assignable
+    // to the new Expression class type directly.
+    type FS = maplibregl.FilterSpecification;
+    const emptyFilter = ['in', ['get', 'tract_geoid'], ['literal', []]] as unknown as FS;
 
     if (!priceFilterThreshold || !marketData || !PRICE_FILTER_METRICS.has(activeMetric)) {
-      map.setFilter('tracts-hatch', empty);
+      map.setFilter('tracts-hatch', emptyFilter);
       return;
     }
 
     const quarterData = marketData[selectedQuarter];
     if (!quarterData) {
-      map.setFilter('tracts-hatch', empty);
+      map.setFilter('tracts-hatch', emptyFilter);
       return;
     }
 
@@ -328,12 +332,8 @@ export function MapView({
       })
       .map(([id]) => id);
 
-    map.setFilter(
-      'tracts-hatch',
-      aboveIds.length > 0
-        ? (['in', ['get', 'tract_geoid'], ['literal', aboveIds]] as maplibregl.Expression)
-        : empty,
-    );
+    const activeFilter = ['in', ['get', 'tract_geoid'], ['literal', aboveIds]] as unknown as FS;
+    map.setFilter('tracts-hatch', aboveIds.length > 0 ? activeFilter : emptyFilter);
   }, [priceFilterThreshold, marketData, selectedQuarter, activeMetric, mapReady]);
 
   // Hover tooltip: update React state via map events
