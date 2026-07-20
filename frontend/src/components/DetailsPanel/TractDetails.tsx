@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { TractQuarterIndex, TractQuarterRecord, Metadata } from '../../data/types';
 import {
   formatCurrency, formatRate, formatHpi, formatQuarterLabel,
@@ -22,6 +22,18 @@ export function TractDetails({
   marketData,
   metadata,
 }: Props) {
+  const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
+
+  // Notify chart viewer windows when tract changes
+  useEffect(() => {
+    if (tractGeoid) {
+      const chartViewerWindow = window.open('', 'chart-viewer');
+      if (chartViewerWindow && !chartViewerWindow.closed) {
+        chartViewerWindow.postMessage({ type: 'TRACT_CHANGED', tractGeoid }, window.location.origin);
+      }
+    }
+  }, [tractGeoid]);
+
   const record: TractQuarterRecord | null = useMemo(() => {
     if (!marketData || !tractGeoid) return null;
     return getTractRecord(marketData, selectedQuarter, tractGeoid);
@@ -161,6 +173,9 @@ export function TractDetails({
             marketData={marketData}
             tractGeoid={tractGeoid}
             quarters={sortedQuarters}
+            highlightedQuarter={highlightedQuarter}
+            onHighlightQuarter={setHighlightedQuarter}
+            showExpandButton
           />
         </div>
       )}

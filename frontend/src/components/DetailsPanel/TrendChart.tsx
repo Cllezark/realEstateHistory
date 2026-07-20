@@ -9,6 +9,10 @@ interface Props {
   marketData: TractQuarterIndex;
   tractGeoid: string;
   quarters: string[];
+  highlightedQuarter?: string | null;
+  onHighlightQuarter?: (quarter: string | null) => void;
+  showExpandButton?: boolean;
+  isExpanded?: boolean;
 }
 
 interface ChartPoint {
@@ -48,8 +52,26 @@ function TooltipBridge({ active, payload, onUpdate }: BridgeProps) {
 
 // ── TrendChart ────────────────────────────────────────────────────────────────
 
-export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
+export function TrendChart({
+  marketData,
+  tractGeoid,
+  quarters,
+  highlightedQuarter,
+  onHighlightQuarter,
+  showExpandButton,
+  isExpanded,
+}: Props) {
   const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
+
+  const handleExpandClick = useCallback(() => {
+    const chartData = {
+      tractGeoid,
+      quarters,
+      marketData,
+    };
+    sessionStorage.setItem('chartViewerData', JSON.stringify(chartData));
+    window.open('?view=chart-viewer', 'chart-viewer', 'width=1200,height=800,resizable=yes,scrollbars=yes');
+  }, [tractGeoid, quarters, marketData]);
 
   const data: ChartPoint[] = useMemo(() => {
     return quarters.map(q => {
@@ -84,9 +106,36 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
     }).format(val);
   };
 
+  const handleDotClick = (point: ChartPoint) => {
+    if (onHighlightQuarter) {
+      onHighlightQuarter(highlightedQuarter === point.quarter ? null : point.quarter);
+    }
+  };
+
+  const chartHeight = isExpanded ? 500 : 180;
+
   return (
     <div>
-      <ResponsiveContainer width="100%" height={180}>
+      {showExpandButton && (
+        <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={handleExpandClick}
+            style={{
+              padding: '4px 10px',
+              fontSize: '0.75rem',
+              border: '1px solid #2b8cbe',
+              background: '#2b8cbe',
+              color: '#fff',
+              borderRadius: '3px',
+              cursor: 'pointer',
+            }}
+            title="Open chart in expandable window"
+          >
+            Expand
+          </button>
+        </div>
+      )}
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 20, left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
           <XAxis
@@ -106,12 +155,6 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
             }}
             width={55}
           />
-          {/*
-            Recharts clones this element and passes active/payload/label into
-            TooltipBridge as props.  TooltipBridge returns null (no visible
-            tooltip inside the chart) but pipes the data out via useEffect so
-            the info box below can display it.
-          */}
           <Tooltip
             content={<TooltipBridge onUpdate={handleTooltipUpdate} />}
             cursor={{ stroke: '#ccc', strokeWidth: 1 }}
@@ -121,14 +164,74 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
             dataKey="median"
             stroke="#2b8cbe"
             strokeWidth={2}
-            dot={{ r: 3, fill: '#2b8cbe' }}
+            dot={(props: any) => {
+              const { cx, cy, payload } = props;
+              const isHighlighted = !highlightedQuarter || payload.quarter === highlightedQuarter;
+              return (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={3}
+                  fill="#2b8cbe"
+                  opacity={isHighlighted ? 1 : 0.2}
+                  cursor="pointer"
+                  onClick={() => handleDotClick(payload)}
+                  style={{ transition: 'opacity 0.2s' }}
+                />
+              );
+            }}
             connectNulls={false}
             activeDot={{ r: 5 }}
+            strokeOpacity={highlightedQuarter ? 0.2 : 1}
+            style={{ transition: 'stroke-opacity 0.2s' }}
           />
+          {highlightedQuarter && (
+            <Line
+              type="monotone"
+              dataKey="median"
+              stroke="#e31a1c"
+              strokeWidth={3}
+              dot={(props: any) => {
+                const { cx, cy, payload } = props;
+                if (payload.quarter !== highlightedQuarter) return null;
+                return (
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill="#e31a1c"
+                    opacity={1}
+                    cursor="pointer"
+                    onClick={() => handleDotClick(payload)}
+                  />
+                );
+              }}
+              connectNulls={false}
+              isAnimationActive={false}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
 
-      {/* Fixed info box — data piped here from TooltipBridge above */}
+      {highlightedQuarter && (
+        <div style={{ marginTop: '6px', textAlign: 'center' }}>
+          <button
+            onClick={() => onHighlightQuarter?.(null)}
+            style={{
+              padding: '2px 8px',
+              fontSize: '0.7rem',
+              border: '1px solid #e31a1c',
+              background: '#fff',
+              color: '#e31a1c',
+              borderRadius: '3px',
+              cursor: 'pointer',
+            }}
+          >
+            Clear highlight
+          </button>
+        </div>
+      )}
+
       <div style={{
         minHeight: '36px',
         padding: '4px 8px',
@@ -139,7 +242,14 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
         color: '#333',
         marginTop: '2px',
       }}>
-        {activePoint ? (
+        {highlightedQuarter ? (
+          <>
+            <strong>Highlighted: {data.find(d => d.quarter === highlightedQuarter)?.label}</strong>
+            {' — '}
+            {formatValue(data.find(d => d.quarter === highlightedQuarter)?.median ?? null)}
+            {' (click dots to highlight different quarters)'}
+          </>
+        ) : activePoint ? (
           <>
             <strong>{activePoint.label}</strong>: {formatValue(activePoint.median)}
             {activePoint.isSuppressed && (
@@ -150,7 +260,7 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
             )}
           </>
         ) : (
-          <span style={{ color: '#aaa' }}>Hover chart to see values</span>
+          <span style={{ color: '#aaa' }}>Hover chart to see values, click dots to highlight</span>
         )}
       </div>
     </div>
