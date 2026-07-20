@@ -417,10 +417,12 @@ def publish_dashboard(
         )
 
     # --- Required columns check ---
+    # (suppress_median is intentionally absent: this stage computes it below,
+    # so requiring it as input would create a dependency on a prior publish
+    # run's output rather than on the mortgage-payment stage's actual product)
     required_cols = [
         "tract_geoid", "year", "quarter", "quarter_id",
         "qualified_sale_count", "median_sale_price",
-        "suppress_median",
     ]
     missing = [c for c in required_cols if c not in df.columns]
     if missing:

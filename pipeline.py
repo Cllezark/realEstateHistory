@@ -22,6 +22,7 @@ from src.inventory import run_inventory
 from src.raw_manifest import run_raw_layer
 from src.normalize_property import normalize_property
 from src.normalize_sales import normalize_sales
+from src.normalize_os_sales import normalize_os_sales
 from src.sale_filter import apply_sale_filter
 from src.city_membership import assign_city_membership
 from src.tract_assignment import assign_tracts
@@ -38,6 +39,7 @@ STAGES = [
     "raw_manifest",
     "normalize_property",
     "normalize_sales",
+    "normalize_os_sales",
     "sale_filter",
     "city_membership",
     "tract_assignment",
@@ -114,12 +116,23 @@ def main():
         bronze_sales = output_dir / "bronze_sales.parquet"
         results["sales"] = normalize_sales(bronze_sales, output_dir, run_id)
 
+    # --- Stage 4b: Normalize Historical Sales (Phase 3) ---
+    if "normalize_os_sales" in stages_to_run:
+        print("\n" + "=" * 60)
+        print("STAGE 4b: Normalize Historical Sales (RP_OS_SALES)")
+        print("=" * 60)
+        bronze_os = output_dir / "bronze_os_sales.parquet"
+        silver_sales = output_dir / "silver_sales.parquet"
+        results["os_sales"] = normalize_os_sales(
+            bronze_os, silver_sales, output_dir, config, run_id
+        )
+
     # --- Stage 5: Sale Filter ---
     if "sale_filter" in stages_to_run:
         print("\n" + "=" * 60)
         print("STAGE 5: Analytical Sale Filter")
         print("=" * 60)
-        sales_path = output_dir / "silver_sales.parquet"
+        sales_path = output_dir / "silver_sales_combined.parquet"
         prop_path = output_dir / "silver_property_current.parquet"
         results["filter"] = apply_sale_filter(
             sales_path, prop_path, output_dir, config, run_id

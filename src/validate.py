@@ -64,12 +64,20 @@ def validate_outputs(
             check("nonnegative_median_price", neg_medians == 0,
                   f"{neg_medians} negative median prices")
 
-        # Sale-date range
-        sales = pd.read_parquet(output_dir / "silver_sales.parquet")
+        # Sale-date range — use the combined (historical + current) table when
+        # present; the floor is enforced by the analytical filter, so silver
+        # may legitimately contain earlier raw sales. Check the enriched fact.
+        combined_path = output_dir / "silver_sales_combined.parquet"
+        sales_table = combined_path if combined_path.exists() \
+            else output_dir / "silver_sales.parquet"
+        sales = pd.read_parquet(sales_table)
+        enriched = pd.read_parquet(output_dir / "fact_sale_enriched.parquet")
+        enriched_dates = enriched["sale_date"].dropna()
         dates = sales["sale_date"].dropna()
-        min_expected = pd.Timestamp("2021-01-01")
-        check("sale_date_range_min", dates.min() >= min_expected,
-              f"Min date: {dates.min().date()}")
+        min_expected = pd.Timestamp(cfg["sale_filter"]["min_sale_date"])
+        check("sale_date_range_min", enriched_dates.min() >= min_expected,
+              f"Min enriched date: {enriched_dates.min().date()} "
+              f"(floor {min_expected.date()})")
         check("sale_date_range_max", dates.max() <= pd.Timestamp.now(),
               f"Max date: {dates.max().date()}")
 
