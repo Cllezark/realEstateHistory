@@ -1,14 +1,23 @@
 import type { TractQuarterRecord, TractQuarterIndex } from './types';
 
+const fmtCurrency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const fmtInteger = new Intl.NumberFormat('en-US');
+
 /** Format a number as whole-dollar US currency. */
 export function formatCurrency(value: number | null): string {
   if (value == null) return 'Not available';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return fmtCurrency.format(value);
+}
+
+/** Format a plain integer with thousands separators. */
+export function formatInteger(value: number): string {
+  return fmtInteger.format(value);
 }
 
 /** Format a percentage rate to two decimal places. */

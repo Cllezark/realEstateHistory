@@ -287,6 +287,13 @@ export function MapView({
     matchExpr.push(MISSING_COLOR);
 
     map.setPaintProperty('tracts-fill', 'fill-color', matchExpr as unknown as maplibregl.Expression);
+  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, mapReady]);
+
+  // Update highlight filter when selected tract changes (independent of color repaint)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    if (!map.getLayer('tracts-highlight')) return;
 
     if (selectedTract) {
       map.setFilter('tracts-highlight', ['==', ['get', 'tract_geoid'], selectedTract]);
@@ -294,7 +301,7 @@ export function MapView({
     } else {
       map.setLayoutProperty('tracts-highlight', 'visibility', 'none');
     }
-  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, selectedTract, mapReady]);
+  }, [selectedTract, mapReady]);
 
   // Update hatch filter when price threshold / quarter / metric changes
   useEffect(() => {

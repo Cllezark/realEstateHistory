@@ -1,5 +1,6 @@
 import type { MapMetric, LegendBreak } from '../../data/types';
 import { getMetricLabel, MISSING_COLOR, SUPPRESSED_COLOR } from '../../data/classification';
+import { formatInteger } from '../../data/formatters';
 import styles from './MapLegend.module.css';
 
 const PRICE_FILTER_METRICS = new Set<MapMetric>([
@@ -31,7 +32,7 @@ export function MapLegend({ metric, breaks, comparisonMode, priceFilterThreshold
             background: 'repeating-linear-gradient(-45deg, #c9b8a8, #c9b8a8 3px, #1a1a1a 3px, #1a1a1a 6px)',
           }} />
           <span className={styles.label}>
-            Above ${new Intl.NumberFormat('en-US').format(priceFilterThreshold!)}
+            Above ${formatInteger(priceFilterThreshold!)}
           </span>
         </div>
       )}
