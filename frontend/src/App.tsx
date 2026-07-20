@@ -13,6 +13,10 @@ import {
   calculateQuantileBreaks,
   calculateMedianPriceBreaks,
   calculateMeanPriceBreaks,
+  calculateP25PriceBreaks,
+  calculateP75PriceBreaks,
+  calculateMinPriceBreaks,
+  calculateMaxPriceBreaks,
   calculateMonthlyPaymentBreaks,
   calculateAppreciationBreaks,
   MISSING_COLOR,
@@ -26,6 +30,7 @@ export default function App() {
     setSelectedTract,
     setSelectedQuarter,
     setActiveMetric,
+    setPriceFilterThreshold,
     enableComparison,
     disableComparison,
   } = useAppState(metadata?.dateCoverageEnd ?? '');
@@ -72,12 +77,13 @@ export default function App() {
   const breaks = useMemo(() => {
     if (!marketData || !state.selectedQuarter) return [];
     switch (state.activeMetric) {
-      case 'medianSalePrice':
-        return calculateMedianPriceBreaks();
-      case 'meanSalePrice':
-        return calculateMeanPriceBreaks();
-      case 'estimatedMonthlyPrincipalInterest':
-        return calculateMonthlyPaymentBreaks();
+      case 'medianSalePrice': return calculateMedianPriceBreaks();
+      case 'meanSalePrice': return calculateMeanPriceBreaks();
+      case 'p25SalePrice': return calculateP25PriceBreaks();
+      case 'p75SalePrice': return calculateP75PriceBreaks();
+      case 'minSalePrice': return calculateMinPriceBreaks();
+      case 'maxSalePrice': return calculateMaxPriceBreaks();
+      case 'estimatedMonthlyPrincipalInterest': return calculateMonthlyPaymentBreaks();
       default:
         return calculateQuantileBreaks(marketData, state.selectedQuarter, state.activeMetric);
     }
@@ -199,11 +205,13 @@ export default function App() {
               comparisonMode={state.comparisonMode}
               comparisonColors={comparisonColors}
               onSelectTract={setSelectedTract}
+              priceFilterThreshold={state.priceFilterThreshold}
             />
             <MapLegend
               metric={state.activeMetric}
               breaks={breaks}
               comparisonMode={state.comparisonMode}
+              priceFilterThreshold={state.priceFilterThreshold}
             />
           </div>
         }
@@ -215,6 +223,44 @@ export default function App() {
                 onChange={setActiveMetric}
                 disabled={loading !== 'loaded'}
               />
+            </div>
+            <div style={{ padding: '0.5rem 0.5rem 0', borderBottom: '1px solid #e0e0e0', fontSize: '0.8rem' }}>
+              <label style={{ display: 'block', marginBottom: '3px', color: '#555', fontWeight: 500 }}>
+                Price filter (hatch tracts above):
+              </label>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <span style={{ color: '#555' }}>$</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={10000}
+                  placeholder="e.g. 400000"
+                  value={state.priceFilterThreshold ?? ''}
+                  onChange={(e) => {
+                    const raw = e.target.value.trim();
+                    setPriceFilterThreshold(raw === '' ? null : Number(raw));
+                  }}
+                  disabled={loading !== 'loaded'}
+                  style={{
+                    flex: 1,
+                    padding: '3px 6px',
+                    fontSize: '0.8rem',
+                    border: '1px solid #ccc',
+                    borderRadius: '3px',
+                    minWidth: 0,
+                  }}
+                />
+                {state.priceFilterThreshold != null && (
+                  <button
+                    onClick={() => setPriceFilterThreshold(null)}
+                    style={{ padding: '2px 6px', fontSize: '0.75rem', cursor: 'pointer' }}
+                    aria-label="Clear price filter"
+                  >✕</button>
+                )}
+              </div>
+              <div style={{ marginTop: '2px', marginBottom: '4px', color: '#888', fontSize: '0.72rem' }}>
+                Applies to price-based metrics only
+              </div>
             </div>
             <ComparisonControls
               marketData={marketData}
@@ -244,6 +290,7 @@ export default function App() {
             onChangeQuarter={setSelectedQuarter}
             onPlayToggle={handlePlayToggle}
             isPlaying={isPlaying}
+            maxQuarter={metadata?.dateCoverageEnd}
           />
         }
       />

@@ -1,7 +1,49 @@
-.mapContainer {
-  width: 100%;
-  height: 100%;
+.mapWrapper {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.hoverTooltip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  pointer-events: none;
+  z-index: 10;
+  max-width: 200px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.tooltipName {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tooltipGeoid {
+  color: #666;
+  font-size: 0.72rem;
+  margin-bottom: 4px;
+}
+
+.tooltipMetric {
+  color: #222;
+}
+
+.tooltipSuppressed {
+  color: #888;
+  font-style: italic;
+  font-size: 0.72rem;
+  margin-top: 2px;
 }

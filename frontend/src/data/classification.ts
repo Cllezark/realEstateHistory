@@ -37,6 +37,10 @@ export const SUPPRESSED_COLOR = '#bdbdbd';
 const METRIC_LABELS: Record<string, string> = {
   medianSalePrice: 'Median Sale Price',
   meanSalePrice: 'Mean Sale Price',
+  p25SalePrice: '25th Pct. Sale Price',
+  p75SalePrice: '75th Pct. Sale Price',
+  minSalePrice: 'Min Sale Price',
+  maxSalePrice: 'Max Sale Price',
   qualifiedSaleCount: 'Qualified Sale Count',
   averageRatePercent: 'Average Mortgage Rate (%)',
   estimatedMonthlyPrincipalInterest: 'Est. Monthly P&I',
@@ -106,6 +110,23 @@ export function calculateMedianPriceBreaks(): LegendBreak[] {
 
 /** Calculate fixed $100K interval breaks for mean sale price. */
 export function calculateMeanPriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+/** Calculate fixed $100K interval breaks for p25/p75/min/max sale price metrics. */
+export function calculateP25PriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+export function calculateP75PriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+export function calculateMinPriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+export function calculateMaxPriceBreaks(): LegendBreak[] {
   return calculateFixedIntervalBreaks(100_000, 10);
 }
 

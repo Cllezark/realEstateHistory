@@ -2,13 +2,20 @@ import type { MapMetric, LegendBreak } from '../../data/types';
 import { getMetricLabel, MISSING_COLOR, SUPPRESSED_COLOR } from '../../data/classification';
 import styles from './MapLegend.module.css';
 
+const PRICE_FILTER_METRICS = new Set<MapMetric>([
+  'medianSalePrice', 'meanSalePrice', 'p25SalePrice', 'p75SalePrice',
+  'minSalePrice', 'maxSalePrice', 'estimatedMonthlyPrincipalInterest',
+]);
+
 interface Props {
   metric: MapMetric;
   breaks: LegendBreak[];
   comparisonMode: boolean;
+  priceFilterThreshold?: number | null;
 }
 
-export function MapLegend({ metric, breaks, comparisonMode }: Props) {
+export function MapLegend({ metric, breaks, comparisonMode, priceFilterThreshold }: Props) {
+  const showHatchEntry = !!priceFilterThreshold && PRICE_FILTER_METRICS.has(metric);
   return (
     <div className={styles.legend} role="complementary" aria-label="Map legend">
       <h3 className={styles.title}>{getMetricLabel(metric)}</h3>
@@ -18,6 +25,16 @@ export function MapLegend({ metric, breaks, comparisonMode }: Props) {
           <span className={styles.label}>{b.label}</span>
         </div>
       ))}
+      {showHatchEntry && (
+        <div className={styles.breakItem}>
+          <span className={styles.swatch} style={{
+            background: 'repeating-linear-gradient(-45deg, #c9b8a8, #c9b8a8 3px, #1a1a1a 3px, #1a1a1a 6px)',
+          }} />
+          <span className={styles.label}>
+            Above ${new Intl.NumberFormat('en-US').format(priceFilterThreshold!)}
+          </span>
+        </div>
+      )}
       {!comparisonMode && (
         <>
           <div className={styles.breakItem}>
