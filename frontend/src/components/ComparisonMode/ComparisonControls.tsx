@@ -71,8 +71,14 @@ export function ComparisonControls({
       ) : (
         <div className={styles.active}>
           <span className={styles.comparisonLabel}>
-            Comparing: {startQuarter ? formatQuarterLabel(startQuarter) : '—'} → {endQuarter ? formatQuarterLabel(endQuarter) : '—'}
+            Median price appreciation
           </span>
+          <span className={styles.comparisonRange}>
+            {startQuarter ? formatQuarterLabel(startQuarter) : '—'} → {endQuarter ? formatQuarterLabel(endQuarter) : '—'}
+          </span>
+          <p className={styles.comparisonHint}>
+            Colors show % change in median sale price between the two quarters. Red = declined, green = appreciated.
+          </p>
           <button className={styles.clearBtn} onClick={onDisable}>
             Clear comparison
           </button>

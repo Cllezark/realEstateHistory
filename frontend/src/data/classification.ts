@@ -289,8 +289,11 @@ export function calculateAppreciationBreaks(
     const minValue = -maxAbs + i * step;
     const maxValue = -maxAbs + (i + 1) * step;
     const color = DIVERGING_PALETTE[i % DIVERGING_PALETTE.length];
+    const crossesZero = minValue <= 0 && maxValue >= 0;
     breaks.push({
-      label: `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
+      label: crossesZero
+        ? `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}% (≈ no change)`
+        : `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
       minValue,
       maxValue,
       color,

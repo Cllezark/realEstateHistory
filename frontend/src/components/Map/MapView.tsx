@@ -16,6 +16,7 @@ interface Props {
   breaks: LegendBreak[];
   comparisonMode: boolean;
   comparisonColors: Map<string, string> | null;
+  appreciationMap?: Map<string, number | null> | null;
   onSelectTract: (tractGeoid: string | null) => void;
   priceFilterThreshold?: number | null;
 }
@@ -95,6 +96,7 @@ export function MapView({
   breaks,
   comparisonMode,
   comparisonColors,
+  appreciationMap,
   onSelectTract,
   priceFilterThreshold,
 }: Props) {
@@ -368,6 +370,10 @@ export function MapView({
     ? formatMetricValue(hoveredTract.record, activeMetric)
     : null;
 
+  const appreciationValue = comparisonMode && hoveredTract && appreciationMap
+    ? appreciationMap.get(hoveredTract.geoid)
+    : undefined;
+
   return (
     <div className={styles.mapWrapper}>
       <div
@@ -380,12 +386,26 @@ export function MapView({
         <div className={styles.hoverTooltip}>
           <div className={styles.tooltipName}>{hoveredTract.name}</div>
           <div className={styles.tooltipGeoid}>GEOID: {hoveredTract.geoid}</div>
-          <div className={styles.tooltipMetric}>
-            {getMetricLabel(activeMetric)}:{' '}
-            {tooltipValue ?? <em>No data</em>}
-          </div>
-          {hoveredTract.record?.suppressMedian && (
-            <div className={styles.tooltipSuppressed}>Suppressed (&lt;5 sales)</div>
+          {comparisonMode ? (
+            <div className={styles.tooltipMetric}>
+              Price change:{' '}
+              {appreciationValue == null
+                ? <em>Insufficient data</em>
+                : <strong style={{ color: appreciationValue >= 0 ? '#1a9850' : '#d73027' }}>
+                    {appreciationValue >= 0 ? '+' : ''}{appreciationValue.toFixed(1)}%
+                  </strong>
+              }
+            </div>
+          ) : (
+            <>
+              <div className={styles.tooltipMetric}>
+                {getMetricLabel(activeMetric)}:{' '}
+                {tooltipValue ?? <em>No data</em>}
+              </div>
+              {hoveredTract.record?.suppressMedian && (
+                <div className={styles.tooltipSuppressed}>Suppressed (&lt;5 sales)</div>
+              )}
+            </>
           )}
         </div>
       )}

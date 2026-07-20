@@ -89,30 +89,36 @@ export default function App() {
     }
   }, [marketData, state.selectedQuarter, state.activeMetric]);
 
-  // Comparison mode colors
-  const comparisonColors = useMemo(() => {
+  // Comparison mode: raw appreciation percentages per tract
+  const appreciationMap = useMemo(() => {
     if (!marketData || !state.comparisonMode || !state.comparisonStartQuarter || !state.comparisonEndQuarter) {
       return null;
     }
-
-    const appreciationMap = new Map<string, number | null>();
+    const map = new Map<string, number | null>();
     const allTracts = new Set<string>();
-
     const startData = marketData[state.comparisonStartQuarter];
     const endData = marketData[state.comparisonEndQuarter];
     if (startData) Object.keys(startData).forEach(t => allTracts.add(t));
     if (endData) Object.keys(endData).forEach(t => allTracts.add(t));
-
     for (const tractId of allTracts) {
-      const startRecord = startData?.[tractId] ?? null;
-      const endRecord = endData?.[tractId] ?? null;
-      const { percentageChange } = calculateAppreciation(startRecord, endRecord);
-      appreciationMap.set(tractId, percentageChange);
+      const { percentageChange } = calculateAppreciation(
+        startData?.[tractId] ?? null,
+        endData?.[tractId] ?? null,
+      );
+      map.set(tractId, percentageChange);
     }
+    return map;
+  }, [marketData, state.comparisonMode, state.comparisonStartQuarter, state.comparisonEndQuarter]);
 
-    const appBreaks = calculateAppreciationBreaks(appreciationMap);
+  // Comparison mode: legend breaks derived from the appreciation range
+  const comparisonBreaks = useMemo(() => {
+    if (!appreciationMap) return [];
+    return calculateAppreciationBreaks(appreciationMap);
+  }, [appreciationMap]);
 
-    // Build color map by finding which break each percentage falls into
+  // Comparison mode: tract → color map
+  const comparisonColors = useMemo(() => {
+    if (!appreciationMap || comparisonBreaks.length === 0) return null;
     const colorMap = new Map<string, string>();
     for (const [tractId, pct] of appreciationMap) {
       if (pct == null) {
@@ -120,23 +126,17 @@ export default function App() {
         continue;
       }
       let found = false;
-      for (const b of appBreaks) {
+      for (const b of comparisonBreaks) {
         if (pct >= b.minValue && pct <= b.maxValue) {
           colorMap.set(tractId, b.color);
           found = true;
           break;
         }
       }
-      if (!found && appBreaks.length > 0) {
-        colorMap.set(tractId, appBreaks[appBreaks.length - 1].color);
-      }
-      if (!found && appBreaks.length === 0) {
-        colorMap.set(tractId, MISSING_COLOR);
-      }
+      if (!found) colorMap.set(tractId, comparisonBreaks[comparisonBreaks.length - 1].color);
     }
-
     return colorMap;
-  }, [marketData, state.comparisonMode, state.comparisonStartQuarter, state.comparisonEndQuarter]);
+  }, [appreciationMap, comparisonBreaks]);
 
   // Get selected tract name from geometry
   const tractName = useMemo(() => {
@@ -204,6 +204,7 @@ export default function App() {
               breaks={breaks}
               comparisonMode={state.comparisonMode}
               comparisonColors={comparisonColors}
+              appreciationMap={appreciationMap}
               onSelectTract={setSelectedTract}
               priceFilterThreshold={state.priceFilterThreshold}
             />
@@ -211,6 +212,9 @@ export default function App() {
               metric={state.activeMetric}
               breaks={breaks}
               comparisonMode={state.comparisonMode}
+              comparisonBreaks={comparisonBreaks}
+              comparisonStartQuarter={state.comparisonStartQuarter}
+              comparisonEndQuarter={state.comparisonEndQuarter}
               priceFilterThreshold={state.priceFilterThreshold}
             />
           </div>

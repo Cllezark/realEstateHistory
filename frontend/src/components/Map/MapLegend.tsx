@@ -1,6 +1,6 @@
 import type { MapMetric, LegendBreak } from '../../data/types';
 import { getMetricLabel, MISSING_COLOR, SUPPRESSED_COLOR } from '../../data/classification';
-import { formatInteger } from '../../data/formatters';
+import { formatInteger, formatQuarterLabel } from '../../data/formatters';
 import styles from './MapLegend.module.css';
 
 const PRICE_FILTER_METRICS = new Set<MapMetric>([
@@ -12,15 +12,34 @@ interface Props {
   metric: MapMetric;
   breaks: LegendBreak[];
   comparisonMode: boolean;
+  comparisonBreaks?: LegendBreak[];
+  comparisonStartQuarter?: string | null;
+  comparisonEndQuarter?: string | null;
   priceFilterThreshold?: number | null;
 }
 
-export function MapLegend({ metric, breaks, comparisonMode, priceFilterThreshold }: Props) {
-  const showHatchEntry = !!priceFilterThreshold && PRICE_FILTER_METRICS.has(metric);
+export function MapLegend({
+  metric,
+  breaks,
+  comparisonMode,
+  comparisonBreaks,
+  comparisonStartQuarter,
+  comparisonEndQuarter,
+  priceFilterThreshold,
+}: Props) {
+  const showHatchEntry = !comparisonMode && !!priceFilterThreshold && PRICE_FILTER_METRICS.has(metric);
+  const activeBreaks = comparisonMode && comparisonBreaks?.length ? comparisonBreaks : breaks;
+  const title = comparisonMode ? 'Median price appreciation' : getMetricLabel(metric);
+
   return (
     <div className={styles.legend} role="complementary" aria-label="Map legend">
-      <h3 className={styles.title}>{getMetricLabel(metric)}</h3>
-      {breaks.map((b, i) => (
+      <h3 className={styles.title}>{title}</h3>
+      {comparisonMode && comparisonStartQuarter && comparisonEndQuarter && (
+        <p className={styles.comparisonSubtitle}>
+          {formatQuarterLabel(comparisonStartQuarter)} → {formatQuarterLabel(comparisonEndQuarter)}
+        </p>
+      )}
+      {activeBreaks.map((b, i) => (
         <div key={i} className={styles.breakItem}>
           <span className={styles.swatch} style={{ backgroundColor: b.color }} />
           <span className={styles.label}>{b.label}</span>
@@ -37,12 +56,10 @@ export function MapLegend({ metric, breaks, comparisonMode, priceFilterThreshold
         </div>
       )}
       {!comparisonMode && (
-        <>
-          <div className={styles.breakItem}>
-            <span className={styles.swatch} style={{ backgroundColor: SUPPRESSED_COLOR }} />
-            <span className={styles.label}>Suppressed (&lt;5 sales)</span>
-          </div>
-        </>
+        <div className={styles.breakItem}>
+          <span className={styles.swatch} style={{ backgroundColor: SUPPRESSED_COLOR }} />
+          <span className={styles.label}>Suppressed (&lt;5 sales)</span>
+        </div>
       )}
       <div className={styles.breakItem}>
         <span className={styles.swatch} style={{ backgroundColor: MISSING_COLOR }} />
