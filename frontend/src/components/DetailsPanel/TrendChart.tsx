@@ -27,7 +27,6 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
       const record = getTractRecord(marketData, q, tractGeoid);
       const isSuppressed = record?.suppressMedian ?? false;
       const isPartial = record?.partialQuarterFlag ?? false;
-
       return {
         quarter: q,
         median: isSuppressed ? null : (record?.medianSalePrice ?? null),
@@ -44,7 +43,21 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
 
   const formatValue = (val: number | null) => {
     if (val == null) return 'Suppressed or missing';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(val);
+  };
+
+  // Mirror Task #13: pipe Recharts active-point data into React state so we can
+  // render it in a fixed box below the chart instead of a cursor-following popup.
+  // content={() => null} keeps <Tooltip> in the tree (enabling activePayload
+  // computation) without rendering any visible tooltip element.
+  const handleMouseMove = (chartState: unknown) => {
+    const state = chartState as { activePayload?: Array<{ payload: ChartPoint }> };
+    const point = state?.activePayload?.[0]?.payload ?? null;
+    setActivePoint(point);
   };
 
   return (
@@ -53,10 +66,7 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
         <LineChart
           data={data}
           margin={{ top: 4, right: 8, bottom: 20, left: 8 }}
-          onMouseMove={(d) => {
-            const payload = (d as { activePayload?: { payload: ChartPoint }[] }).activePayload;
-            if (payload?.[0]) setActivePoint(payload[0].payload);
-          }}
+          onMouseMove={handleMouseMove}
           onMouseLeave={() => setActivePoint(null)}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
@@ -77,7 +87,8 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
             }}
             width={55}
           />
-          <Tooltip style={{ display: 'none' }} wrapperStyle={{ display: 'none' }} />
+          {/* Tooltip kept in tree so Recharts computes activePayload; content is invisible */}
+          <Tooltip content={() => null} cursor={{ stroke: '#ccc', strokeWidth: 1 }} />
           <Line
             type="monotone"
             dataKey="median"
@@ -89,6 +100,8 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
           />
         </LineChart>
       </ResponsiveContainer>
+
+      {/* Fixed info box below chart — mirrors the map's top-right hover tooltip */}
       <div style={{
         minHeight: '36px',
         padding: '4px 8px',
@@ -102,8 +115,12 @@ export function TrendChart({ marketData, tractGeoid, quarters }: Props) {
         {activePoint ? (
           <>
             <strong>{activePoint.label}</strong>: {formatValue(activePoint.median)}
-            {activePoint.isSuppressed && <em style={{ marginLeft: 4, color: '#888' }}>(suppressed)</em>}
-            {activePoint.isPartial && <em style={{ marginLeft: 4, color: '#888' }}>(partial)</em>}
+            {activePoint.isSuppressed && (
+              <em style={{ marginLeft: 4, color: '#888' }}>(suppressed)</em>
+            )}
+            {activePoint.isPartial && (
+              <em style={{ marginLeft: 4, color: '#888' }}>(partial)</em>
+            )}
           </>
         ) : (
           <span style={{ color: '#aaa' }}>Hover chart to see values</span>
