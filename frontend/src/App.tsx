@@ -11,6 +11,7 @@ import { useMapData } from './hooks/useMapData';
 import { useAppState } from './hooks/useAppState';
 import {
   calculateQuantileBreaks,
+  calculateMedianPriceBreaks,
   calculateAppreciationBreaks,
   MISSING_COLOR,
 } from './data/classification';
@@ -68,6 +69,9 @@ export default function App() {
   // Calculate legend breaks
   const breaks = useMemo(() => {
     if (!marketData || !state.selectedQuarter) return [];
+    if (state.activeMetric === 'medianSalePrice') {
+      return calculateMedianPriceBreaks();
+    }
     return calculateQuantileBreaks(marketData, state.selectedQuarter, state.activeMetric);
   }, [marketData, state.selectedQuarter, state.activeMetric]);
 

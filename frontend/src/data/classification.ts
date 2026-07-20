@@ -1,6 +1,6 @@
 import type { TractQuarterIndex, TractQuarterRecord, MapMetric, LegendBreak } from './types';
 
-/** Color-blind-conscious sequential palette (9 steps). */
+/** Color-blind-conscious sequential palette (10 steps, progressively intense). */
 const SEQUENTIAL_PALETTE = [
   '#f7fcf0',
   '#e0f3db',
@@ -11,6 +11,7 @@ const SEQUENTIAL_PALETTE = [
   '#2b8cbe',
   '#0868ac',
   '#084081',
+  '#051d3e',
 ];
 
 /** Diverging palette for comparison mode (centered on zero). */
@@ -73,6 +74,31 @@ function extractMetricValues(
     }
   }
   return values;
+}
+
+/** Calculate fixed $100K interval breaks for median sale price. */
+export function calculateMedianPriceBreaks(): LegendBreak[] {
+  const step = 100_000;
+  const steps = 10;
+  const breaks: LegendBreak[] = [];
+
+  for (let i = 0; i < steps; i++) {
+    const minValue = i * step;
+    const maxValue = (i + 1) * step - 1;
+    const color = SEQUENTIAL_PALETTE[i];
+
+    const label = i === steps - 1
+      ? `$${fmtCompact(minValue)} and above`
+      : `${fmtCompact(minValue)} – ${fmtCompact(maxValue)}`;
+
+    breaks.push({
+      label,
+      minValue,
+      maxValue: i === steps - 1 ? Infinity : maxValue,
+      color,
+    });
+  }
+  return breaks;
 }
 
 /** Calculate quantile breaks for a metric in a quarter. */
