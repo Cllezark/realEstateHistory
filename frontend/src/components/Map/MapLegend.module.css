@@ -1,0 +1,40 @@
+.legend {
+  position: absolute;
+  bottom: 24px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  z-index: 10;
+  max-width: 220px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.breakItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.swatch {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

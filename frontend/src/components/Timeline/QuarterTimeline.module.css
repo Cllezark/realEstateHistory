@@ -1,0 +1,86 @@
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.navBtn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.navBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.navBtn:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.sliderWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.sliderLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #222;
+}
+
+.slider {
+  width: 100%;
+  max-width: 600px;
+  height: 6px;
+  accent-color: #2b8cbe;
+  cursor: pointer;
+}
+
+.slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sliderEnds {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  font-size: 0.65rem;
+  color: #777;
+  margin-top: 2px;
+}
+
+.playBtn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.playBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.playBtn:hover:not(:disabled) {
+  background: #e8e8e8;
+}

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp",
+        "--browser", "chromium",
+        "--headless",
+        "--no-sandbox",
+        "--isolated",
+        "--viewport-size", "1280x720",
+        "--test-id-attribute", "data-testid",
+        "--timeout-action", "10000",
+        "--timeout-navigation", "30000",
+        "--caps", "vision,pdf",
+        "--save-session",
+        "--output-dir", ".playwright-output",
+        "--console-level", "error"
+      ]
+    }
+  }
+}
