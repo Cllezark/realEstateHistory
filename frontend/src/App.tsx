@@ -29,12 +29,41 @@ export default function App() {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Fall back to last quarter when metadata loads
+  // Fall back to last quarter when metadata loads.
+  // Defensively walk backward through quarters to find one with actual
+  // market data, in case the pipeline publishes a trailing empty quarter.
   useEffect(() => {
-    if (metadata && !state.selectedQuarter) {
-      setSelectedQuarter(metadata.dateCoverageEnd);
+    if (!metadata || !marketData) return;
+    // Only set default on initial load (no quarter yet)
+    if (state.selectedQuarter) return;
+
+    const available = getSortedQuarterIds(marketData);
+    if (available.length === 0) return;
+
+    // Start from dateCoverageEnd and walk backward to find a quarter with data
+    let candidate = metadata.dateCoverageEnd;
+    while (candidate >= available[0]) {
+      const quarterData = marketData[candidate];
+      if (quarterData) {
+        // Check if any tract in this quarter has a median price
+        const hasData = Object.values(quarterData).some(
+          (r) => r.medianSalePrice != null,
+        );
+        if (hasData) {
+          setSelectedQuarter(candidate);
+          return;
+        }
+      }
+      // Walk backward to previous quarter
+      const parsed = /^(\d{4})-Q([1-4])$/.exec(candidate);
+      if (!parsed) break;
+      const year = parseInt(parsed[1], 10);
+      const q = parseInt(parsed[2], 10);
+      candidate = q === 1 ? `${year - 1}-Q4` : `${year}-Q${q - 1}`;
     }
-  }, [metadata, state.selectedQuarter, setSelectedQuarter]);
+    // Fallback to first available quarter
+    setSelectedQuarter(available[0]);
+  }, [metadata, marketData, state.selectedQuarter, setSelectedQuarter]);
 
   // Calculate legend breaks
   const breaks = useMemo(() => {

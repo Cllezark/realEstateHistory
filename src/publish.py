@@ -181,7 +181,12 @@ def validate_publication_assets(
         meta_start = meta.get("dateCoverageStart")
         meta_end = meta.get("dateCoverageEnd")
         data_start = str(df["quarter_id"].min())
-        data_end = str(df["quarter_id"].max())
+        # Coverage end: use the last quarter with actual data (not trailing
+        # empty spine quarters that have null median_sale_price)
+        data_quarters = sorted(
+            df.loc[df["median_sale_price"].notna(), "quarter_id"].dropna().unique()
+        )
+        data_end = str(data_quarters[-1]) if len(data_quarters) > 0 else str(df["quarter_id"].max())
         if meta_start != data_start:
             errors.append(
                 f"Metadata dateCoverageStart '{meta_start}' does not match "
@@ -190,7 +195,7 @@ def validate_publication_assets(
         if meta_end != data_end:
             errors.append(
                 f"Metadata dateCoverageEnd '{meta_end}' does not match "
-                f"data max quarter '{data_end}'"
+                f"data coverage end '{data_end}'"
             )
 
     # --- 7. Required fields in dashboard ---
@@ -241,7 +246,7 @@ def _build_tracts_geojson(
     geo_props.extend(area_cols.keys())
 
     geojson_path = web_assets_dir / "tracts.geojson"
-    stp_tracts[geo_props + ["geometry"]].to_file(geojson_path, driver="GeoJSON")
+    stp_tracts[geo_props + ["geometry"]].to_file(geojson_path, driver="GeoJSON", RFC7946=True)
     print(f"St. Pete tracts GeoJSON: {geojson_path} ({len(stp_tracts)} tracts)")
     return geojson_path
 
@@ -320,6 +325,19 @@ def _build_metadata(
     cfg_sale = config.get("sale_filter", {})
     cfg_geo = config.get("geography", {}).get("census_tract", {})
 
+    # Determine coverage end: last quarter that has at least one tract
+    # with a non-null median_sale_price (skip empty trailing quarters
+    # that exist only as spine rows with no sales data).
+    coverage_quarters = (
+        df.loc[df["median_sale_price"].notna(), "quarter_id"]
+        .dropna()
+        .unique()
+    )
+    if len(coverage_quarters) > 0:
+        data_coverage_end = str(sorted(coverage_quarters)[-1])
+    else:
+        data_coverage_end = str(df["quarter_id"].max())
+
     metadata = {
         "buildDate": datetime.now().astimezone().isoformat(),
         "dataSource": "pcpao",
@@ -329,7 +347,7 @@ def _build_metadata(
             "2020 TIGER/Line Census tracts (effective January 1, 2020)",
         ),
         "dateCoverageStart": str(df["quarter_id"].min()),
-        "dateCoverageEnd": str(df["quarter_id"].max()),
+        "dateCoverageEnd": data_coverage_end,
         "metrics": [c for c in _METRIC_COLUMNS if c in df.columns],
         "mortgageAssumptions": {
             "downPaymentPercent": float(cfg_mortgage.get("down_payment_percent", 20.0)),
