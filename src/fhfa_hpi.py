@@ -53,6 +53,14 @@ def normalize_fhfa_hpi(
             pinellas_hpi[col] = pd.to_numeric(pinellas_hpi[col], errors="coerce")
             pinellas_hpi.loc[pinellas_hpi[col] == 0, col] = None
 
+    # Phase 3 geography provenance: HPI is preserved on its source tract
+    # codes, never crosswalked. The measured GEOID set matches 2020 TIGER
+    # 100% (see docs/fhfa-hpi-vintage.md); vintage_expected comes from config
+    # and must be confirmed against the FHFA release documentation.
+    pinellas_hpi["fhfa_tract_vintage"] = cfg.get("vintage_expected", "unconfirmed")
+    pinellas_hpi["fhfa_geography_method"] = "source_tract_code"
+    pinellas_hpi["fhfa_source_release"] = "hpi_at_tract.csv"
+
     # Lineage
     pinellas_hpi["_pipeline_run_id"] = run_id
     pinellas_hpi["_normalized_at_utc"] = utc_now()
