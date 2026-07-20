@@ -62,13 +62,24 @@
 
 .active {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .comparisonLabel {
   font-size: 0.85rem;
   font-weight: 600;
   color: #333;
+}
+
+.comparisonRange {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.comparisonHint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #777;
+  line-height: 1.4;
 }

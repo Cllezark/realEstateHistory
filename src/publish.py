@@ -313,10 +313,82 @@ def _build_market_json(
     return json_path
 
 
+def _historical_manifest(df: pd.DataFrame, config: dict,
+                         manifest_path: Optional[Path]) -> dict:
+    """Phase 3 publication manifest: coverage boundaries, geography method,
+    rule versions, source hashes, and known series breaks."""
+    hist_cfg = config.get("historical", {})
+    fred_cfg = config.get("fred", {})
+
+    observed = df[df["median_sale_price"].notna()]
+    quarters = sorted(observed["quarter_id"].dropna().unique())
+    earliest = str(quarters[0]) if quarters else None
+    latest = str(quarters[-1]) if quarters else None
+
+    # Complete coverage: first quarter where at least half the tracts that
+    # ever publish a median do so (distinguishes "earliest observation" from
+    # "earliest quarter with sufficiently complete coverage")
+    complete_start = earliest
+    if len(observed) > 0:
+        tracts_per_quarter = observed.groupby("quarter_id")["tract_geoid"].nunique()
+        threshold = observed["tract_geoid"].nunique() * 0.5
+        qualifying = tracts_per_quarter[tracts_per_quarter >= threshold]
+        if len(qualifying) > 0:
+            complete_start = str(sorted(qualifying.index)[0])
+
+    source_files = []
+    if manifest_path is not None and Path(manifest_path).exists():
+        manifest = pd.read_parquet(manifest_path)
+        source_files = [
+            {"file": r["source_file"], "sha256": r["source_sha256"]}
+            for _, r in manifest.iterrows()
+        ]
+
+    return {
+        "earliestSupportedQuarter": earliest,
+        "latestSupportedQuarter": latest,
+        "completeCoverageStartQuarter": complete_start,
+        "tractDisplayVintage": "2020",
+        "historicalGeographyMethod": "direct_point_to_2020_tract",
+        "cityBoundaryMethod": "fixed_2020_place_boundary",
+        "historicalCutover": {
+            "date": hist_cfg.get("cutover_date", "2021-01-01"),
+            "before": "RP_OS_SALES.csv (historical schema)",
+            "onOrAfter": "RP_SALES.csv (current schema)",
+        },
+        "ruleVersions": {
+            "sourceSchemaCurrent": hist_cfg.get("source_schema_version_current"),
+            "sourceSchemaHistorical": hist_cfg.get("source_schema_version_historical"),
+            "multiParcelHistorical": hist_cfg.get("multi_parcel_rule_version"),
+            "propertyClassHistorical": hist_cfg.get("property_class_rule_version"),
+        },
+        "knownBreaks": [
+            {
+                "date": fred_cfg.get("methodology_break_date", "2022-11-17"),
+                "series": "mortgageRate",
+                "description": fred_cfg.get(
+                    "methodology_break_note",
+                    "Freddie Mac survey methodology change",
+                ),
+            },
+            {
+                "date": hist_cfg.get("cutover_date", "2021-01-01"),
+                "series": "sales",
+                "description": "Source file cutover: historical official-record "
+                               "extract to current PCPAO sales extract; "
+                               "multi-parcel flag derived (not observed) before "
+                               "this date at 99.6% validated agreement",
+            },
+        ],
+        "sourceFiles": source_files,
+    }
+
+
 def _build_metadata(
     df: pd.DataFrame,
     config: dict,
     web_assets_dir: Path,
+    manifest_path: Optional[Path] = None,
 ) -> Path:
     """Write metadata.json with build info, coverage, and assumptions."""
     web_assets_dir.mkdir(parents=True, exist_ok=True)
@@ -364,6 +436,7 @@ def _build_metadata(
             "mortgageRate": "FRED / Freddie Mac 30-Year Fixed Rate Mortgage Average",
         },
         "pipelineVersion": str(config.get("pipeline", {}).get("version", "1.0.0")),
+        "historical": _historical_manifest(df, config, manifest_path),
     }
 
     meta_path = web_assets_dir / "metadata.json"
@@ -417,10 +490,12 @@ def publish_dashboard(
         )
 
     # --- Required columns check ---
+    # (suppress_median is intentionally absent: this stage computes it below,
+    # so requiring it as input would create a dependency on a prior publish
+    # run's output rather than on the mortgage-payment stage's actual product)
     required_cols = [
         "tract_geoid", "year", "quarter", "quarter_id",
         "qualified_sale_count", "median_sale_price",
-        "suppress_median",
     ]
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
@@ -535,7 +610,10 @@ def publish_dashboard(
     market_json_path = _build_market_json(df, st_pete_geoids, web_assets_dir)
 
     # 3. Metadata JSON
-    metadata_path = _build_metadata(df, config, web_assets_dir)
+    metadata_path = _build_metadata(
+        df, config, web_assets_dir,
+        manifest_path=output_dir / "bronze_source_manifest.parquet",
+    )
 
     # --- Validate generated assets ---
     validation_errors = validate_publication_assets(

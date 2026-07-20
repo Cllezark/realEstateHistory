@@ -142,7 +142,7 @@ class TestPipelineIntegration:
         assert config["geography"]["state_fips"] == "12"
         assert config["geography"]["county_fips"] == "103"
         assert config["geography"]["city"]["place_fips"] == "63000"
-        assert config["sale_filter"]["min_sale_date"] == "2021-01-01"
+        assert config["sale_filter"]["min_sale_date"] == "2011-01-01"
 
     def test_fhfa_prefix(self):
         config = load_config(PROJECT_CONFIG)

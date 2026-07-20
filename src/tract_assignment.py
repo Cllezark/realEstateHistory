@@ -79,6 +79,9 @@ def assign_tracts(
     assignment = assignment.rename(columns={"NAME": "tract_name"})
     assignment["tract_assignment_method"] = "spatial_within"
     assignment["tract_boundary_vintage"] = "2020"
+    # Phase 3 geography model: every parcel point (historical or current)
+    # is assigned directly to fixed 2020 geography
+    assignment["geography_method"] = "direct_point_to_2020_tract"
     assignment["tract_assignment_quality_flag"] = None
     assignment.loc[assignment["strap"].isin(dupe_parcels["strap"].unique()),
                    "tract_assignment_quality_flag"] = "AMBIGUOUS_MULTI_TRACT"
@@ -92,6 +95,7 @@ def assign_tracts(
             "tract_name": None,
             "tract_assignment_method": None,
             "tract_boundary_vintage": "2020",
+            "geography_method": "unassigned",
             "tract_assignment_quality_flag": "NO_TRACT_MATCH",
         })
         assignment = pd.concat([assignment, no_tract_df], ignore_index=True)
@@ -138,7 +142,8 @@ def assign_tracts(
 
     # Save parcel-tract assignment
     assign_cols = ["strap", "tract_geoid", "tract_name", "tract_assignment_method",
-                   "tract_boundary_vintage", "tract_assignment_quality_flag"]
+                   "tract_boundary_vintage", "geography_method",
+                   "tract_assignment_quality_flag"]
     assignment[assign_cols].to_parquet(output_dir / "silver_parcel_tract.parquet", index=False)
 
     # Merge tract assignment back to sales

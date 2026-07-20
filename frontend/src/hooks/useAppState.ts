@@ -10,6 +10,7 @@ const DEFAULT_STATE: AppState = {
   comparisonEndQuarter: null,
   loading: 'idle',
   error: null,
+  priceFilterThreshold: null,
 };
 
 /** Read app state from URL query parameters. */
@@ -88,6 +89,10 @@ export function useAppState(initialQuarter: string) {
     setState(prev => ({ ...prev, error, loading: error ? 'error' : prev.loading }));
   }, []);
 
+  const setPriceFilterThreshold = useCallback((threshold: number | null) => {
+    setState(prev => ({ ...prev, priceFilterThreshold: threshold }));
+  }, []);
+
   const enableComparison = useCallback((start: string, end: string) => {
     setState(prev => ({
       ...prev,
@@ -113,6 +118,7 @@ export function useAppState(initialQuarter: string) {
     setActiveMetric,
     setLoading,
     setError,
+    setPriceFilterThreshold,
     enableComparison,
     disableComparison,
   };

@@ -22,9 +22,11 @@ from src.inventory import run_inventory
 from src.raw_manifest import run_raw_layer
 from src.normalize_property import normalize_property
 from src.normalize_sales import normalize_sales
+from src.normalize_os_sales import normalize_os_sales
 from src.sale_filter import apply_sale_filter
 from src.city_membership import assign_city_membership
 from src.tract_assignment import assign_tracts
+from src.tract_bridge import build_tract_bridge
 from src.fhfa_hpi import normalize_fhfa_hpi
 from src.fred_mortgage import normalize_fred_mortgage
 from src.tract_aggregate import build_tract_quarter_aggregate
@@ -38,9 +40,11 @@ STAGES = [
     "raw_manifest",
     "normalize_property",
     "normalize_sales",
+    "normalize_os_sales",
     "sale_filter",
     "city_membership",
     "tract_assignment",
+    "tract_bridge",
     "fhfa_hpi",
     "fred_mortgage",
     "tract_aggregate",
@@ -84,6 +88,11 @@ def main():
 
     results = {}
 
+    # Shared intermediate paths — defined up front so every stage can run
+    # standalone via --stage without depending on an earlier block's locals
+    enriched_path = output_dir / "fact_sale_enriched.parquet"
+    dim_tract = output_dir / "dim_census_tract.parquet"
+
     # --- Stage 1: Inventory ---
     if "inventory" in stages_to_run:
         print("\n" + "=" * 60)
@@ -114,12 +123,23 @@ def main():
         bronze_sales = output_dir / "bronze_sales.parquet"
         results["sales"] = normalize_sales(bronze_sales, output_dir, run_id)
 
+    # --- Stage 4b: Normalize Historical Sales (Phase 3) ---
+    if "normalize_os_sales" in stages_to_run:
+        print("\n" + "=" * 60)
+        print("STAGE 4b: Normalize Historical Sales (RP_OS_SALES)")
+        print("=" * 60)
+        bronze_os = output_dir / "bronze_os_sales.parquet"
+        silver_sales = output_dir / "silver_sales.parquet"
+        results["os_sales"] = normalize_os_sales(
+            bronze_os, silver_sales, output_dir, config, run_id
+        )
+
     # --- Stage 5: Sale Filter ---
     if "sale_filter" in stages_to_run:
         print("\n" + "=" * 60)
         print("STAGE 5: Analytical Sale Filter")
         print("=" * 60)
-        sales_path = output_dir / "silver_sales.parquet"
+        sales_path = output_dir / "silver_sales_combined.parquet"
         prop_path = output_dir / "silver_property_current.parquet"
         results["filter"] = apply_sale_filter(
             sales_path, prop_path, output_dir, config, run_id
@@ -131,7 +151,6 @@ def main():
         print("STAGE 6: St. Petersburg Membership (Spatial)")
         print("=" * 60)
         place_shp = data_dir / config["paths"]["sources"]["tiger_place"]
-        enriched_path = output_dir / "fact_sale_enriched.parquet"
         results["city"] = assign_city_membership(
             enriched_path, place_shp, output_dir, config, run_id
         )
@@ -146,13 +165,28 @@ def main():
             enriched_path, tract_shp, output_dir, config, run_id
         )
 
+    # --- Stage 7b: 2010 Tract Dimension + 2010-2020 Bridge (audit layer) ---
+    if "tract_bridge" in stages_to_run:
+        print("\n" + "=" * 60)
+        print("STAGE 7b: 2010 Tract Dimension + 2010-2020 Bridge")
+        print("=" * 60)
+        tract10_shp = data_dir / config["paths"]["sources"]["tiger_tract_2010"]
+        relationship = data_dir / config["paths"]["sources"]["tract_relationship"]
+        if tract10_shp.exists() and relationship.exists():
+            results["bridge"] = build_tract_bridge(
+                tract10_shp, relationship,
+                output_dir / "dim_census_tract.parquet",
+                output_dir, config, run_id,
+            )
+        else:
+            print("2010 tract shapefile or relationship file missing — skipping")
+
     # --- Stage 8: FHFA HPI ---
     if "fhfa_hpi" in stages_to_run:
         print("\n" + "=" * 60)
         print("STAGE 8: FHFA Tract HPI")
         print("=" * 60)
         bronze_fhfa = output_dir / "bronze_fhfa_hpi.parquet"
-        dim_tract = output_dir / "dim_census_tract.parquet"
         results["fhfa"] = normalize_fhfa_hpi(
             bronze_fhfa, dim_tract, output_dir, config, run_id
         )

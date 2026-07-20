@@ -21,11 +21,14 @@ paths:
   # Source files (relative to data_dir)
   sources:
     sales: ["RP_SALES.csv"]
+    os_sales: ["RP_OS_SALES.csv"]
     property_info: ["RP_PROPERTY_INFO.csv"]
     fhfa_hpi: ["hpi_at_tract.csv"]
-    fred_mortgage: ["MORTGAGE30US.csv"]
+    fred_mortgage: ["MORTGAGE30US.csv", "MORTGAGE30US_2010s.csv"]
     tiger_tract: "tl_2020_12_tract.shp"
+    tiger_tract_2010: "tl_2010_12_tract10/tl_2010_12_tract10.shp"
     tiger_place: "tl_2020_12_place.shp"
+    tract_relationship: "tab20_tract20_tract10_natl.txt"
 
   # Output files
   output:
@@ -86,10 +89,28 @@ geography:
     project_crs: "EPSG:3086"  # Florida East (US Feet) for area calculations
 
 # ---------------------------------------------------------------------------
+# Historical integration (Phase 3)
+# ---------------------------------------------------------------------------
+historical:
+  # Rows before the cutover come from RP_OS_SALES.csv (historical schema);
+  # RP_SALES.csv stays authoritative from the cutover forward, preserving
+  # the Phase 2 results unchanged.
+  cutover_date: "2021-01-01"
+  source_schema_version_current: "pcpao_current_v1"
+  source_schema_version_historical: "pcpao_os_v1"
+  # MULTI_SALES_YN is absent from the historical schema; the flag is derived
+  # by deed grouping (same BOOK_PAGE + SALE_DATE across >1 parcel) and
+  # validated against the post-cutover overlap with RP_SALES.csv.
+  multi_parcel_rule_version: "derived_book_page_v1"
+  # Property-class filtering joins the CURRENT (2026) roll — sale-era
+  # property classes are not available in the historical extract.
+  property_class_rule_version: "current_roll_v1"
+
+# ---------------------------------------------------------------------------
 # Analytical sale filter
 # ---------------------------------------------------------------------------
 sale_filter:
-  min_sale_date: "2021-01-01"
+  min_sale_date: "2011-01-01"
   min_price: 1  # Positive price
   max_price: 1000000000  # Sentinel upper bound
 

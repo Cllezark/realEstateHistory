@@ -110,6 +110,7 @@ export interface AppState {
   comparisonEndQuarter: string | null;
   loading: LoadingState;
   error: string | null;
+  priceFilterThreshold: number | null;
 }
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error';

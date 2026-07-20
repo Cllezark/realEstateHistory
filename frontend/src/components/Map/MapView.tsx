@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
-import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak } from '../../data/types';
+import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
-import { getTractRecord, getEffectiveMedian, formatCurrency } from '../../data/formatters';
+import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
 import styles from './MapView.module.css';
 
 interface Props {
@@ -16,11 +16,24 @@ interface Props {
   breaks: LegendBreak[];
   comparisonMode: boolean;
   comparisonColors: Map<string, string> | null;
+  appreciationMap?: Map<string, number | null> | null;
   onSelectTract: (tractGeoid: string | null) => void;
+  priceFilterThreshold?: number | null;
+}
+
+interface HoveredTract {
+  name: string;
+  geoid: string;
+  record: TractQuarterRecord | null;
 }
 
 const ST_PETE_CENTER: [number, number] = [-82.66, 27.77];
 const ST_PETE_ZOOM = 11.5;
+
+const PRICE_FILTER_METRICS = new Set<MapMetric>([
+  'medianSalePrice', 'meanSalePrice', 'p25SalePrice', 'p75SalePrice',
+  'minSalePrice', 'maxSalePrice', 'estimatedMonthlyPrincipalInterest',
+]);
 
 /** Light basemap style using OpenStreetMap raster tiles (no API key required). */
 const BASEMAP_STYLE: maplibregl.StyleSpecification = {
@@ -43,6 +56,37 @@ const BASEMAP_STYLE: maplibregl.StyleSpecification = {
   ],
 };
 
+function formatMetricValue(record: TractQuarterRecord, metric: MapMetric): string {
+  const val = record[metric];
+  if (val == null) return 'No data';
+  if (metric === 'averageRatePercent' || metric === 'annualChange') {
+    return `${(val as number).toFixed(2)}%`;
+  }
+  if (metric === 'hpi') return formatHpi(val as number);
+  if (metric === 'qualifiedSaleCount') return String(val);
+  return formatCurrency(val as number);
+}
+
+function buildHatchPattern(): ImageData {
+  const size = 12;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#c9b8a8';
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 3;
+  // Tile the diagonal stripe across the canvas cell
+  for (let offset = -size; offset <= size * 2; offset += size) {
+    ctx.beginPath();
+    ctx.moveTo(offset, size);
+    ctx.lineTo(offset + size, 0);
+    ctx.stroke();
+  }
+  return ctx.getImageData(0, 0, size, size);
+}
+
 export function MapView({
   geometry,
   marketData,
@@ -52,15 +96,16 @@ export function MapView({
   breaks,
   comparisonMode,
   comparisonColors,
+  appreciationMap,
   onSelectTract,
+  priceFilterThreshold,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
   const styleLoadedRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
-  // Track whether we've already added the tract layers to the map
   const layersAddedRef = useRef(false);
+  const [hoveredTract, setHoveredTract] = useState<HoveredTract | null>(null);
 
   // Initialize map — defer to next frame to avoid WebGL context loss
   // caused by React StrictMode double-mounting in development
@@ -70,9 +115,6 @@ export function MapView({
     let cancelled = false;
     const container = mapContainerRef.current;
 
-    // Defer map creation by one animation frame so the browser can
-    // reclaim the WebGL context from any previously-destroyed map
-    // (critical for React StrictMode double-mount in development)
     const raf = requestAnimationFrame(() => {
       if (cancelled || mapRef.current) return;
 
@@ -86,8 +128,6 @@ export function MapView({
 
       map.addControl(new maplibregl.NavigationControl(), 'top-left');
 
-      // Inline style objects load synchronously during construction.
-      // If already loaded, mark ready now; otherwise wait for the event.
       if (map.isStyleLoaded()) {
         styleLoadedRef.current = true;
         setMapReady(true);
@@ -98,7 +138,6 @@ export function MapView({
         });
       }
 
-      // Handle WebGL context loss — attempt recovery
       map.on('webglcontextlost', () => {
         console.warn('[MapView] WebGL context lost');
       });
@@ -106,12 +145,9 @@ export function MapView({
         console.log('[MapView] WebGL context restored');
       });
 
-      // If the style fails to load (network error for tiles), still
-      // mark ready so GeoJSON overlays render on whatever we have
       map.on('error', (e) => {
         if ((e.error?.status === 404 || e.error?.status === 403) && !styleLoadedRef.current) {
           console.warn('Map tile error (non-fatal):', e.error.message);
-          // Do not auto-mark ready—let style.load or isStyleLoaded() handle it
         }
       });
 
@@ -154,7 +190,6 @@ export function MapView({
           data: geometry as FeatureCollection,
         });
 
-        // Fill layer (below labels but above basemap)
         map.addLayer({
           id: 'tracts-fill',
           type: 'fill',
@@ -165,7 +200,6 @@ export function MapView({
           },
         });
 
-        // Border layer
         map.addLayer({
           id: 'tracts-border',
           type: 'line',
@@ -177,7 +211,6 @@ export function MapView({
           },
         });
 
-        // Highlight layer for selected tract
         map.addLayer({
           id: 'tracts-highlight',
           type: 'line',
@@ -191,13 +224,26 @@ export function MapView({
           layout: { visibility: 'none' },
         });
 
+        // Add hatch pattern image for price filter overlay
+        const hatchData = buildHatchPattern();
+        map.addImage('hatch-pattern', hatchData);
+
+        // Hatch overlay layer for tracts above price threshold (starts empty)
+        map.addLayer({
+          id: 'tracts-hatch',
+          type: 'fill',
+          source: 'tracts',
+          paint: {
+            'fill-pattern': 'hatch-pattern',
+          },
+          filter: ['in', ['get', 'tract_geoid'], ['literal', []]],
+        });
+
         // Click handler for tract selection
         map.on('click', 'tracts-fill', (e) => {
           if (e.features && e.features.length > 0) {
             const tractGeoid = e.features[0].properties?.tract_geoid;
-            if (tractGeoid) {
-              onSelectTract(tractGeoid);
-            }
+            if (tractGeoid) onSelectTract(tractGeoid);
           }
         });
 
@@ -209,11 +255,9 @@ export function MapView({
           map.getCanvas().style.cursor = '';
         });
 
-        // Mark layers as successfully added only after all operations complete
         layersAddedRef.current = true;
       } catch (err) {
         console.error('[MapView] Failed to add tract layers:', err);
-        // Do not set layersAddedRef—allow retry on next effect run
       }
     }
   }, [geometry, onSelectTract, mapReady]);
@@ -225,8 +269,6 @@ export function MapView({
     if (!map.getSource('tracts')) return;
 
     const quarterData = marketData[selectedQuarter];
-
-    // Build a color lookup by tract_geoid
     const colorByTract: Record<string, string> = {};
 
     if (comparisonMode && comparisonColors) {
@@ -240,71 +282,133 @@ export function MapView({
       }
     }
 
-    // Apply colors via setPaintProperty with match expression
     const matchExpr: unknown[] = ['match', ['get', 'tract_geoid']];
     for (const [tractId, color] of Object.entries(colorByTract)) {
       matchExpr.push(tractId, color);
     }
-    matchExpr.push(MISSING_COLOR); // default
+    matchExpr.push(MISSING_COLOR);
 
     map.setPaintProperty('tracts-fill', 'fill-color', matchExpr as unknown as maplibregl.Expression);
+  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, mapReady]);
 
-    // Update highlight filter
+  // Update highlight filter when selected tract changes (independent of color repaint)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    if (!map.getLayer('tracts-highlight')) return;
+
     if (selectedTract) {
       map.setFilter('tracts-highlight', ['==', ['get', 'tract_geoid'], selectedTract]);
       map.setLayoutProperty('tracts-highlight', 'visibility', 'visible');
     } else {
       map.setLayoutProperty('tracts-highlight', 'visibility', 'none');
     }
-  }, [marketData, selectedQuarter, activeMetric, breaks, comparisonMode, comparisonColors, selectedTract, mapReady]);
+  }, [selectedTract, mapReady]);
 
-  // Hover tooltip
+  // Update hatch filter when price threshold / quarter / metric changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !map.getLayer('tracts-hatch')) return;
+
+    // MapLibre v5 setFilter expects FilterSpecification; cast through unknown
+    // since the expression array syntax is valid at runtime but not assignable
+    // to the new Expression class type directly.
+    type FS = maplibregl.FilterSpecification;
+    const emptyFilter = ['in', ['get', 'tract_geoid'], ['literal', []]] as unknown as FS;
+
+    if (!priceFilterThreshold || !marketData || !PRICE_FILTER_METRICS.has(activeMetric)) {
+      map.setFilter('tracts-hatch', emptyFilter);
+      return;
+    }
+
+    const quarterData = marketData[selectedQuarter];
+    if (!quarterData) {
+      map.setFilter('tracts-hatch', emptyFilter);
+      return;
+    }
+
+    const aboveIds = Object.entries(quarterData)
+      .filter(([, record]) => {
+        const val = record[activeMetric] as number | null;
+        return val != null && val > priceFilterThreshold;
+      })
+      .map(([id]) => id);
+
+    const activeFilter = ['in', ['get', 'tract_geoid'], ['literal', aboveIds]] as unknown as FS;
+    map.setFilter('tracts-hatch', aboveIds.length > 0 ? activeFilter : emptyFilter);
+  }, [priceFilterThreshold, marketData, selectedQuarter, activeMetric, mapReady]);
+
+  // Hover tooltip: update React state via map events
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !marketData || !mapReady) return;
     if (!map.getSource('tracts')) return;
 
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-    popupRef.current = popup;
-
     const onMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
       if (!e.features || e.features.length === 0) return;
       const props = e.features[0].properties;
-      const tractGeoid = props?.tract_geoid;
-      const tractName = props?.tract_name ?? tractGeoid;
-
-      const record = getTractRecord(marketData, selectedQuarter, tractGeoid);
-      let tooltipHtml = `<strong>${tractName}</strong><br/>GEOID: ${tractGeoid}`;
-
-      if (record) {
-        const median = getEffectiveMedian(record);
-        if (median != null) {
-          tooltipHtml += `<br/>${getMetricLabel(activeMetric)}: ${formatCurrency(median)}`;
-        } else if (record.suppressMedian) {
-          tooltipHtml += `<br/><em>Suppressed (fewer than 5 sales)</em>`;
-        } else {
-          tooltipHtml += `<br/><em>No data</em>`;
-        }
-      } else {
-        tooltipHtml += `<br/><em>No data for ${selectedQuarter}</em>`;
-      }
-
-      popup.setLngLat(e.lngLat).setHTML(tooltipHtml).addTo(map);
+      const geoid = props?.tract_geoid as string;
+      const name = (props?.tract_name ?? geoid) as string;
+      const record = getTractRecord(marketData, selectedQuarter, geoid);
+      setHoveredTract({ name, geoid, record });
     };
 
     const onMouseLeave = () => {
-      popup.remove();
+      setHoveredTract(null);
     };
 
     map.on('mousemove', 'tracts-fill', onMouseMove);
     map.on('mouseleave', 'tracts-fill', onMouseLeave);
 
     return () => {
-      popup.remove();
       map.off('mousemove', 'tracts-fill', onMouseMove);
       map.off('mouseleave', 'tracts-fill', onMouseLeave);
     };
   }, [marketData, selectedQuarter, activeMetric, mapReady]);
 
-  return <div ref={mapContainerRef} className={styles.mapContainer} role="application" aria-label="St. Petersburg Census tract map" />;
+  const tooltipValue = hoveredTract?.record
+    ? formatMetricValue(hoveredTract.record, activeMetric)
+    : null;
+
+  const appreciationValue = comparisonMode && hoveredTract && appreciationMap
+    ? appreciationMap.get(hoveredTract.geoid)
+    : undefined;
+
+  return (
+    <div className={styles.mapWrapper}>
+      <div
+        ref={mapContainerRef}
+        className={styles.mapContainer}
+        role="application"
+        aria-label="St. Petersburg Census tract map"
+      />
+      {hoveredTract && (
+        <div className={styles.hoverTooltip}>
+          <div className={styles.tooltipName}>{hoveredTract.name}</div>
+          <div className={styles.tooltipGeoid}>GEOID: {hoveredTract.geoid}</div>
+          {comparisonMode ? (
+            <div className={styles.tooltipMetric}>
+              Price change:{' '}
+              {appreciationValue == null
+                ? <em>Insufficient data</em>
+                : <strong style={{ color: appreciationValue >= 0 ? '#1a9850' : '#d73027' }}>
+                    {appreciationValue >= 0 ? '+' : ''}{appreciationValue.toFixed(1)}%
+                  </strong>
+              }
+            </div>
+          ) : (
+            <>
+              <div className={styles.tooltipMetric}>
+                {getMetricLabel(activeMetric)}:{' '}
+                {tooltipValue ?? <em>No data</em>}
+              </div>
+              {hoveredTract.record?.suppressMedian && (
+                <div className={styles.tooltipSuppressed}>Suppressed (&lt;5 sales)</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -10,6 +10,7 @@ interface Props {
   onChangeQuarter: (quarter: string) => void;
   onPlayToggle?: () => void;
   isPlaying?: boolean;
+  maxQuarter?: string;
 }
 
 export function QuarterTimeline({
@@ -19,8 +20,12 @@ export function QuarterTimeline({
   onChangeQuarter,
   onPlayToggle,
   isPlaying,
+  maxQuarter,
 }: Props) {
-  const quarterIds = marketData ? getSortedQuarterIds(marketData) : [];
+  const allQuarterIds = marketData ? getSortedQuarterIds(marketData) : [];
+  const quarterIds = maxQuarter
+    ? allQuarterIds.filter(q => q <= maxQuarter)
+    : allQuarterIds;
   const currentIndex = quarterIds.indexOf(selectedQuarter);
   const firstQuarter = quarterIds[0] ?? '';
   const lastQuarter = quarterIds[quarterIds.length - 1] ?? '';

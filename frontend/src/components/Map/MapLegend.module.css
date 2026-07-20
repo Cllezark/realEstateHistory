@@ -13,9 +13,15 @@
 }
 
 .title {
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.comparisonSubtitle {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  color: #666;
 }
 
 .breakItem {
