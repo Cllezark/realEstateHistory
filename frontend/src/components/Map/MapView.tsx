@@ -89,13 +89,10 @@ export function MapView({
       // Inline style objects load synchronously during construction.
       // If already loaded, mark ready now; otherwise wait for the event.
       if (map.isStyleLoaded()) {
-        console.log('[MapView] style already loaded synchronously, setting mapReady');
         styleLoadedRef.current = true;
         setMapReady(true);
       } else {
-        console.log('[MapView] style not yet loaded, waiting for style.load event');
         map.on('style.load', () => {
-          console.log('[MapView] style.load event fired, setting mapReady');
           styleLoadedRef.current = true;
           setMapReady(true);
         });
@@ -106,8 +103,7 @@ export function MapView({
         console.warn('[MapView] WebGL context lost');
       });
       map.on('webglcontextrestored', () => {
-        console.log('[MapView] WebGL context restored, re-adding layers if needed');
-        setMapReady(true);
+        console.log('[MapView] WebGL context restored');
       });
 
       // If the style fails to load (network error for tiles), still
@@ -115,8 +111,7 @@ export function MapView({
       map.on('error', (e) => {
         if ((e.error?.status === 404 || e.error?.status === 403) && !styleLoadedRef.current) {
           console.warn('Map tile error (non-fatal):', e.error.message);
-          styleLoadedRef.current = true;
-          setMapReady(true);
+          // Do not auto-mark ready—let style.load or isStyleLoaded() handle it
         }
       });
 
@@ -148,79 +143,78 @@ export function MapView({
     const map = mapRef.current;
     if (!map || !geometry || !mapReady) return;
 
-    // Guard: don't add sources/layers if style isn't loaded
-    if (!map.isStyleLoaded()) return;
-
-    console.log('[MapView] geometry effect running — mapReady:', mapReady, 'features:', geometry.features.length, 'styleLoaded:', map.isStyleLoaded(), 'layersAdded:', layersAddedRef.current);
-
     const source = map.getSource('tracts') as maplibregl.GeoJSONSource | undefined;
 
     if (source) {
-      console.log('[MapView] source exists, calling setData');
       source.setData(geometry as FeatureCollection);
     } else if (!layersAddedRef.current) {
-      console.log('[MapView] adding tracts source and layers');
-      layersAddedRef.current = true;
+      try {
+        map.addSource('tracts', {
+          type: 'geojson',
+          data: geometry as FeatureCollection,
+        });
 
-      map.addSource('tracts', {
-        type: 'geojson',
-        data: geometry as FeatureCollection,
-      });
+        // Fill layer (below labels but above basemap)
+        map.addLayer({
+          id: 'tracts-fill',
+          type: 'fill',
+          source: 'tracts',
+          paint: {
+            'fill-color': '#e7e1ef',
+            'fill-opacity': 0.7,
+          },
+        });
 
-      // Fill layer (below labels but above basemap) — bright test color to confirm rendering
-      map.addLayer({
-        id: 'tracts-fill',
-        type: 'fill',
-        source: 'tracts',
-        paint: {
-          'fill-color': '#ff6600',  // bright orange for visibility testing
-          'fill-opacity': 0.75,
-        },
-      });
+        // Border layer
+        map.addLayer({
+          id: 'tracts-border',
+          type: 'line',
+          source: 'tracts',
+          paint: {
+            'line-color': '#333',
+            'line-width': 1,
+            'line-opacity': 0.9,
+          },
+        });
 
-      // Border layer
-      map.addLayer({
-        id: 'tracts-border',
-        type: 'line',
-        source: 'tracts',
-        paint: {
-          'line-color': '#333',
-          'line-width': 1,
-          'line-opacity': 0.9,
-        },
-      });
+        // Highlight layer for selected tract
+        map.addLayer({
+          id: 'tracts-highlight',
+          type: 'line',
+          source: 'tracts',
+          paint: {
+            'line-color': '#e31a1c',
+            'line-width': 2,
+            'line-opacity': 1,
+          },
+          filter: ['==', ['get', 'tract_geoid'], ''],
+          layout: { visibility: 'none' },
+        });
 
-      // Highlight layer for selected tract
-      map.addLayer({
-        id: 'tracts-highlight',
-        type: 'line',
-        source: 'tracts',
-        paint: {
-          'line-color': '#e31a1c',
-          'line-width': 2,
-          'line-opacity': 1,
-        },
-        filter: ['==', ['get', 'tract_geoid'], ''],
-        layout: { visibility: 'none' },
-      });
-
-      // Click handler for tract selection
-      map.on('click', 'tracts-fill', (e) => {
-        if (e.features && e.features.length > 0) {
-          const tractGeoid = e.features[0].properties?.tract_geoid;
-          if (tractGeoid) {
-            onSelectTract(tractGeoid);
+        // Click handler for tract selection
+        map.on('click', 'tracts-fill', (e) => {
+          if (e.features && e.features.length > 0) {
+            const tractGeoid = e.features[0].properties?.tract_geoid;
+            if (tractGeoid) {
+              onSelectTract(tractGeoid);
+            }
           }
-        }
-      });
+        });
 
-      // Hover cursor
-      map.on('mouseenter', 'tracts-fill', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'tracts-fill', () => {
-        map.getCanvas().style.cursor = '';
-      });
+        // Hover cursor
+        map.on('mouseenter', 'tracts-fill', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'tracts-fill', () => {
+          map.getCanvas().style.cursor = '';
+        });
+
+        // Mark layers as successfully added only after all operations complete
+        layersAddedRef.current = true;
+      } catch (err) {
+        console.error('[MapView] Failed to add tract layers:', err);
+        // Do not set layersAddedRef—allow retry on next effect run
+      }
     }
   }, [geometry, onSelectTract, mapReady]);
 
@@ -228,7 +222,7 @@ export function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !marketData || breaks.length === 0 || !mapReady) return;
-    if (!map.isStyleLoaded()) return;
+    if (!map.getSource('tracts')) return;
 
     const quarterData = marketData[selectedQuarter];
 
@@ -268,12 +262,12 @@ export function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !marketData || !mapReady) return;
-    if (!map.isStyleLoaded()) return;
+    if (!map.getSource('tracts')) return;
 
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
     popupRef.current = popup;
 
-    map.on('mousemove', 'tracts-fill', (e) => {
+    const onMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
       if (!e.features || e.features.length === 0) return;
       const props = e.features[0].properties;
       const tractGeoid = props?.tract_geoid;
@@ -296,14 +290,19 @@ export function MapView({
       }
 
       popup.setLngLat(e.lngLat).setHTML(tooltipHtml).addTo(map);
-    });
+    };
 
-    map.on('mouseleave', 'tracts-fill', () => {
+    const onMouseLeave = () => {
       popup.remove();
-    });
+    };
+
+    map.on('mousemove', 'tracts-fill', onMouseMove);
+    map.on('mouseleave', 'tracts-fill', onMouseLeave);
 
     return () => {
       popup.remove();
+      map.off('mousemove', 'tracts-fill', onMouseMove);
+      map.off('mouseleave', 'tracts-fill', onMouseLeave);
     };
   }, [marketData, selectedQuarter, activeMetric, mapReady]);
 
