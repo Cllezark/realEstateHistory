@@ -1,9 +1,15 @@
 # Large source data files
 /data/MORTGAGE30US.csv
+/data/MORTGAGE30US_2010s.csv
 /data/RP_PROPERTY_INFO.csv
 /data/RP_SALES.csv
+/data/RP_OS_SALES.csv
 /data/hpi_at_tract.csv
+/data/tab20_tract20_tract10_natl.txt
 /data/*.zip
+
+# 2010 TIGER tract shapefile (extracted)
+/data/tl_2010_12_tract10/
 
 # TIGER shapefile data (large binary files)
 /data/*.shp
