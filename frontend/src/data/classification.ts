@@ -76,10 +76,8 @@ function extractMetricValues(
   return values;
 }
 
-/** Calculate fixed $100K interval breaks for median sale price. */
-export function calculateMedianPriceBreaks(): LegendBreak[] {
-  const step = 100_000;
-  const steps = 10;
+/** Calculate fixed $100K interval breaks for sale price metrics. */
+function calculateFixedIntervalBreaks(step: number, steps: number): LegendBreak[] {
   const breaks: LegendBreak[] = [];
 
   for (let i = 0; i < steps; i++) {
@@ -90,6 +88,41 @@ export function calculateMedianPriceBreaks(): LegendBreak[] {
     const label = i === steps - 1
       ? `$${fmtCompact(minValue)} and above`
       : `${fmtCompact(minValue)} – ${fmtCompact(maxValue)}`;
+
+    breaks.push({
+      label,
+      minValue,
+      maxValue: i === steps - 1 ? Infinity : maxValue,
+      color,
+    });
+  }
+  return breaks;
+}
+
+/** Calculate fixed $100K interval breaks for median/mean sale price. */
+export function calculateMedianPriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+/** Calculate fixed $100K interval breaks for mean sale price. */
+export function calculateMeanPriceBreaks(): LegendBreak[] {
+  return calculateFixedIntervalBreaks(100_000, 10);
+}
+
+/** Calculate fixed $500 interval breaks for estimated monthly P&I. */
+export function calculateMonthlyPaymentBreaks(): LegendBreak[] {
+  const step = 500;
+  const steps = 10;
+  const breaks: LegendBreak[] = [];
+
+  for (let i = 0; i < steps; i++) {
+    const minValue = i * step;
+    const maxValue = (i + 1) * step - 1;
+    const color = SEQUENTIAL_PALETTE[i];
+
+    const label = i === steps - 1
+      ? `$${minValue} and above`
+      : `$${minValue} – $${maxValue}`;
 
     breaks.push({
       label,

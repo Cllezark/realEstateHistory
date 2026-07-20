@@ -12,6 +12,8 @@ import { useAppState } from './hooks/useAppState';
 import {
   calculateQuantileBreaks,
   calculateMedianPriceBreaks,
+  calculateMeanPriceBreaks,
+  calculateMonthlyPaymentBreaks,
   calculateAppreciationBreaks,
   MISSING_COLOR,
 } from './data/classification';
@@ -69,10 +71,16 @@ export default function App() {
   // Calculate legend breaks
   const breaks = useMemo(() => {
     if (!marketData || !state.selectedQuarter) return [];
-    if (state.activeMetric === 'medianSalePrice') {
-      return calculateMedianPriceBreaks();
+    switch (state.activeMetric) {
+      case 'medianSalePrice':
+        return calculateMedianPriceBreaks();
+      case 'meanSalePrice':
+        return calculateMeanPriceBreaks();
+      case 'estimatedMonthlyPrincipalInterest':
+        return calculateMonthlyPaymentBreaks();
+      default:
+        return calculateQuantileBreaks(marketData, state.selectedQuarter, state.activeMetric);
     }
-    return calculateQuantileBreaks(marketData, state.selectedQuarter, state.activeMetric);
   }, [marketData, state.selectedQuarter, state.activeMetric]);
 
   // Comparison mode colors
