@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl)",
+      "Read(//c/Users/CliffordLezark/.config/github-copilot/**)",
+      "Bash(wsl && find ~ -name \"config.json\" -path \"*/copilot*\" 2>/dev/null)",
+      "Bash(env)"
+    ]
+  }
+}
