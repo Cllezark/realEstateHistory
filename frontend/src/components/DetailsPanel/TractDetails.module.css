@@ -147,6 +147,63 @@
   margin: 2px 0;
 }
 
+.salesControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.sortFields {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.sortButton {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sortButton:hover {
+  background: #e8e8e8;
+  border-color: #b0b0b0;
+}
+
+.sortButton.active {
+  background: #2b8cbe;
+  color: #fff;
+  border-color: #1a5a8f;
+}
+
+.sortDirection {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #666;
+  font-weight: 600;
+  width: 36px;
+  transition: all 0.2s ease;
+}
+
+.sortDirection:hover {
+  background: #e8e8e8;
+  border-color: #b0b0b0;
+}
+
 .salesList {
   display: flex;
   flex-direction: column;

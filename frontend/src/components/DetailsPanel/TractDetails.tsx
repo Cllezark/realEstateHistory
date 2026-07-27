@@ -16,6 +16,9 @@ interface Props {
   parcelSales: ParcelSalesIndex | null;
 }
 
+type SortField = 'price' | 'date';
+type SortDirection = 'asc' | 'desc';
+
 export function TractDetails({
   tractGeoid,
   tractName,
@@ -25,13 +28,37 @@ export function TractDetails({
   parcelSales,
 }: Props) {
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>('price');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  const sales: ParcelSale[] = useMemo(() => {
+  const rawSales: ParcelSale[] = useMemo(() => {
     if (!parcelSales || !tractGeoid) return [];
     const quarterData = parcelSales[selectedQuarter];
     if (!quarterData) return [];
     return quarterData[tractGeoid] ?? [];
   }, [parcelSales, tractGeoid, selectedQuarter]);
+
+  const sales: ParcelSale[] = useMemo(() => {
+    const sorted = [...rawSales];
+    sorted.sort((a, b) => {
+      let aVal: number | string | null;
+      let bVal: number | string | null;
+
+      if (sortField === 'price') {
+        aVal = a.salePrice ?? 0;
+        bVal = b.salePrice ?? 0;
+      } else {
+        aVal = a.saleDate ?? '';
+        bVal = b.saleDate ?? '';
+      }
+
+      if (aVal === bVal) return 0;
+
+      const comparison = aVal < bVal ? -1 : 1;
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    return sorted;
+  }, [rawSales, sortField, sortDirection]);
 
   // Notify chart viewer windows when tract changes
   useEffect(() => {
@@ -193,6 +220,31 @@ export function TractDetails({
       {sales.length > 0 && (
         <div className={styles.chartSection}>
           <h3 className={styles.chartTitle}>Individual sales in {formatQuarterLabel(selectedQuarter)}</h3>
+          <div className={styles.salesControls}>
+            <div className={styles.sortFields}>
+              <button
+                className={`${styles.sortButton} ${sortField === 'price' ? styles.active : ''}`}
+                onClick={() => setSortField('price')}
+                title="Sort by price"
+              >
+                Price
+              </button>
+              <button
+                className={`${styles.sortButton} ${sortField === 'date' ? styles.active : ''}`}
+                onClick={() => setSortField('date')}
+                title="Sort by date"
+              >
+                Date
+              </button>
+            </div>
+            <button
+              className={styles.sortDirection}
+              onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+              title={`Switch to ${sortDirection === 'asc' ? 'descending' : 'ascending'} order`}
+            >
+              {sortDirection === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
           <div className={styles.salesList}>
             {sales.map((sale, idx) => (
               <div key={idx} className={styles.saleItem}>
