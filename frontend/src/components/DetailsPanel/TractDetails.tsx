@@ -60,16 +60,6 @@ export function TractDetails({
     return sorted;
   }, [rawSales, sortField, sortDirection]);
 
-  // Notify chart viewer windows when tract changes
-  useEffect(() => {
-    if (tractGeoid) {
-      const chartViewerWindow = window.open('', 'chart-viewer');
-      if (chartViewerWindow && !chartViewerWindow.closed) {
-        chartViewerWindow.postMessage({ type: 'TRACT_CHANGED', tractGeoid }, window.location.origin);
-      }
-    }
-  }, [tractGeoid]);
-
   const record: TractQuarterRecord | null = useMemo(() => {
     if (!marketData || !tractGeoid) return null;
     return getTractRecord(marketData, selectedQuarter, tractGeoid);
