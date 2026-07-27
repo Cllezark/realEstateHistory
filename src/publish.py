@@ -299,6 +299,8 @@ def _build_parcel_sales_json(
             "address": str(row["site_address"]) if pd.notna(row["site_address"]) else None,
             "salePrice": int(row["sale_price"]) if pd.notna(row["sale_price"]) else None,
             "saleDate": sale_date_str,
+            "latitude": float(row["latitude"]) if pd.notna(row["latitude"]) else None,
+            "longitude": float(row["longitude"]) if pd.notna(row["longitude"]) else None,
         }
 
         result[quarter_key][tract_key].append(sale_entry)

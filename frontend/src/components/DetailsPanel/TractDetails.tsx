@@ -14,6 +14,7 @@ interface Props {
   marketData: TractQuarterIndex | null;
   metadata: Metadata | null;
   parcelSales: ParcelSalesIndex | null;
+  onSaleClick?: (sale: ParcelSale) => void;
 }
 
 type SortField = 'price' | 'date';
@@ -26,6 +27,7 @@ export function TractDetails({
   marketData,
   metadata,
   parcelSales,
+  onSaleClick,
 }: Props) {
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('price');
@@ -237,7 +239,12 @@ export function TractDetails({
           </div>
           <div className={styles.salesList}>
             {sales.map((sale, idx) => (
-              <div key={idx} className={styles.saleItem}>
+              <div
+                key={idx}
+                className={styles.saleItem}
+                onClick={() => onSaleClick?.(sale)}
+                style={{ cursor: sale.latitude != null ? 'pointer' : 'default' }}
+              >
                 {sale.saleDate && (
                   <div className={styles.saleDate}>{sale.saleDate}</div>
                 )}

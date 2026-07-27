@@ -19,6 +19,7 @@ interface Props {
   appreciationMap?: Map<string, number | null> | null;
   onSelectTract: (tractGeoid: string | null) => void;
   priceFilterThreshold?: number | null;
+  flyToTarget?: { center: [number, number]; zoom?: number } | null;
 }
 
 interface HoveredTract {
@@ -99,6 +100,7 @@ export function MapView({
   appreciationMap,
   onSelectTract,
   priceFilterThreshold,
+  flyToTarget,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -304,6 +306,13 @@ export function MapView({
       map.setLayoutProperty('tracts-highlight', 'visibility', 'none');
     }
   }, [selectedTract, mapReady]);
+
+  // Fly to a parcel location when triggered from the sales list
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !flyToTarget) return;
+    map.flyTo({ center: flyToTarget.center, zoom: flyToTarget.zoom ?? 16 });
+  }, [flyToTarget, mapReady]);
 
   // Update hatch filter when price threshold / quarter / metric changes
   useEffect(() => {

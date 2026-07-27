@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useEffect, useState } from 'react';
+import type { ParcelSale } from './data/types';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { AppShell } from './components/AppShell/AppShell';
 import { MapView } from './components/Map/MapView';
@@ -36,6 +37,12 @@ export default function App() {
   } = useAppState(metadata?.dateCoverageEnd ?? '');
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom?: number } | null>(null);
+
+  const handleSaleClick = useCallback((sale: ParcelSale) => {
+    if (sale.latitude == null || sale.longitude == null) return;
+    setFlyToTarget({ center: [sale.longitude, sale.latitude], zoom: 16 });
+  }, []);
 
   // Fall back to last quarter when metadata loads.
   // Defensively walk backward through quarters to find one with actual
@@ -207,6 +214,7 @@ export default function App() {
               appreciationMap={appreciationMap}
               onSelectTract={setSelectedTract}
               priceFilterThreshold={state.priceFilterThreshold}
+              flyToTarget={flyToTarget}
             />
             <MapLegend
               metric={state.activeMetric}
@@ -283,6 +291,7 @@ export default function App() {
                 marketData={marketData}
                 metadata={metadata}
                 parcelSales={parcelSales}
+                onSaleClick={handleSaleClick}
               />
             </div>
           </div>

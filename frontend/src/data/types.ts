@@ -78,6 +78,8 @@ export interface ParcelSale {
   address: string | null;
   salePrice: number | null;
   saleDate: string | null; // YYYY-MM-DD format
+  latitude: number | null;
+  longitude: number | null;
 }
 
 /** Parcel sales indexed by quarter then tract: quarter_id → tract_geoid → sales[] */
