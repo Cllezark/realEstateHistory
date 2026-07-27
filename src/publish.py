@@ -251,6 +251,71 @@ def _build_tracts_geojson(
     return geojson_path
 
 
+def _build_parcel_sales_json(
+    enriched_sales_path: Path,
+    web_assets_dir: Path,
+) -> Path:
+    """Write individual parcel sales as a JSON file indexed by quarter and tract.
+
+    Structure: { quarter_id: { tract_geoid: [ {parcel_number, address, sale_price, sale_date}, ... ] } }
+
+    Includes only St. Pete parcels with valid tract assignments and single-parcel sales.
+    """
+    web_assets_dir.mkdir(parents=True, exist_ok=True)
+
+    sales = pd.read_parquet(enriched_sales_path)
+
+    # Filter to St. Pete parcels with tract assignment and single-parcel sales
+    valid_sales = sales[
+        (sales["inside_st_petersburg"] == True) &
+        sales["tract_geoid"].notna() &
+        (sales["_is_multi_parcel"] == False)
+    ].copy()
+
+    # Derive quarter
+    valid_sales["year"] = valid_sales["sale_date"].dt.year
+    valid_sales["quarter"] = valid_sales["sale_date"].dt.quarter
+    valid_sales["quarter_id"] = (
+        valid_sales["year"].astype(str) + "-Q" + valid_sales["quarter"].astype(str)
+    )
+
+    # Build nested dict: { quarter_id: { tract_geoid: [ sales... ] } }
+    result: dict = {}
+
+    for _, row in valid_sales.iterrows():
+        quarter_key = str(row["quarter_id"])
+        tract_key = str(row["tract_geoid"])
+
+        if quarter_key not in result:
+            result[quarter_key] = {}
+        if tract_key not in result[quarter_key]:
+            result[quarter_key][tract_key] = []
+
+        # Format sale date as YYYY-MM-DD
+        sale_date_str = row["sale_date"].strftime("%Y-%m-%d") if pd.notna(row["sale_date"]) else None
+
+        sale_entry = {
+            "parcelNumber": str(row["parcel_number"]) if pd.notna(row["parcel_number"]) else None,
+            "address": str(row["site_address"]) if pd.notna(row["site_address"]) else None,
+            "salePrice": int(row["sale_price"]) if pd.notna(row["sale_price"]) else None,
+            "saleDate": sale_date_str,
+        }
+
+        result[quarter_key][tract_key].append(sale_entry)
+
+    # Sort sales by date within each tract-quarter
+    for quarter_data in result.values():
+        for sales_list in quarter_data.values():
+            sales_list.sort(key=lambda x: x["saleDate"] or "", reverse=True)
+
+    json_path = web_assets_dir / "parcel-sales.json"
+    with open(json_path, "w") as f:
+        json.dump(result, f, separators=(",", ":"), sort_keys=True)
+
+    print(f"Parcel sales JSON: {json_path}")
+    return json_path
+
+
 def _build_market_json(
     df: pd.DataFrame,
     st_pete_geoids: list[str],
@@ -456,6 +521,7 @@ def publish_dashboard(
     config: dict,
     run_id: str,
     web_assets_dir: Optional[Path] = None,
+    enriched_sales_path: Optional[Path] = None,
 ) -> dict:
     """Merge FHFA HPI into dashboard and produce final outputs.
 
@@ -464,6 +530,7 @@ def publish_dashboard(
     assets for the frontend:
       - frontend/public/data/tracts.geojson   (St. Pete tracts only)
       - frontend/public/data/tract-quarter.json
+      - frontend/public/data/parcel-sales.json
       - frontend/public/data/metadata.json
     """
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -609,7 +676,15 @@ def publish_dashboard(
     # 2. Tract-quarter market data JSON
     market_json_path = _build_market_json(df, st_pete_geoids, web_assets_dir)
 
-    # 3. Metadata JSON
+    # 3. Parcel-level sales JSON (if enriched sales data available)
+    parcel_sales_path = None
+    if enriched_sales_path and enriched_sales_path.exists():
+        try:
+            parcel_sales_path = _build_parcel_sales_json(enriched_sales_path, web_assets_dir)
+        except Exception as e:
+            print(f"WARNING: Failed to build parcel sales JSON: {e}")
+
+    # 4. Metadata JSON
     metadata_path = _build_metadata(
         df, config, web_assets_dir,
         manifest_path=output_dir / "bronze_source_manifest.parquet",
@@ -633,14 +708,18 @@ def publish_dashboard(
     print(f"Dashboard published: {cells} cells, {cells_with_sales} with sales")
     print(f"  Columns: {list(df.columns)[:12]}...")
 
+    web_assets = {
+        "tracts_geojson": str(stp_geojson_path),
+        "market_json": str(market_json_path),
+        "metadata_json": str(metadata_path),
+    }
+    if parcel_sales_path:
+        web_assets["parcel_sales_json"] = str(parcel_sales_path)
+
     return {
         "dashboard_path": str(final_path),
         "total_cells": cells,
         "cells_with_sales": cells_with_sales,
         "st_pete_tracts": len(st_pete_geoids),
-        "web_assets": {
-            "tracts_geojson": str(stp_geojson_path),
-            "market_json": str(market_json_path),
-            "metadata_json": str(metadata_path),
-        },
+        "web_assets": web_assets,
     }

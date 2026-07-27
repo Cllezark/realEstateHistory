@@ -146,3 +146,47 @@
 .disclosures p {
   margin: 2px 0;
 }
+
+.salesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.saleItem {
+  padding: 8px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.saleDate {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.saleAddress {
+  font-size: 0.8rem;
+  color: #222;
+  font-weight: 500;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.salePrice {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a7f4a;
+  margin-bottom: 4px;
+}
+
+.saleParcelNumber {
+  font-size: 0.7rem;
+  color: #999;
+  font-family: monospace;
+}

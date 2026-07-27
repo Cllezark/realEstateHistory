@@ -18,3 +18,18 @@ export async function loadMetadata(): Promise<import('./types').Metadata> {
   if (!resp.ok) throw new Error(`Failed to load metadata: ${resp.status} ${resp.statusText}`);
   return resp.json();
 }
+
+/** Fetch and parse parcel-level sales data. */
+export async function loadParcelSales(): Promise<import('./types').ParcelSalesIndex | null> {
+  try {
+    const resp = await fetch('/data/parcel-sales.json');
+    if (!resp.ok) {
+      console.warn(`Parcel sales data not available: ${resp.status} ${resp.statusText}`);
+      return null;
+    }
+    return resp.json();
+  } catch (err) {
+    console.warn('Failed to load parcel sales data:', err);
+    return null;
+  }
+}

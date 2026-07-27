@@ -245,6 +245,7 @@ def main():
             config,
             run_id,
             web_assets_dir=web_assets_dir,
+            enriched_sales_path=enriched_path,
         )
 
     # --- Stage 13: Validate ---

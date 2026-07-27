@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import type { TractGeoJSON, TractQuarterIndex, Metadata, LoadingState } from '../data/types';
-import { loadTractGeometry, loadTractQuarterData, loadMetadata } from '../data/loaders';
+import type { TractGeoJSON, TractQuarterIndex, Metadata, ParcelSalesIndex, LoadingState } from '../data/types';
+import { loadTractGeometry, loadTractQuarterData, loadMetadata, loadParcelSales } from '../data/loaders';
 
 interface MapDataResult {
   geometry: TractGeoJSON | null;
   marketData: TractQuarterIndex | null;
   metadata: Metadata | null;
+  parcelSales: ParcelSalesIndex | null;
   loading: LoadingState;
   error: string | null;
 }
@@ -15,6 +16,7 @@ export function useMapData(): MapDataResult {
   const [geometry, setGeometry] = useState<TractGeoJSON | null>(null);
   const [marketData, setMarketData] = useState<TractQuarterIndex | null>(null);
   const [metadata, setMetadata] = useState<Metadata | null>(null);
+  const [parcelSales, setParcelSales] = useState<ParcelSalesIndex | null>(null);
   const [loading, setLoading] = useState<LoadingState>('idle');
   const [error, setError] = useState<string | null>(null);
 
@@ -25,15 +27,17 @@ export function useMapData(): MapDataResult {
       setLoading('loading');
       setError(null);
       try {
-        const [geo, mkt, meta] = await Promise.all([
+        const [geo, mkt, meta, parcels] = await Promise.all([
           loadTractGeometry(),
           loadTractQuarterData(),
           loadMetadata(),
+          loadParcelSales(),
         ]);
         if (!cancelled) {
           setGeometry(geo);
           setMarketData(mkt);
           setMetadata(meta);
+          setParcelSales(parcels);
           setLoading('loaded');
         }
       } catch (err) {
@@ -48,5 +52,5 @@ export function useMapData(): MapDataResult {
     return () => { cancelled = true; };
   }, []);
 
-  return { geometry, marketData, metadata, loading, error };
+  return { geometry, marketData, metadata, parcelSales, loading, error };
 }

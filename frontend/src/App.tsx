@@ -24,7 +24,7 @@ import {
 import { calculateAppreciation, getSortedQuarterIds } from './data/formatters';
 
 export default function App() {
-  const { geometry, marketData, metadata, loading, error } = useMapData();
+  const { geometry, marketData, metadata, parcelSales, loading, error } = useMapData();
   const {
     state,
     setSelectedTract,
@@ -282,6 +282,7 @@ export default function App() {
                 selectedQuarter={state.selectedQuarter}
                 marketData={marketData}
                 metadata={metadata}
+                parcelSales={parcelSales}
               />
             </div>
           </div>

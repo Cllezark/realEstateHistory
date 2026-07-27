@@ -72,6 +72,17 @@ export interface Attributions {
   mortgageRate: string;
 }
 
+/** A single parcel sale record. */
+export interface ParcelSale {
+  parcelNumber: string | null;
+  address: string | null;
+  salePrice: number | null;
+  saleDate: string | null; // YYYY-MM-DD format
+}
+
+/** Parcel sales indexed by quarter then tract: quarter_id → tract_geoid → sales[] */
+export type ParcelSalesIndex = Record<string, Record<string, ParcelSale[]>>;
+
 /** The active map metric. */
 export type MapMetric =
   | 'medianSalePrice'

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { TractQuarterIndex, TractQuarterRecord, Metadata } from '../../data/types';
+import type { TractQuarterIndex, TractQuarterRecord, Metadata, ParcelSalesIndex, ParcelSale } from '../../data/types';
 import {
   formatCurrency, formatRate, formatHpi, formatQuarterLabel,
   getTractRecord, getSortedQuarterIds, getEffectiveMedian,
@@ -13,6 +13,7 @@ interface Props {
   selectedQuarter: string;
   marketData: TractQuarterIndex | null;
   metadata: Metadata | null;
+  parcelSales: ParcelSalesIndex | null;
 }
 
 export function TractDetails({
@@ -21,8 +22,16 @@ export function TractDetails({
   selectedQuarter,
   marketData,
   metadata,
+  parcelSales,
 }: Props) {
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
+
+  const sales: ParcelSale[] = useMemo(() => {
+    if (!parcelSales || !tractGeoid) return [];
+    const quarterData = parcelSales[selectedQuarter];
+    if (!quarterData) return [];
+    return quarterData[tractGeoid] ?? [];
+  }, [parcelSales, tractGeoid, selectedQuarter]);
 
   // Notify chart viewer windows when tract changes
   useEffect(() => {
@@ -177,6 +186,36 @@ export function TractDetails({
             onHighlightQuarter={setHighlightedQuarter}
             showExpandButton
           />
+        </div>
+      )}
+
+      {/* Individual parcel sales */}
+      {sales.length > 0 && (
+        <div className={styles.chartSection}>
+          <h3 className={styles.chartTitle}>Individual sales in {formatQuarterLabel(selectedQuarter)}</h3>
+          <div className={styles.salesList}>
+            {sales.map((sale, idx) => (
+              <div key={idx} className={styles.saleItem}>
+                {sale.saleDate && (
+                  <div className={styles.saleDate}>{sale.saleDate}</div>
+                )}
+                {sale.address && (
+                  <div className={styles.saleAddress}>{sale.address}</div>
+                )}
+                {sale.salePrice !== null && (
+                  <div className={styles.salePrice}>{formatCurrency(sale.salePrice)}</div>
+                )}
+                {sale.parcelNumber && (
+                  <div className={styles.saleParcelNumber}>Parcel: {sale.parcelNumber}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {sales.length === 0 && parcelSales && tractGeoid && parcelSales[selectedQuarter]?.[tractGeoid] === undefined && (
+        <div className={styles.chartSection} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>
+          <p>No individual sales data available for this quarter.</p>
         </div>
       )}
 
