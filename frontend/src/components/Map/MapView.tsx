@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
-import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord, Metadata } from '../../data/types';
+import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord, Metadata, MyMapPointsGeoJSON, MyMapPolygonsGeoJSON, MyMapMetadata, MyMapLayerVisibility } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
 import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
 import styles from './MapView.module.css';
@@ -21,12 +21,26 @@ interface Props {
   onSelectTract: (tractGeoid: string | null) => void;
   priceFilterThreshold?: number | null;
   flyToTarget?: { center: [number, number]; zoom?: number } | null;
+  /** MyMap layers (Google MyMap integration) */
+  myMapPoints?: MyMapPointsGeoJSON | null;
+  myMapPolygons?: MyMapPolygonsGeoJSON | null;
+  myMapVisibility?: MyMapLayerVisibility | null;
+  myMapMetadata?: MyMapMetadata | null;
 }
 
 interface HoveredTract {
   name: string;
   geoid: string;
   record: TractQuarterRecord | null;
+}
+
+interface HoveredMyMap {
+  title: string;
+  folder: string;
+  description: string;
+  priceFormatted: string | null;
+  url: string | null;
+  isPoint: boolean;
 }
 
 const REGION_CENTER: [number, number] = [-82.74, 27.85];
@@ -103,13 +117,19 @@ export function MapView({
   onSelectTract,
   priceFilterThreshold,
   flyToTarget,
+  myMapPoints,
+  myMapPolygons,
+  myMapVisibility,
+  myMapMetadata: _myMapMetadata,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const styleLoadedRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const layersAddedRef = useRef(false);
+  const myMapEventsBoundRef = useRef(false);
   const [hoveredTract, setHoveredTract] = useState<HoveredTract | null>(null);
+  const [hoveredMyMap, setHoveredMyMap] = useState<HoveredMyMap | null>(null);
 
   // Initialize map — defer to next frame to avoid WebGL context loss
   // caused by React StrictMode double-mounting in development
@@ -354,6 +374,123 @@ export function MapView({
     map.setFilter('tracts-hatch', aboveIds.length > 0 ? activeFilter : emptyFilter);
   }, [priceFilterThreshold, marketData, selectedQuarter, activeMetric, mapReady]);
 
+  // Add/update MyMap point and polygon sources and layers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    // --- MyMap point source + layer ---
+    // If source doesn't exist yet, create it. If it exists, update data in-place.
+    // Event handlers are bound once (via myMapEventsBoundRef).
+    if (myMapPoints && myMapPoints.features.length > 0) {
+      const ptSource = map.getSource('mymap-points') as maplibregl.GeoJSONSource | undefined;
+      if (ptSource) {
+        ptSource.setData(myMapPoints as FeatureCollection);
+      } else {
+        map.addSource('mymap-points', {
+          type: 'geojson',
+          data: myMapPoints as FeatureCollection,
+        });
+        map.addLayer({
+          id: 'mymap-points-circle',
+          type: 'circle',
+          source: 'mymap-points',
+          paint: {
+            'circle-radius': 7,
+            'circle-color': ['get', 'folderColor'],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#fff',
+            'circle-opacity': 0.85,
+          },
+        });
+      }
+    }
+
+    // --- MyMap polygon source + layers ---
+    if (myMapPolygons && myMapPolygons.features.length > 0) {
+      const polySource = map.getSource('mymap-polygons') as maplibregl.GeoJSONSource | undefined;
+      if (polySource) {
+        polySource.setData(myMapPolygons as FeatureCollection);
+      } else {
+        map.addSource('mymap-polygons', {
+          type: 'geojson',
+          data: myMapPolygons as FeatureCollection,
+        });
+        map.addLayer({
+          id: 'mymap-polygons-fill',
+          type: 'fill',
+          source: 'mymap-polygons',
+          paint: {
+            'fill-color': ['get', 'fillColor'],
+            'fill-opacity': ['get', 'fillOpacity'],
+          },
+        });
+        map.addLayer({
+          id: 'mymap-polygons-border',
+          type: 'line',
+          source: 'mymap-polygons',
+          paint: {
+            'line-color': ['get', 'fillColor'],
+            'line-width': 2,
+            'line-dasharray': [4, 3],
+            'line-opacity': 0.7,
+          },
+        });
+      }
+    }
+
+    // Bind click + cursor event handlers once (persist across data refreshes)
+    if (!myMapEventsBoundRef.current) {
+      myMapEventsBoundRef.current = true;
+
+      // Click handler — fly to point
+      map.on('click', 'mymap-points-circle', (e) => {
+        if (e.features && e.features.length > 0) {
+          const geom = e.features[0].geometry as { type: string; coordinates: [number, number] };
+          if (geom?.coordinates) {
+            map.flyTo({ center: geom.coordinates, zoom: 15 });
+          }
+        }
+      });
+
+      // Hover cursors for points and polygons
+      map.on('mouseenter', 'mymap-points-circle', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'mymap-points-circle', () => {
+        map.getCanvas().style.cursor = '';
+      });
+      map.on('mouseenter', 'mymap-polygons-fill', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'mymap-polygons-fill', () => {
+        map.getCanvas().style.cursor = '';
+      });
+    }
+  }, [myMapPoints, myMapPolygons, mapReady]);
+
+  // Update MyMap layer visibility based on toggle state
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    if (!myMapVisibility) return;
+
+    // Point layer visibility
+    const ptLayer = map.getLayer('mymap-points-circle');
+    if (ptLayer) {
+      const show = !!(myMapVisibility.points && myMapPoints?.features?.length);
+      map.setLayoutProperty('mymap-points-circle', 'visibility', show ? 'visible' : 'none');
+    }
+
+    // Polygon layer visibility
+    const polyFill = map.getLayer('mymap-polygons-fill');
+    if (polyFill) {
+      const show = !!(myMapVisibility.polygons && myMapPolygons?.features?.length);
+      map.setLayoutProperty('mymap-polygons-fill', 'visibility', show ? 'visible' : 'none');
+      map.setLayoutProperty('mymap-polygons-border', 'visibility', show ? 'visible' : 'none');
+    }
+  }, [myMapVisibility, myMapPoints, myMapPolygons, mapReady]);
+
   // Hover tooltip: update React state via map events
   useEffect(() => {
     const map = mapRef.current;
@@ -382,6 +519,54 @@ export function MapView({
     };
   }, [marketData, selectedQuarter, activeMetric, mapReady]);
 
+  // MyMap hover tooltip events
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const onMyMapPointMove = (e: maplibregl.MapLayerMouseEvent) => {
+      if (!e.features || e.features.length === 0) return;
+      const props = e.features[0].properties;
+      setHoveredMyMap({
+        title: (props?.title ?? '') as string,
+        folder: (props?.folder ?? '') as string,
+        description: (props?.description ?? '') as string,
+        priceFormatted: (props?.priceFormatted as string) ?? null,
+        url: (props?.url as string) ?? null,
+        isPoint: true,
+      });
+    };
+
+    const onMyMapPolygonMove = (e: maplibregl.MapLayerMouseEvent) => {
+      if (!e.features || e.features.length === 0) return;
+      const props = e.features[0].properties;
+      setHoveredMyMap({
+        title: (props?.title ?? '') as string,
+        folder: (props?.folder ?? '') as string,
+        description: '',
+        priceFormatted: null,
+        url: null,
+        isPoint: false,
+      });
+    };
+
+    const onMyMapLeave = () => {
+      setHoveredMyMap(null);
+    };
+
+    map.on('mousemove', 'mymap-points-circle', onMyMapPointMove);
+    map.on('mouseleave', 'mymap-points-circle', onMyMapLeave);
+    map.on('mousemove', 'mymap-polygons-fill', onMyMapPolygonMove);
+    map.on('mouseleave', 'mymap-polygons-fill', onMyMapLeave);
+
+    return () => {
+      map.off('mousemove', 'mymap-points-circle', onMyMapPointMove);
+      map.off('mouseleave', 'mymap-points-circle', onMyMapLeave);
+      map.off('mousemove', 'mymap-polygons-fill', onMyMapPolygonMove);
+      map.off('mouseleave', 'mymap-polygons-fill', onMyMapLeave);
+    };
+  }, [mapReady]);
+
   const tooltipValue = hoveredTract?.record
     ? formatMetricValue(hoveredTract.record, activeMetric)
     : null;
@@ -398,7 +583,43 @@ export function MapView({
         role="application"
         aria-label={`${metadata?.region?.displayName ?? 'South Pinellas & Gulf Beaches'} Census tract map`}
       />
-      {hoveredTract && (
+      {hoveredMyMap && (
+        <div className={styles.hoverTooltip}>
+          <div className={styles.tooltipName}>{hoveredMyMap.title}</div>
+          <div className={styles.tooltipGeoid}>{hoveredMyMap.folder}</div>
+          {hoveredMyMap.isPoint ? (
+            <>
+              {hoveredMyMap.priceFormatted && (
+                <div className={styles.tooltipMetric}>
+                  Price: <strong>{hoveredMyMap.priceFormatted}</strong>
+                </div>
+              )}
+              {hoveredMyMap.description && (
+                <div className={styles.tooltipMetric} style={{ maxWidth: 240, whiteSpace: 'normal' }}>
+                  {hoveredMyMap.description.length > 140
+                    ? hoveredMyMap.description.slice(0, 140) + '…'
+                    : hoveredMyMap.description}
+                </div>
+              )}
+              {hoveredMyMap.url && (
+                <div className={styles.tooltipMetric}>
+                  <a
+                    href={hoveredMyMap.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#2b8cbe', fontSize: '0.75rem' }}
+                  >
+                    View listing →
+                  </a>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={styles.tooltipMetric}>Area overlay</div>
+          )}
+        </div>
+      )}
+      {!hoveredMyMap && hoveredTract && (
         <div className={styles.hoverTooltip}>
           <div className={styles.tooltipName}>{hoveredTract.name}</div>
           <div className={styles.tooltipGeoid}>GEOID: {hoveredTract.geoid}</div>

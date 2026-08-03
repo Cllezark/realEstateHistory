@@ -1,0 +1,115 @@
+.toggles {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  max-width: 260px;
+  max-height: 50vh;
+  overflow-y: auto;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.togglesTitle {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.masterToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.masterToggle input {
+  cursor: pointer;
+}
+
+.folderList {
+  margin: 0;
+  padding: 0 0 0 8px;
+  list-style: none;
+  border-left: 2px solid #e0e0e0;
+}
+
+.folderToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.folderToggle input {
+  cursor: pointer;
+}
+
+.folderDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.folderLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.polygonToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.polygonToggle input {
+  cursor: pointer;
+}
+
+.polygonSwatch {
+  display: inline-block;
+  width: 12px;
+  height: 10px;
+  border: 1px dashed #666;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.refreshArea {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.refreshBtn {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.refreshBtn:hover {
+  background: #e0e0e0;
+}
+
+.refreshStatus {
+  margin-top: 3px;
+  font-size: 0.68rem;
+  color: #666;
+}

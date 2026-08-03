@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "data:build": "cd .. && python pipeline.py --stage publish"
+    "data:build": "cd .. && python pipeline.py --stage publish",
+    "data:mymap": "cd .. && bash scripts/refresh_mymap.sh"
   },
   "dependencies": {
     "maplibre-gl": "^5.24.0",

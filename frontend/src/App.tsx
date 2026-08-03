@@ -4,11 +4,13 @@ import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { AppShell } from './components/AppShell/AppShell';
 import { MapView } from './components/Map/MapView';
 import { MapLegend } from './components/Map/MapLegend';
+import { MyMapLayerToggles } from './components/Map/MyMapLayerToggles';
 import { QuarterTimeline } from './components/Timeline/QuarterTimeline';
 import { TractDetails } from './components/DetailsPanel/TractDetails';
 import { ComparisonControls } from './components/ComparisonMode/ComparisonControls';
 import { MetricSelector } from './components/MetricSelector/MetricSelector';
 import { useMapData } from './hooks/useMapData';
+import { useMyMapData } from './hooks/useMyMapData';
 import { useAppState } from './hooks/useAppState';
 import {
   calculateQuantileBreaks,
@@ -26,6 +28,7 @@ import { calculateAppreciation, getSortedQuarterIds } from './data/formatters';
 
 export default function App() {
   const { geometry, marketData, metadata, parcelSales, loading, error } = useMapData();
+  const myMapData = useMyMapData();
   const {
     state,
     setSelectedTract,
@@ -38,6 +41,21 @@ export default function App() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom?: number } | null>(null);
+  const [myMapRefreshStatus, setMyMapRefreshStatus] = useState<string | null>(null);
+
+  const handleMyMapRefresh = useCallback(() => {
+    const url = window.prompt(
+      'Enter the Google MyMap KML export URL:\n\n' +
+      '(Get this from your MyMap → three-dot menu → Export to KML/KMZ → copy download link)',
+    );
+    if (!url) return;
+    setMyMapRefreshStatus('Loading…');
+    myMapData.refreshFromUrl(url).then(() => {
+      setMyMapRefreshStatus(myMapData.error ? `Error: ${myMapData.error}` : 'Refreshed!');
+    }).catch((err: unknown) => {
+      setMyMapRefreshStatus(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    });
+  }, [myMapData]);
 
   const handleSaleClick = useCallback((sale: ParcelSale) => {
     if (sale.latitude == null || sale.longitude == null) return;
@@ -216,6 +234,10 @@ export default function App() {
               onSelectTract={setSelectedTract}
               priceFilterThreshold={state.priceFilterThreshold}
               flyToTarget={flyToTarget}
+              myMapPoints={myMapData.points}
+              myMapPolygons={myMapData.polygons}
+              myMapVisibility={myMapData.visibility}
+              myMapMetadata={myMapData.metadata}
             />
             <MapLegend
               metric={state.activeMetric}
@@ -225,6 +247,13 @@ export default function App() {
               comparisonStartQuarter={state.comparisonStartQuarter}
               comparisonEndQuarter={state.comparisonEndQuarter}
               priceFilterThreshold={state.priceFilterThreshold}
+            />
+            <MyMapLayerToggles
+              metadata={myMapData.metadata}
+              visibility={myMapData.visibility}
+              onVisibilityChange={myMapData.setVisibility}
+              onRefresh={handleMyMapRefresh}
+              refreshStatus={myMapRefreshStatus}
             />
           </div>
         }
