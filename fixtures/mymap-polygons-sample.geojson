@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-82.647, 27.759],
+          [-82.599, 27.759],
+          [-82.599, 27.807],
+          [-82.647, 27.807],
+          [-82.647, 27.759]
+        ]]
+      },
+      "properties": {
+        "title": "Sample Zone",
+        "folder": "Sample areas",
+        "fillColor": "#2ca25f",
+        "fillOpacity": 0.25
+      }
+    }
+  ]
+}

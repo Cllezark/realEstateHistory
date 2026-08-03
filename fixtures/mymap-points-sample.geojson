@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-82.6595, 27.7899]
+      },
+      "properties": {
+        "title": "Sample Tour - 123 Main St",
+        "description": "Sample description for testing. $450,000 3bed/2bath 1,500 sqft.",
+        "folder": "Sample tours",
+        "folderColor": "#e41a1c",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/sample"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-82.7103, 27.8132]
+      },
+      "properties": {
+        "title": "Sample Tour - 456 Oak Ave",
+        "description": "Another sample tour. $525,000 4bed/2bath 1,800 sqft.",
+        "folder": "Sample tours",
+        "folderColor": "#e41a1c",
+        "price": 525000,
+        "priceFormatted": "$525,000",
+        "url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-82.7065, 27.7740]
+      },
+      "properties": {
+        "title": "Sample Work Location",
+        "description": "Office location.",
+        "folder": "Sample areas",
+        "folderColor": "#377eb8",
+        "price": null,
+        "priceFormatted": null,
+        "url": null
+      }
+    }
+  ]
+}

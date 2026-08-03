@@ -1,0 +1,20 @@
+{
+  "buildDate": "2026-01-01T00:00:00Z",
+  "sourceDescription": "Sample MyMap data for testing",
+  "totalPoints": 3,
+  "totalPolygons": 1,
+  "folders": [
+    {
+      "name": "Sample tours",
+      "color": "#e41a1c",
+      "pointCount": 2,
+      "polygonCount": 0
+    },
+    {
+      "name": "Sample areas",
+      "color": "#377eb8",
+      "pointCount": 1,
+      "polygonCount": 1
+    }
+  ]
+}

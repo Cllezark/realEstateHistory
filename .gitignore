@@ -51,6 +51,15 @@ Thumbs.db
 *.duckdb
 *.duckdb.wal
 
+# MyMap personal data (keep local, not in repo)
+mymap.kmz
+mymap.kml
+*.kmz
+*.kml
+frontend/public/data/mymap-points.geojson
+frontend/public/data/mymap-polygons.geojson
+frontend/public/data/mymap-metadata.json
+
 # Temporary
 *.tmp
 *.bak
