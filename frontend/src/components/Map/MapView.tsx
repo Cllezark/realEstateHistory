@@ -26,6 +26,9 @@ interface Props {
   myMapPolygons?: MyMapPolygonsGeoJSON | null;
   myMapVisibility?: MyMapLayerVisibility | null;
   myMapMetadata?: MyMapMetadata | null;
+  /** Pinned MyMap point from click-to-select */
+  selectedMyMapPoint?: HoveredMyMap | null;
+  onSelectMyMapPoint?: (point: HoveredMyMap | null) => void;
 }
 
 interface HoveredTract {
@@ -34,7 +37,7 @@ interface HoveredTract {
   record: TractQuarterRecord | null;
 }
 
-interface HoveredMyMap {
+export interface HoveredMyMap {
   title: string;
   folder: string;
   description: string;
@@ -121,6 +124,8 @@ export function MapView({
   myMapPolygons,
   myMapVisibility,
   myMapMetadata: _myMapMetadata,
+  selectedMyMapPoint,
+  onSelectMyMapPoint,
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -443,12 +448,41 @@ export function MapView({
     if (!myMapEventsBoundRef.current) {
       myMapEventsBoundRef.current = true;
 
-      // Click handler — fly to point
+      // Click handler — pin the point and fly to it
       map.on('click', 'mymap-points-circle', (e) => {
         if (e.features && e.features.length > 0) {
-          const geom = e.features[0].geometry as { type: string; coordinates: [number, number] };
+          const feature = e.features[0];
+          const geom = feature.geometry as { type: string; coordinates: [number, number] };
+          const props = feature.properties;
           if (geom?.coordinates) {
             map.flyTo({ center: geom.coordinates, zoom: 15 });
+          }
+          if (onSelectMyMapPoint) {
+            onSelectMyMapPoint({
+              title: (props?.title ?? '') as string,
+              folder: (props?.folder ?? '') as string,
+              description: (props?.description ?? '') as string,
+              priceFormatted: (props?.priceFormatted as string) ?? null,
+              url: (props?.url as string) ?? null,
+              isPoint: true,
+            });
+          }
+        }
+      });
+
+      // Click handler for polygons — pin area overlay info
+      map.on('click', 'mymap-polygons-fill', (e) => {
+        if (e.features && e.features.length > 0) {
+          const props = e.features[0].properties;
+          if (onSelectMyMapPoint) {
+            onSelectMyMapPoint({
+              title: (props?.title ?? '') as string,
+              folder: (props?.folder ?? '') as string,
+              description: '',
+              priceFormatted: null,
+              url: null,
+              isPoint: false,
+            });
           }
         }
       });
@@ -467,7 +501,7 @@ export function MapView({
         map.getCanvas().style.cursor = '';
       });
     }
-  }, [myMapPoints, myMapPolygons, mapReady]);
+  }, [myMapPoints, myMapPolygons, mapReady, onSelectMyMapPoint]);
 
   // Update MyMap layer visibility based on toggle state
   useEffect(() => {
@@ -567,6 +601,24 @@ export function MapView({
     };
   }, [mapReady]);
 
+  // Clear pinned MyMap point when clicking empty map space
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !onSelectMyMapPoint) return;
+
+    const onMapClick = (e: maplibregl.MapLayerMouseEvent) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ['mymap-points-circle', 'mymap-polygons-fill'],
+      });
+      if (features.length === 0) {
+        onSelectMyMapPoint(null);
+      }
+    };
+
+    map.on('click', onMapClick);
+    return () => { map.off('click', onMapClick); };
+  }, [mapReady, onSelectMyMapPoint]);
+
   const tooltipValue = hoveredTract?.record
     ? formatMetricValue(hoveredTract.record, activeMetric)
     : null;
@@ -608,6 +660,45 @@ export function MapView({
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: '#2b8cbe', fontSize: '0.75rem' }}
+                  >
+                    View listing →
+                  </a>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={styles.tooltipMetric}>Area overlay</div>
+          )}
+        </div>
+      )}
+      {selectedMyMapPoint && (
+        <div className={styles.pinnedInfoCard}>
+          <button
+            className={styles.pinnedCloseButton}
+            onClick={() => onSelectMyMapPoint?.(null)}
+            aria-label="Close pinned info"
+          >
+            ×
+          </button>
+          <div className={styles.tooltipName}>{selectedMyMapPoint.title}</div>
+          <div className={styles.tooltipGeoid}>{selectedMyMapPoint.folder}</div>
+          {selectedMyMapPoint.isPoint ? (
+            <>
+              {selectedMyMapPoint.priceFormatted && (
+                <div className={styles.tooltipMetric}>
+                  Price: <strong>{selectedMyMapPoint.priceFormatted}</strong>
+                </div>
+              )}
+              <div className={styles.tooltipMetric} style={{ maxWidth: '100%', whiteSpace: 'normal', marginTop: 4 }}>
+                {selectedMyMapPoint.description}
+              </div>
+              {selectedMyMapPoint.url && (
+                <div className={styles.tooltipMetric}>
+                  <a
+                    href={selectedMyMapPoint.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#2b8cbe', fontSize: '0.8rem' }}
                   >
                     View listing →
                   </a>

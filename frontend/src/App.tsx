@@ -2,7 +2,7 @@ import { useMemo, useCallback, useEffect, useState } from 'react';
 import type { ParcelSale } from './data/types';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { AppShell } from './components/AppShell/AppShell';
-import { MapView } from './components/Map/MapView';
+import { MapView, type HoveredMyMap } from './components/Map/MapView';
 import { MapLegend } from './components/Map/MapLegend';
 import { MyMapLayerToggles } from './components/Map/MyMapLayerToggles';
 import { QuarterTimeline } from './components/Timeline/QuarterTimeline';
@@ -42,6 +42,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom?: number } | null>(null);
   const [myMapRefreshStatus, setMyMapRefreshStatus] = useState<string | null>(null);
+  const [selectedMyMapPoint, setSelectedMyMapPoint] = useState<HoveredMyMap | null>(null);
 
   const handleMyMapRefresh = useCallback(() => {
     const url = window.prompt(
@@ -56,6 +57,13 @@ export default function App() {
       setMyMapRefreshStatus(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     });
   }, [myMapData]);
+
+  const handleSelectMyMapPoint = useCallback((point: HoveredMyMap | null) => {
+    setSelectedMyMapPoint(point);
+    if (point?.url) {
+      window.open(point.url, '_blank', 'noopener,noreferrer');
+    }
+  }, []);
 
   const handleSaleClick = useCallback((sale: ParcelSale) => {
     if (sale.latitude == null || sale.longitude == null) return;
@@ -238,6 +246,8 @@ export default function App() {
               myMapPolygons={myMapData.polygons}
               myMapVisibility={myMapData.visibility}
               myMapMetadata={myMapData.metadata}
+              selectedMyMapPoint={selectedMyMapPoint}
+              onSelectMyMapPoint={handleSelectMyMapPoint}
             />
             <MapLegend
               metric={state.activeMetric}
