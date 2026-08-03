@@ -2,7 +2,7 @@
 
 ## WCAG 2.1 AA Compliance
 
-The St. Pete Real Estate Map MVP targets WCAG 2.1 Level AA conformance. This document describes the accessibility features implemented and recommendations for future improvements.
+The South Pinellas & Gulf Beaches Real Estate Map targets WCAG 2.1 Level AA conformance. This document describes the accessibility features implemented and recommendations for future improvements.
 
 ## Keyboard Navigation
 
@@ -47,7 +47,7 @@ The St. Pete Real Estate Map MVP targets WCAG 2.1 Level AA conformance. This doc
 
 ### Map
 
-- The map container has `role="application"` and `aria-label="St. Petersburg Census tract map"`
+- The map container has `role="application"` and `aria-label="South Pinellas & Gulf Beaches Census tract map"`
 - MapLibre GL JS canvas elements are not natively screen-reader accessible. Users relying on screen readers should use the Details Panel for tract data.
 
 ### Tract Selection
@@ -57,7 +57,7 @@ The St. Pete Real Estate Map MVP targets WCAG 2.1 Level AA conformance. This doc
 
 ### Status Announcements
 
-- Loading state: visually displayed with "Loading St. Petersburg housing data…"
+- Loading state: visually displayed with "Loading South Pinellas housing data…"
 - Error state: `role="alert"` with descriptive error message and guidance
 - Data not available: "No data" indicators on map and "No data for [quarter]" in tooltips
 

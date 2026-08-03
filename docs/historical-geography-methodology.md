@@ -12,7 +12,7 @@ tracts** by the same mechanism:
 flowchart LR
     A[Historical sale\nRP_OS_SALES.csv] --> B[Parcel join\nSTRAP → current roll]
     B --> C[Point validation\ncoordinate ranges, CRS]
-    C --> D[City membership\nfixed 2020 St. Pete boundary]
+    C --> D[Region membership\nfixed 2020 boundaries]
     D --> E[Spatial assignment\npoint-in-polygon → 2020 tract]
     E --> F[Quarterly aggregation\nmedians recomputed per tract-quarter]
     F --> G[Browser publication\ntract-quarter.json]
@@ -52,15 +52,17 @@ method must be disclosed.
 | `fhfa_geography_method` | FHFA fact | `source_tract_code` (never crosswalked) |
 | `crosswalk_quality_flag` | bridge | `SLIVER_OVERLAP`, `CROSSES_COUNTY_BOUNDARY`, null |
 
-## City boundary
+## Region boundary
 
-The study area uses **one fixed St. Petersburg boundary** (2020 TIGER place,
-GEOID `1263000`) across the whole series (`cityBoundaryMethod:
-fixed_2020_place_boundary` in the publication metadata). Annexation history is
-therefore *not* reflected: a parcel annexed in 2015 contributes its pre-2015
-sales to the study area as if it had always been inside. This trades
-historically contemporaneous membership for a stable study area whose changes
-reflect market movement rather than boundary movement.
+The study area uses **one fixed regional boundary** (2020 TIGER place
+polygons for the allowlist municipalities plus the Clearwater Beach island
+box, with a centroid-latitude cutoff of 27.90°N) across the whole series
+(`regionBoundaryMethod: fixed_2020_place_boundary` in the publication
+metadata). Annexation history is therefore *not* reflected: a parcel annexed
+in 2015 contributes its pre-2015 sales to the study area as if it had always
+been inside. This trades historically contemporaneous membership for a stable
+study area whose changes reflect market movement rather than boundary
+movement.
 
 ## The alternative path (not implemented)
 

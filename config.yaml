@@ -72,6 +72,46 @@ geography:
     place_geoid: "1263000"
     name: "St. Petersburg"
 
+  # Dashboard coverage region (south Pinellas + Gulf beaches).
+  # A 2020 tract is in the region when it is land (ALAND > 0) and either
+  # (a) its centroid latitude <= cutoff_latitude (inclusive), or
+  # (b) it intersects any municipality in place_fips, or
+  # (c) it intersects the Clearwater Beach island box (Clearwater place
+  #     polygon clipped to the clearwater_beach bounds).
+  region:
+    display_name: "South Pinellas & Gulf Beaches"
+    cutoff_latitude: 27.90
+    clearwater_place_fips: "12875"  # Clearwater
+    clearwater_beach:
+      lon_min: -82.85
+      lon_max: -82.79
+      lat_min: 27.88
+      lat_max: 28.02
+    # Municipalities included explicitly (intersects rule), regardless of
+    # the latitude cut: Belleair group, Gulfport, Kenneth City, Pinellas
+    # Park, and the Gulf beach towns.
+    place_fips:
+      - "05075"  # Belleair
+      - "05100"  # Belleair Beach
+      - "05125"  # Belleair Bluffs
+      - "05150"  # Belleair Shore
+      - "28175"  # Gulfport
+      - "36175"  # Kenneth City
+      - "56975"  # Pinellas Park
+      - "33625"  # Indian Rocks Beach
+      - "33675"  # Indian Shores
+      - "42400"  # Madeira Beach
+      - "49725"  # North Redington Beach
+      - "59725"  # Redington Beach
+      - "59750"  # Redington Shores
+      - "62885"  # St. Pete Beach
+      - "67675"  # South Pasadena
+      - "71825"  # Treasure Island
+      - "72325"  # Tierra Verde
+    map:
+      center: [-82.74, 27.85]
+      zoom: 11
+
   # Census tract
   census_tract:
     geoid_length: 11
@@ -241,6 +281,7 @@ validation:
   # Failure thresholds (halt pipeline)
   failures:
     min_expected_rows: 100
-    min_pinellas_tracts: 200
+    min_region_land_tracts: 179  # south Pinellas + Gulf beaches land tracts
+    min_region_fhfa_coverage_pct: 70.0  # FHFA lacks HPI for some sparsely-sold tracts
     max_coordinate_oob_pct: 50.0    # percent out-of-bounds
     required_columns: []

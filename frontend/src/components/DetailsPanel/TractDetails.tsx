@@ -77,7 +77,7 @@ export function TractDetails({
     return (
       <div className={styles.panel}>
         <div className={styles.noSelection}>
-          <h2>St. Petersburg Housing Market</h2>
+          <h2>{metadata?.region?.displayName ?? 'South Pinellas'} Housing Market</h2>
           <p>Select a Census tract on the map to view detailed quarterly metrics.</p>
           {selectedQuarter && (
             <p className={styles.currentQuarter}>

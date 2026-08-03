@@ -96,7 +96,7 @@ def validate_outputs(
         check("coordinate_bounds_lat", bool(lat_ok))
         check("coordinate_bounds_lon", bool(lon_ok))
 
-        # St. Petersburg boundary assignment
+        # St. Petersburg boundary assignment (reconciliation report only)
         if "inside_st_petersburg" in df.columns:
             inside = df["inside_st_petersburg"].value_counts()
             check("city_assignment_present", True,
@@ -110,6 +110,40 @@ def validate_outputs(
         match_pct = len(fhfa_geoids & tiger_geoids) / max(len(fhfa_geoids), 1) * 100
         check("fhfa_tiger_join_coverage", match_pct > 70,
               f"{match_pct:.1f}% of FHFA tracts match TIGER geometry")
+
+        # Region tract coverage: published region must contain at least the
+        # configured minimum land tracts flagged inside_region.
+        region_cfg = cfg.get("geography", {}).get("region", {})
+        min_tracts = int(
+            cfg.get("validation", {})
+            .get("failures", {})
+            .get("min_region_land_tracts", 179)
+        )
+        if "inside_region" in dim_tract.columns:
+            region_count = int((dim_tract["inside_region"] == True).sum())
+            check(
+                "region_tract_coverage",
+                region_count >= min_tracts,
+                f"{region_count} region land tracts (min {min_tracts})",
+            )
+            region_geoids = set(
+                dim_tract.loc[dim_tract["inside_region"] == True, "tract_geoid"].astype(str)
+            )
+            missing_hpi = region_geoids - fhfa_geoids
+            region_hpi_pct = (
+                len(region_geoids - missing_hpi) / max(len(region_geoids), 1) * 100
+            )
+            min_hpi_pct = float(
+                cfg.get("validation", {})
+                .get("failures", {})
+                .get("min_region_fhfa_coverage_pct", 70.0)
+            )
+            check(
+                "region_fhfa_coverage",
+                region_hpi_pct >= min_hpi_pct,
+                f"{region_hpi_pct:.1f}% of region tracts have FHFA HPI "
+                f"({len(missing_hpi)} missing; min {min_hpi_pct:.1f}%)",
+            )
 
         # Complete tract-quarter spine
         if "qualified_sale_count" in df.columns:

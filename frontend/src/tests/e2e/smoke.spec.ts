@@ -5,10 +5,10 @@ test.describe('Map MVP smoke test', () => {
     await page.goto('/');
 
     // Check that the page title is correct
-    await expect(page).toHaveTitle('St. Petersburg Real Estate — Tract Map');
+    await expect(page).toHaveTitle('South Pinellas & Gulf Beaches Real Estate — Tract Map');
 
     // Check that the map container exists
-    const mapContainer = page.locator('[aria-label="St. Petersburg Census tract map"]');
+    const mapContainer = page.locator('[aria-label="South Pinellas & Gulf Beaches Census tract map"]');
     await expect(mapContainer).toBeVisible({ timeout: 10000 });
 
     // Check that the timeline exists
@@ -20,7 +20,7 @@ test.describe('Map MVP smoke test', () => {
     await page.goto('/');
 
     // Wait for map to load
-    await page.waitForSelector('[aria-label="St. Petersburg Census tract map"]', { timeout: 10000 });
+    await page.waitForSelector('[aria-label="South Pinellas & Gulf Beaches Census tract map"]', { timeout: 10000 });
 
     // Click on the map canvas to try selecting a tract
     const mapCanvas = page.locator('.maplibregl-canvas');
@@ -31,7 +31,7 @@ test.describe('Map MVP smoke test', () => {
     await page.goto('/');
 
     // Wait for map to load
-    await page.waitForSelector('[aria-label="St. Petersburg Census tract map"]', { timeout: 10000 });
+    await page.waitForSelector('[aria-label="South Pinellas & Gulf Beaches Census tract map"]', { timeout: 10000 });
 
     // Click the next quarter button
     const nextBtn = page.locator('[aria-label="Next quarter"]');
@@ -44,7 +44,7 @@ test.describe('Map MVP smoke test', () => {
     await page.goto('/');
 
     // Wait for map to load
-    await page.waitForSelector('[aria-label="St. Petersburg Census tract map"]', { timeout: 10000 });
+    await page.waitForSelector('[aria-label="South Pinellas & Gulf Beaches Census tract map"]', { timeout: 10000 });
 
     // The details panel should be visible
     const detailsPanel = page.locator('[aria-label="Tract details"]');
@@ -58,7 +58,7 @@ test.describe('Map MVP smoke test', () => {
     });
 
     await page.goto('/');
-    await page.waitForSelector('[aria-label="St. Petersburg Census tract map"]', { timeout: 10000 });
+    await page.waitForSelector('[aria-label="South Pinellas & Gulf Beaches Census tract map"]', { timeout: 10000 });
     await page.waitForTimeout(2000);
 
     expect(errors).toEqual([]);

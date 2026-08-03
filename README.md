@@ -1,7 +1,10 @@
-# St. Petersburg Real Estate ETL Pipeline
+# South Pinellas & Gulf Beaches Real Estate ETL Pipeline
 
 Reproducible local ETL pipeline producing quarterly, Census-tract-level
-housing-market records for parcels inside St. Petersburg, Florida.
+housing-market records for parcels inside the south Pinellas dashboard region
+(Gulfport, Kenneth City, Pinellas Park, the Gulf beach towns, and every
+Census tract with a centroid at or below 27.90°N, plus the Belleair group and
+Clearwater Beach island).
 
 ## Prerequisites
 
@@ -99,9 +102,9 @@ graph TD
 | `silver_sales` | Parquet | Cleaned, deduplicated sales |
 | `silver_fhfa_tract_hpi_annual` | Parquet | Pinellas FHFA HPI |
 | `silver_fred_mortgage_weekly` | Parquet | Weekly mortgage rates |
-| `dim_st_petersburg_boundary` | Parquet | City boundary metadata |
+| `dim_st_petersburg_boundary` | Parquet | St. Pete boundary metadata (reconciliation only) |
 | `dim_census_tract` | GeoParquet | Tract geometry + attributes |
-| `fact_sale_enriched` | Parquet | Sales with city/tract assignment |
+| `fact_sale_enriched` | Parquet | Sales with region/tract assignment |
 | `fact_mortgage_rate_quarter` | Parquet | Quarterly mortgage rates |
 | `fact_tract_hpi_annual` | Parquet | Tract-year HPI values |
 | `agg_tract_sale_quarter` | Parquet | Tract-quarter aggregates |
@@ -123,7 +126,8 @@ Edit `config.yaml` to adjust:
 ## Phase 2: Interactive Map Dashboard
 
 A React+TypeScript+Vite frontend application provides an interactive
-choropleth map of St. Petersburg housing market data by Census tract.
+choropleth map of housing market data by Census tract across the
+South Pinellas & Gulf Beaches region (179 land tracts).
 
 ```bash
 # Generate web assets from pipeline data
@@ -160,9 +164,11 @@ system overview, component tree, and data flow documentation.
 1. **2020 TIGER/Line geometry** — Uses 2020 vintage to match FHFA tract HPI
    boundaries (2020 Census tracts).
 
-2. **Spatial city membership** — Parcels are assigned to St. Petersburg using
-   spatial point-in-polygon with the 2020 incorporated-place boundary, not
-   tax district fields alone.
+2. **Spatial region membership** — Parcels are assigned to the dashboard
+   region using a latitude cutoff plus spatial point-in-polygon with 2020
+   incorporated-place boundaries, not tax district fields alone. St.
+   Petersburg membership is retained separately for reconciliation
+   reporting.
 
 3. **Complete tract-quarter spine** — Missing periods appear as null rows
    rather than disappearing, ensuring consistent dashboard layout.
@@ -207,7 +213,7 @@ Regression guarantee: 2021+ dashboard values are unchanged from Phase 2
   on the current roll; sales on retired/renumbered parcels are absent from
   the source (see docs/historical-data-quality.md).
 - **2020 boundary applied retroactively**: All sales are classified
-  against the 2020 St. Petersburg city boundary, regardless of sale date.
+  against the 2020 dashboard-region geography, regardless of sale date.
 - **Property snapshot date**: Current property attributes (ROLL_YEAR=2026)
   describe the parcel as it exists now, not necessarily as it existed
   on the historical sale date.

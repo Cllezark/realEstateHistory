@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""St. Petersburg Real Estate ETL Pipeline.
+"""South Pinellas & Gulf Beaches Real Estate ETL Pipeline.
 
 Usage:
     python pipeline.py [--config CONFIG] [--stage STAGE] [--skip-validation]
@@ -56,7 +56,7 @@ STAGES = [
 
 def main():
     parser = argparse.ArgumentParser(
-        description="St. Petersburg Real Estate ETL Pipeline"
+        description="South Pinellas & Gulf Beaches Real Estate ETL Pipeline"
     )
     parser.add_argument("--config", default="config.yaml", help="Path to config YAML")
     parser.add_argument("--stage", choices=STAGES, help="Run a single stage")
@@ -148,7 +148,7 @@ def main():
     # --- Stage 6: City Membership ---
     if "city_membership" in stages_to_run:
         print("\n" + "=" * 60)
-        print("STAGE 6: St. Petersburg Membership (Spatial)")
+        print("STAGE 6: Region Membership (Spatial)")
         print("=" * 60)
         place_shp = data_dir / config["paths"]["sources"]["tiger_place"]
         results["city"] = assign_city_membership(
@@ -161,8 +161,9 @@ def main():
         print("STAGE 7: Census Tract Assignment (Spatial)")
         print("=" * 60)
         tract_shp = data_dir / config["paths"]["sources"]["tiger_tract"]
+        place_shp = data_dir / config["paths"]["sources"]["tiger_place"]
         results["tract"] = assign_tracts(
-            enriched_path, tract_shp, output_dir, config, run_id
+            enriched_path, tract_shp, place_shp, output_dir, config, run_id
         )
 
     # --- Stage 7b: 2010 Tract Dimension + 2010-2020 Bridge (audit layer) ---

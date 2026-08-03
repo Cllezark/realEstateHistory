@@ -114,8 +114,8 @@ def validate_publication_assets(
 
     # --- 1. GeoJSON: unique tract_geoid per feature ---
     if geojson_path.exists():
-        stp_geojson = gpd.read_file(geojson_path)
-        geoids_in_geojson = stp_geojson["tract_geoid"].tolist()
+        region_geojson = gpd.read_file(geojson_path)
+        geoids_in_geojson = region_geojson["tract_geoid"].tolist()
         if len(geoids_in_geojson) != len(set(geoids_in_geojson)):
             dupes = [g for g in geoids_in_geojson if geoids_in_geojson.count(g) > 1]
             errors.append(
@@ -126,12 +126,12 @@ def validate_publication_assets(
         errors.append(f"GeoJSON file not found: {geojson_path}")
 
     # --- 2. Every tract in market data exists in geometry ---
-    st_pete_geoids = set(
+    market_geoids = set(
         df.loc[df["qualified_sale_count"].notna(), "tract_geoid"].unique()
     )
     geometry_geoids = set(dim_tract["tract_geoid"].unique()) if dim_tract is not None else set()
     if geometry_geoids:
-        missing = st_pete_geoids - geometry_geoids
+        missing = market_geoids - geometry_geoids
         if missing:
             errors.append(
                 f"Market-data tract GEOIDs not found in census tract geometry: "
@@ -216,19 +216,19 @@ def validate_publication_assets(
 
 def _build_tracts_geojson(
     dim_tract: gpd.GeoDataFrame,
-    st_pete_geoids: list[str],
+    region_geoids: list[str],
     web_assets_dir: Path,
 ) -> Path:
-    """Write a filtered, simplified GeoJSON containing only St. Pete tracts."""
+    """Write a filtered, simplified GeoJSON containing only region tracts."""
     web_assets_dir.mkdir(parents=True, exist_ok=True)
 
-    stp_tracts = dim_tract[dim_tract["tract_geoid"].isin(st_pete_geoids)].copy()
+    region_tracts = dim_tract[dim_tract["tract_geoid"].isin(region_geoids)].copy()
 
-    if "geometry" not in stp_tracts.columns:
+    if "geometry" not in region_tracts.columns:
         raise ValueError("dim_census_tract missing geometry column")
 
-    stp_tracts = stp_tracts.to_crs("EPSG:4326")
-    stp_tracts["geometry"] = stp_tracts["geometry"].simplify(
+    region_tracts = region_tracts.to_crs("EPSG:4326")
+    region_tracts["geometry"] = region_tracts["geometry"].simplify(
         0.0001, preserve_topology=True
     )
 
@@ -237,17 +237,17 @@ def _build_tracts_geojson(
     geo_props = ["tract_geoid", "tract_name"]
     area_cols = {}
     for friendly, raw in [("land_area", "ALAND"), ("water_area", "AWATER")]:
-        if friendly in stp_tracts.columns:
+        if friendly in region_tracts.columns:
             area_cols[friendly] = friendly
-        elif raw in stp_tracts.columns:
-            stp_tracts[friendly] = stp_tracts[raw]
+        elif raw in region_tracts.columns:
+            region_tracts[friendly] = region_tracts[raw]
             area_cols[friendly] = friendly
 
     geo_props.extend(area_cols.keys())
 
     geojson_path = web_assets_dir / "tracts.geojson"
-    stp_tracts[geo_props + ["geometry"]].to_file(geojson_path, driver="GeoJSON", RFC7946=True)
-    print(f"St. Pete tracts GeoJSON: {geojson_path} ({len(stp_tracts)} tracts)")
+    region_tracts[geo_props + ["geometry"]].to_file(geojson_path, driver="GeoJSON", RFC7946=True)
+    print(f"Region tracts GeoJSON: {geojson_path} ({len(region_tracts)} tracts)")
     return geojson_path
 
 
@@ -259,15 +259,15 @@ def _build_parcel_sales_json(
 
     Structure: { quarter_id: { tract_geoid: [ {parcel_number, address, sale_price, sale_date}, ... ] } }
 
-    Includes only St. Pete parcels with valid tract assignments and single-parcel sales.
+    Includes only region parcels with valid tract assignments and single-parcel sales.
     """
     web_assets_dir.mkdir(parents=True, exist_ok=True)
 
     sales = pd.read_parquet(enriched_sales_path)
 
-    # Filter to St. Pete parcels with tract assignment and single-parcel sales
+    # Filter to region parcels with tract assignment and single-parcel sales
     valid_sales = sales[
-        (sales["inside_st_petersburg"] == True) &
+        (sales["inside_region"] == True) &
         sales["tract_geoid"].notna() &
         (sales["_is_multi_parcel"] == False)
     ].copy()
@@ -320,14 +320,14 @@ def _build_parcel_sales_json(
 
 def _build_market_json(
     df: pd.DataFrame,
-    st_pete_geoids: list[str],
+    region_geoids: list[str],
     web_assets_dir: Path,
 ) -> Path:
     """Write the tract-quarter market data as a JSON file.
 
     Structure: { quarter_id: { tract_geoid: { ...metrics... } } }
 
-    Includes all St. Pete tracts for every quarter (even those with no
+    Includes all region tracts for every quarter (even those with no
     sales), so the frontend can display tracts consistently across time.
     """
     web_assets_dir.mkdir(parents=True, exist_ok=True)
@@ -335,10 +335,10 @@ def _build_market_json(
     # Suppression threshold for null-ing medians
     threshold = df["qualified_sale_count"].notna() & df["suppress_median"]
 
-    # Build a spine of all (quarter_id, tract_geoid) combos for St. Pete
+    # Build a spine of all (quarter_id, tract_geoid) combos for the region
     all_quarters = sorted(df["quarter_id"].unique())
     spine = pd.DataFrame(
-        [(q, g) for q in all_quarters for g in st_pete_geoids],
+        [(q, g) for q in all_quarters for g in region_geoids],
         columns=["quarter_id", "tract_geoid"],
     )
 
@@ -417,7 +417,8 @@ def _historical_manifest(df: pd.DataFrame, config: dict,
         "completeCoverageStartQuarter": complete_start,
         "tractDisplayVintage": "2020",
         "historicalGeographyMethod": "direct_point_to_2020_tract",
-        "cityBoundaryMethod": "fixed_2020_place_boundary",
+        "regionBoundaryMethod": "fixed_2020_place_boundary",
+        "cityBoundaryMethod": "fixed_2020_place_boundary",  # legacy alias
         "historicalCutover": {
             "date": hist_cfg.get("cutover_date", "2021-01-01"),
             "before": "RP_OS_SALES.csv (historical schema)",
@@ -462,7 +463,9 @@ def _build_metadata(
 
     cfg_mortgage = config.get("mortgage", {})
     cfg_sale = config.get("sale_filter", {})
-    cfg_geo = config.get("geography", {}).get("census_tract", {})
+    cfg_geo = config.get("geography", {})
+    cfg_region = cfg_geo.get("region", {})
+    cfg_geo = cfg_geo.get("census_tract", {})
 
     # Determine coverage end: last quarter that has at least one tract
     # with a non-null median_sale_price (skip empty trailing quarters
@@ -485,6 +488,13 @@ def _build_metadata(
             "vintage_description",
             "2020 TIGER/Line Census tracts (effective January 1, 2020)",
         ),
+        "region": {
+            "displayName": cfg_region.get("display_name", "South Pinellas & Gulf Beaches"),
+            "cutoffLatitude": cfg_region.get("cutoff_latitude"),
+            "municipalities": list(cfg_region.get("place_fips", [])),
+            "clearwaterBeach": dict(cfg_region.get("clearwater_beach", {})),
+            "map": cfg_region.get("map", {}),
+        },
         "dateCoverageStart": str(df["quarter_id"].min()),
         "dateCoverageEnd": data_coverage_end,
         "metrics": [c for c in _METRIC_COLUMNS if c in df.columns],
@@ -530,7 +540,7 @@ def publish_dashboard(
     Saves the final dashboard table, generates a simplified GeoJSON for
     the web application (all Pinellas tracts), and produces browser-ready
     assets for the frontend:
-      - frontend/public/data/tracts.geojson   (St. Pete tracts only)
+      - frontend/public/data/tracts.geojson   (region tracts only)
       - frontend/public/data/tract-quarter.json
       - frontend/public/data/parcel-sales.json
       - frontend/public/data/metadata.json
@@ -639,11 +649,17 @@ def publish_dashboard(
     if "geometry" not in dim_tract.columns:
         raise ValueError("dim_census_tract.parquet is missing the geometry column")
 
-    # Identify St. Pete tracts: any tract with >=1 qualified sale in any quarter
-    st_pete_geoids = sorted(
-        df.loc[df["qualified_sale_count"].notna(), "tract_geoid"].unique()
-    )
-    print(f"St. Petersburg tracts (with sales): {len(st_pete_geoids)}")
+    # Identify region tracts: land tracts flagged inside_region in the
+    # census-tract dimension (all published tracts, even those with no sales)
+    if "inside_region" in dim_tract.columns:
+        region_geoids = sorted(
+            dim_tract.loc[dim_tract["inside_region"] == True, "tract_geoid"].astype(str).tolist()
+        )
+    else:
+        region_geoids = sorted(
+            df.loc[df["qualified_sale_count"].notna(), "tract_geoid"].unique()
+        )
+    print(f"Region tracts: {len(region_geoids)}")
 
     # --- Generate simplified GeoJSON for web (ALL Pinellas, existing behavior) ---
     dim_tract_4326 = dim_tract.to_crs("EPSG:4326")
@@ -672,11 +688,11 @@ def publish_dashboard(
     print(f"GeoJSON (all Pinellas): {geojson_path}")
 
     # --- NEW: Browser-ready web assets ---
-    # 1. St. Pete filtered tracts GeoJSON
-    stp_geojson_path = _build_tracts_geojson(dim_tract, st_pete_geoids, web_assets_dir)
+    # 1. Region filtered tracts GeoJSON
+    region_geojson_path = _build_tracts_geojson(dim_tract, region_geoids, web_assets_dir)
 
     # 2. Tract-quarter market data JSON
-    market_json_path = _build_market_json(df, st_pete_geoids, web_assets_dir)
+    market_json_path = _build_market_json(df, region_geoids, web_assets_dir)
 
     # 3. Parcel-level sales JSON (if enriched sales data available)
     parcel_sales_path = None
@@ -694,7 +710,7 @@ def publish_dashboard(
 
     # --- Validate generated assets ---
     validation_errors = validate_publication_assets(
-        stp_geojson_path, market_json_path, metadata_path, df, dim_tract
+        region_geojson_path, market_json_path, metadata_path, df, dim_tract
     )
     if validation_errors:
         for err in validation_errors:
@@ -711,7 +727,7 @@ def publish_dashboard(
     print(f"  Columns: {list(df.columns)[:12]}...")
 
     web_assets = {
-        "tracts_geojson": str(stp_geojson_path),
+        "tracts_geojson": str(region_geojson_path),
         "market_json": str(market_json_path),
         "metadata_json": str(metadata_path),
     }
@@ -722,6 +738,6 @@ def publish_dashboard(
         "dashboard_path": str(final_path),
         "total_cells": cells,
         "cells_with_sales": cells_with_sales,
-        "st_pete_tracts": len(st_pete_geoids),
+        "region_tracts": len(region_geoids),
         "web_assets": web_assets,
     }

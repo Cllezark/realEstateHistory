@@ -64,15 +64,26 @@ Where:
 
 ## Geographic Scope
 
-### St. Petersburg, Florida
+### South Pinellas & Gulf Beaches Region
 
-The map covers **80 Census tracts** within the city of St. Petersburg. Tracts are identified by their 11-digit GEOID (state `12` + county `103` + tract `022701`).
+The map covers **179 land Census tracts** across south Pinellas County:
+Gulfport, Kenneth City, Pinellas Park, the Gulf beach towns (St. Pete Beach,
+Treasure Island, Madeira Beach, the Redingtons, Indian Shores, Indian Rocks
+Beach, Tierra Verde, South Pasadena), the Belleair group, and Clearwater
+Beach island. Tracts are identified by their 11-digit GEOID (state `12` +
+county `103` + tract `022701`).
 
 ### Tract Selection Criteria
 
-A tract is included if it meets **both** conditions:
-1. Geographically within St. Petersburg city limits (determined by Phase 1 city membership logic)
-2. Has at least one qualified sale in the dataset period (2021-Q1 through 2026-Q4)
+A tract is included if it is land (`ALAND > 0`) and meets **any** of:
+1. Its 2020 TIGER centroid latitude is ≤ **27.90** (inclusive)
+2. It intersects any allowlist municipality (see `geography.region.place_fips` in `config.yaml`)
+3. It intersects the Clearwater Beach island isolation box (Clearwater place
+   polygon clipped to `geography.region.clearwater_beach` bounds)
+
+Tracts are published even when they have no qualified sales (rendered gray on
+the map). The complete (tract, quarter) spine is preserved in
+`tract-quarter.json`.
 
 ### Boundary Source
 

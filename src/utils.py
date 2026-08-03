@@ -1,4 +1,4 @@
-"""Shared utilities for the St. Pete Real Estate ETL pipeline."""
+"""Shared utilities for the South Pinellas & Gulf Beaches Real Estate ETL pipeline."""
 
 import hashlib
 import uuid
@@ -6,8 +6,10 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional
 
+import geopandas as gpd
 import yaml
 import duckdb
+from shapely.geometry import box
 
 
 def load_config(config_path: str | Path = "config.yaml") -> dict:
@@ -59,6 +61,31 @@ def write_parquet(df, path: Path):
         conn.execute("CREATE TEMP TABLE _tmp AS SELECT * FROM df")
     conn.execute(f"COPY _tmp TO '{path}' (FORMAT PARQUET)")
     conn.close()
+
+
+def build_region_geometries(places: gpd.GeoDataFrame, config: dict):
+    """Build region allowlist union and Clearwater Beach island geometry.
+
+    Returns (region_union, cw_island) in EPSG:4326. `places` must already be
+    in EPSG:4326. Mirrors the geography.region config block.
+    """
+    region_cfg = config["geography"]["region"]
+    region_places = places[places["PLACEFP"].isin(region_cfg["place_fips"])]
+    if len(region_places) == 0:
+        raise ValueError("No region municipalities found in place file")
+    region_union = region_places.geometry.union_all()
+
+    cw_fp = region_cfg["clearwater_place_fips"]
+    cw = places[places["PLACEFP"] == cw_fp]
+    if len(cw) == 0:
+        raise ValueError(f"Clearwater (PLACEFP={cw_fp}) not found in place file")
+    beach = region_cfg["clearwater_beach"]
+    beach_box = box(
+        beach["lon_min"], beach["lat_min"],
+        beach["lon_max"], beach["lat_max"],
+    )
+    cw_island = cw.geometry.union_all().intersection(beach_box)
+    return region_union, cw_island
 
 
 def pad_tract_geoid(geoid_raw) -> Optional[str]:

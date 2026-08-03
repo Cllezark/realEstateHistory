@@ -54,7 +54,7 @@ Configured in `.mcp.json` at the project root:
 
 ```
 browser_navigate → http://localhost:5173
-browser_wait_for → text "St. Petersburg" appears
+browser_wait_for → text "South Pinellas" appears
 browser_take_screenshot → verify choropleth renders
 browser_snapshot → check metric selector and timeline are present
 ```

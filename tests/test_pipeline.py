@@ -1,4 +1,4 @@
-"""Tests for the St. Pete Real Estate ETL pipeline."""
+"""Tests for the South Pinellas & Gulf Beaches Real Estate ETL pipeline."""
 
 import sys
 from pathlib import Path

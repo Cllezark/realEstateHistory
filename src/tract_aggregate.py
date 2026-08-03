@@ -25,9 +25,9 @@ def build_tract_quarter_aggregate(
 
     sales = pd.read_parquet(enriched_sales_path)
 
-    # Filter to St. Pete parcels with tract assignment
+    # Filter to region parcels with tract assignment
     valid_sales = sales[
-        (sales["inside_st_petersburg"] == True) &
+        (sales["inside_region"] == True) &
         sales["tract_geoid"].notna()
     ].copy()
 

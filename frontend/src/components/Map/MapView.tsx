@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
-import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord } from '../../data/types';
+import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord, Metadata } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
 import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
 import styles from './MapView.module.css';
@@ -10,6 +10,7 @@ import styles from './MapView.module.css';
 interface Props {
   geometry: TractGeoJSON | null;
   marketData: TractQuarterIndex | null;
+  metadata?: Metadata | null;
   selectedQuarter: string;
   selectedTract: string | null;
   activeMetric: MapMetric;
@@ -28,8 +29,8 @@ interface HoveredTract {
   record: TractQuarterRecord | null;
 }
 
-const ST_PETE_CENTER: [number, number] = [-82.66, 27.77];
-const ST_PETE_ZOOM = 11.5;
+const REGION_CENTER: [number, number] = [-82.74, 27.85];
+const REGION_ZOOM = 11;
 
 const PRICE_FILTER_METRICS = new Set<MapMetric>([
   'medianSalePrice', 'meanSalePrice', 'p25SalePrice', 'p75SalePrice',
@@ -91,6 +92,7 @@ function buildHatchPattern(): ImageData {
 export function MapView({
   geometry,
   marketData,
+  metadata,
   selectedQuarter,
   selectedTract,
   activeMetric,
@@ -120,11 +122,16 @@ export function MapView({
     const raf = requestAnimationFrame(() => {
       if (cancelled || mapRef.current) return;
 
+      // Region center/zoom from publication metadata, with fallback constants.
+      const regionMap = metadata?.region?.map;
+      const center = (regionMap?.center as [number, number] | undefined) ?? REGION_CENTER;
+      const zoom = regionMap?.zoom ?? REGION_ZOOM;
+
       const map = new maplibregl.Map({
         container,
         style: BASEMAP_STYLE,
-        center: ST_PETE_CENTER,
-        zoom: ST_PETE_ZOOM,
+        center,
+        zoom,
         attributionControl: { compact: true },
       });
 
@@ -389,7 +396,7 @@ export function MapView({
         ref={mapContainerRef}
         className={styles.mapContainer}
         role="application"
-        aria-label="St. Petersburg Census tract map"
+        aria-label={`${metadata?.region?.displayName ?? 'South Pinellas & Gulf Beaches'} Census tract map`}
       />
       {hoveredTract && (
         <div className={styles.hoverTooltip}>

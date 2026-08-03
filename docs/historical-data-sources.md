@@ -63,7 +63,7 @@ in `metadata.json` `knownBreaks`).
 | `tl_2020_12_tract.shp` | 2020 TIGER Florida tracts — the dashboard geography (275 Pinellas) |
 | `tl_2010_12_tract10/` | 2010 TIGER Florida tracts (246 Pinellas) — native/audit geography |
 | `tab20_tract20_tract10_natl.txt` | Official Census 2020↔2010 tract relationship file (398 Pinellas rows) |
-| `tl_2020_12_place.shp` | 2020 TIGER places — fixed St. Petersburg boundary |
+| `tl_2020_12_place.shp` | 2020 TIGER places — region boundaries (Gulfport, Pinellas Park, beach towns, Belleair, Clearwater) |
 
 ## FHFA HPI
 

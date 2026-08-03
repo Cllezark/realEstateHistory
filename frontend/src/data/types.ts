@@ -1,4 +1,4 @@
-/** Shared types for the St. Pete Real Estate Map MVP. */
+/** Shared types for the Real Estate Tract Map. */
 
 import type { Polygon, MultiPolygon } from 'geojson';
 
@@ -50,6 +50,7 @@ export interface Metadata {
   dataSource: string;
   boundaryVintage: string;
   boundaryDescription: string;
+  region?: RegionInfo;
   dateCoverageStart: string;
   dateCoverageEnd: string;
   metrics: string[];
@@ -58,6 +59,18 @@ export interface Metadata {
   suppressionThreshold: number;
   attributions: Attributions;
   pipelineVersion: string;
+}
+
+/** Dashboard coverage region definition. */
+export interface RegionInfo {
+  displayName: string;
+  cutoffLatitude?: number | null;
+  municipalities?: string[];
+  clearwaterBeach?: Record<string, number>;
+  map?: {
+    center?: [number, number];
+    zoom?: number;
+  };
 }
 
 export interface MortgageAssumptions {

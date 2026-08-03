@@ -192,7 +192,7 @@ export default function App() {
   if (loading === 'loading' || loading === 'idle') {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p style={{ fontSize: '1.2rem', color: '#666' }}>Loading St. Petersburg housing data…</p>
+        <p style={{ fontSize: '1.2rem', color: '#666' }}>Loading housing data…</p>
       </div>
     );
   }
@@ -205,6 +205,7 @@ export default function App() {
             <MapView
               geometry={geometry}
               marketData={marketData}
+              metadata={metadata}
               selectedQuarter={state.selectedQuarter}
               selectedTract={state.selectedTract}
               activeMetric={state.activeMetric}

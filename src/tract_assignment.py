@@ -10,17 +10,18 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
-from .utils import utc_now, pad_tract_geoid
+from .utils import build_region_geometries, pad_tract_geoid, utc_now
 
 
 def assign_tracts(
     enriched_sales_path: Path,
     tract_shp: Path,
+    place_shp: Path,
     output_dir: Path,
     config: dict,
     run_id: str,
 ) -> dict:
-    """Spatially assign each valid St. Pete parcel point to one Census tract."""
+    """Spatially assign each valid region parcel point to one Census tract."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load and filter tracts to Pinellas County
@@ -37,8 +38,22 @@ def assign_tracts(
     pinellas_tracts = pinellas_tracts.to_crs("EPSG:4326")
     pinellas_tracts["tract_geoid"] = pinellas_tracts[geoid_field].astype(str).str.strip().str.zfill(11)
 
+    # Region membership (tract-level): land & (centroid_lat <= cutoff |
+    # intersects allowlist place union | intersects Clearwater Beach box)
+    places = gpd.read_file(place_shp).to_crs("EPSG:4326")
+    region_union, cw_island = build_region_geometries(places, config)
+    region_cutoff = float(config["geography"]["region"]["cutoff_latitude"])
+    land_only = pinellas_tracts["ALAND"].astype(float) > 0
+    centroid_lat = pinellas_tracts.geometry.centroid.y
+    inside_region = (
+        (centroid_lat <= region_cutoff)
+        | pinellas_tracts.geometry.intersects(region_union)
+        | pinellas_tracts.geometry.intersects(cw_island)
+    ) & land_only
+    pinellas_tracts["inside_region"] = inside_region
+
     # Save dim_census_tract (geometry)
-    dim_tract = pinellas_tracts[["tract_geoid", "NAME", "ALAND", "AWATER", "geometry"]].copy()
+    dim_tract = pinellas_tracts[["tract_geoid", "NAME", "ALAND", "AWATER", "inside_region", "geometry"]].copy()
     dim_tract = dim_tract.rename(columns={"NAME": "tract_name"})
     dim_tract["tract_boundary_vintage"] = "2020"
     dim_tract.to_parquet(output_dir / "dim_census_tract.parquet", index=False)
@@ -46,21 +61,21 @@ def assign_tracts(
     # Load enriched sales
     sales = pd.read_parquet(enriched_sales_path)
 
-    # Get unique St. Pete parcels with coordinates
-    st_pete_parcels = sales[
-        (sales["inside_st_petersburg"] == True) &
+    # Get unique region parcels with coordinates
+    region_parcels = sales[
+        (sales["inside_region"] == True) &
         sales["latitude"].notna() &
         sales["longitude"].notna()
     ][["strap", "latitude", "longitude", "pcpao_census_tract"]].drop_duplicates(subset=["strap"]).copy()
 
-    if len(st_pete_parcels) == 0:
-        print("WARNING: No St. Pete parcels with coordinates for tract assignment")
+    if len(region_parcels) == 0:
+        print("WARNING: No region parcels with coordinates for tract assignment")
         return {"tracts_assigned": 0}
 
     # Create point geometries
     geometry = [Point(lon, lat) for lon, lat in
-                zip(st_pete_parcels["longitude"], st_pete_parcels["latitude"])]
-    parcels_gdf = gpd.GeoDataFrame(st_pete_parcels, geometry=geometry, crs="EPSG:4326")
+                zip(region_parcels["longitude"], region_parcels["latitude"])]
+    parcels_gdf = gpd.GeoDataFrame(region_parcels, geometry=geometry, crs="EPSG:4326")
 
     # Spatial join to tracts
     tract_fields = ["tract_geoid", "NAME", "geometry"]
@@ -87,7 +102,7 @@ def assign_tracts(
                    "tract_assignment_quality_flag"] = "AMBIGUOUS_MULTI_TRACT"
 
     # Mark parcels that didn't match a tract
-    no_tract = set(st_pete_parcels["strap"]) - set(assignment["strap"])
+    no_tract = set(region_parcels["strap"]) - set(assignment["strap"])
     if no_tract:
         no_tract_df = pd.DataFrame({
             "strap": list(no_tract),
@@ -102,7 +117,7 @@ def assign_tracts(
 
     # --- PCPAO CENSUS comparison ---
     assignment = assignment.merge(
-        st_pete_parcels[["strap", "pcpao_census_tract"]], on="strap", how="left"
+        region_parcels[["strap", "pcpao_census_tract"]], on="strap", how="left"
     )
 
     # Normalize PCPAO census tract to 11-char for comparison
@@ -126,7 +141,7 @@ def assign_tracts(
             "no_pcpao_tract_field",
             "ambiguous_multi_tract",
             "no_tract_match",
-            "total_st_pete_parcels",
+            "total_region_parcels",
         ],
         "count": [
             int(matched),
@@ -134,7 +149,7 @@ def assign_tracts(
             int(no_pcpao),
             int(ambiguous_count),
             int(len(no_tract)),
-            int(len(st_pete_parcels)),
+            int(len(region_parcels)),
         ],
     })
     disc_path = output_dir / "report_tract_discrepancy.parquet"
@@ -152,7 +167,6 @@ def assign_tracts(
 
     print(f"Tract assignment: {len(assignment)} parcels, {ambiguous_count} ambiguous, "
           f"{len(no_tract)} unmatched, {int(matched)} match PCPAO")
-
     return {
         "tracts_assigned": len(assignment) - len(no_tract),
         "ambiguous": int(ambiguous_count),

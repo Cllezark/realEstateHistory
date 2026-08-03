@@ -2,7 +2,7 @@
 
 ## System Overview
 
-The St. Petersburg Real Estate Map MVP is a client-side React single-page application (SPA) that renders an interactive choropleth map of Census tract-level housing market data. Data is produced by a Python ETL pipeline (Phase 1) and served as static JSON/GeoJSON assets.
+The South Pinellas & Gulf Beaches Real Estate Map is a client-side React single-page application (SPA) that renders an interactive choropleth map of Census tract-level housing market data. Data is produced by a Python ETL pipeline (Phase 1) and served as static JSON/GeoJSON assets.
 
 ```mermaid
 graph TD
@@ -55,7 +55,7 @@ App
 
 ## Data Flow
 
-1. **Pipeline → Static Assets**: Stage 12 filters St. Petersburg tracts (80 tracts) and produces:
+1. **Pipeline → Static Assets**: Stage 12 filters region tracts (179 land tracts) and produces:
    - `tracts.geojson` — GeoJSON FeatureCollection with tract geometry + properties
    - `tract-quarter.json` — Nested `{quarter_id: {tract_geoid: record}}` with all metrics
    - `metadata.json` — Build metadata, assumptions, attributions
@@ -88,7 +88,7 @@ App
 ## Key Design Decisions
 
 ### Match Expressions over Feature State
-MapLibre's `setFeatureState` requires `generateId: true` on the source and individual state updates per feature. Instead, we use `setPaintProperty` with a `['match', ['get', 'tract_geoid'], ...]` expression, building the full color lookup in a single call. This is simpler and more performant for 80 tracts.
+MapLibre's `setFeatureState` requires `generateId: true` on the source and individual state updates per feature. Instead, we use `setPaintProperty` with a `['match', ['get', 'tract_geoid'], ...]` expression, building the full color lookup in a single call. This is simpler and more performant for 179 tracts.
 
 ### URL Query Parameter State
 All interactive state (tract, quarter, metric, comparison mode) is synced to URL query parameters. This enables shareable URLs, browser back/forward navigation, and bookmarking. Invalid parameters are silently ignored with safe defaults.
