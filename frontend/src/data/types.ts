@@ -140,3 +140,106 @@ export interface AppState {
 }
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error';
+
+// =========================================================================
+// MyMap Layer Types (Google MyMap integration)
+// =========================================================================
+
+/** Properties on a MyMap point feature (house tour, work location, etc.). */
+export interface MyMapPointProperties {
+  title: string;
+  description: string;
+  folder: string;
+  folderColor: string;
+  price: number | null;
+  priceFormatted: string | null;
+  url: string | null;
+}
+
+/** GeoJSON Feature for a MyMap point. */
+export interface MyMapPointFeature {
+  type: 'Feature';
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  properties: MyMapPointProperties;
+}
+
+/** Properties on a MyMap polygon feature (area overlay). */
+export interface MyMapPolygonProperties {
+  title: string;
+  folder: string;
+  fillColor: string;
+  fillOpacity: number;
+}
+
+/** GeoJSON Feature for a MyMap polygon. */
+export interface MyMapPolygonFeature {
+  type: 'Feature';
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+  properties: MyMapPolygonProperties;
+}
+
+/** GeoJSON FeatureCollection for MyMap points. */
+export interface MyMapPointsGeoJSON {
+  type: 'FeatureCollection';
+  features: MyMapPointFeature[];
+}
+
+/** GeoJSON FeatureCollection for MyMap polygons. */
+export interface MyMapPolygonsGeoJSON {
+  type: 'FeatureCollection';
+  features: MyMapPolygonFeature[];
+}
+
+/** Per-folder metadata from the MyMap conversion. */
+export interface MyMapFolderMeta {
+  name: string;
+  color: string;
+  pointCount: number;
+  polygonCount: number;
+}
+
+/** MyMap publication metadata. */
+export interface MyMapMetadata {
+  buildDate: string;
+  sourceDescription: string;
+  totalPoints: number;
+  totalPolygons: number;
+  folders: MyMapFolderMeta[];
+}
+
+/** Visibility state for MyMap layers. */
+export interface MyMapLayerVisibility {
+  points: boolean;
+  polygons: boolean;
+  /** Per-folder point visibility (folder name → visible). */
+  folderPoints: Record<string, boolean>;
+  /** Per-polygon visibility (polygon title → visible). */
+  individualPolygons: Record<string, boolean>;
+}
+
+/** Build default visibility state from MyMap metadata (everything visible). */
+export function defaultMyMapVisibility(metadata: MyMapMetadata | null): MyMapLayerVisibility {
+  const folderPoints: Record<string, boolean> = {};
+  const individualPolygons: Record<string, boolean> = {};
+
+  if (metadata) {
+    for (const f of metadata.folders) {
+      folderPoints[f.name] = true;
+    }
+    // Pre-populate polygon keys from metadata folder names
+    // Actual polygon titles are initialized from GeoJSON features on first load
+  }
+
+  return {
+    points: true,
+    polygons: true,
+    folderPoints,
+    individualPolygons,
+  };
+}
