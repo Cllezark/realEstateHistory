@@ -194,6 +194,8 @@ pcpao:
     latitude: "LATITUDE"
     longitude: "LONGITUDE"
     living_area_sqft: "TOTAL_LIVING_SQFT"
+    gross_area_sqft: "TOTAL_GROSS_SQFT"
+    parcel_area_acres: "ACREAGE"
     living_units: "TOTAL_LIVING_UNITS"
     year_built: "YEAR_BUILT"
     parcel_status: "STATUS"

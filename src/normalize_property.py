@@ -27,6 +27,8 @@ CANONICAL_PROPERTY_COLS = [
     "latitude",
     "longitude",
     "living_area_sqft",
+    "gross_area_sqft",
+    "parcel_area_sqft",
     "living_units",
     "year_built",
     "parcel_status",
@@ -75,6 +77,15 @@ def normalize_property(bronze_path: Path, output_dir: Path, run_id: str) -> dict
 
     # Property attributes
     canonical["living_area_sqft"] = pd.to_numeric(df["TOTAL_LIVING_SQFT"], errors="coerce")
+    canonical["gross_area_sqft"] = pd.to_numeric(df["TOTAL_GROSS_SQFT"], errors="coerce")
+
+    # PCPAO's bulk export has no native sqft parcel-area column - only acreage.
+    # Derive sqft with the standard 1 acre = 43,560 sqft conversion. This is an
+    # approximation; PCPAO's per-parcel web UI shows a computed "Land Area" in
+    # sqft that isn't present in this export.
+    _ACRE_TO_SQFT = 43560
+    canonical["parcel_area_sqft"] = pd.to_numeric(df["ACREAGE"], errors="coerce") * _ACRE_TO_SQFT
+
     canonical["living_units"] = pd.to_numeric(df["TOTAL_LIVING_UNITS"], errors="coerce")
 
     # Handle duplicate YEAR_BUILT column (take first non-null)
