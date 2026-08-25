@@ -83,8 +83,12 @@ def normalize_property(bronze_path: Path, output_dir: Path, run_id: str) -> dict
     # Derive sqft with the standard 1 acre = 43,560 sqft conversion. This is an
     # approximation; PCPAO's per-parcel web UI shows a computed "Land Area" in
     # sqft that isn't present in this export.
+    # ACREAGE of exactly 0 means "no individually-assessed land" (e.g. condo
+    # units, which share land with the rest of the building) rather than a
+    # true zero-size lot - treat it as missing rather than a real 0 sqft value.
     _ACRE_TO_SQFT = 43560
-    canonical["parcel_area_sqft"] = pd.to_numeric(df["ACREAGE"], errors="coerce") * _ACRE_TO_SQFT
+    acreage = pd.to_numeric(df["ACREAGE"], errors="coerce")
+    canonical["parcel_area_sqft"] = (acreage * _ACRE_TO_SQFT).where(acreage > 0)
 
     canonical["living_units"] = pd.to_numeric(df["TOTAL_LIVING_UNITS"], errors="coerce")
 
