@@ -57,6 +57,22 @@ function passesAreaFilters(sale: ParcelSale, filters: AreaFilters): boolean {
   );
 }
 
+/** Deep link to the nearest Google Street View panorama at a coordinate. */
+function streetViewUrl(latitude: number, longitude: number): string {
+  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latitude},${longitude}`;
+}
+
+function BinocularsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.5 4h1a1.5 1.5 0 0 1 1.5 1.5V9M13.5 4h-1A1.5 1.5 0 0 0 11 5.5V9" />
+      <circle cx="8" cy="15" r="4" />
+      <circle cx="16" cy="15" r="4" />
+      <path d="M11 15h2" />
+    </svg>
+  );
+}
+
 export function TractDetails({
   tractGeoid,
   tractName,
@@ -348,6 +364,19 @@ export function TractDetails({
                 onClick={() => onSaleClick?.(sale)}
                 style={{ cursor: sale.latitude != null ? 'pointer' : 'default' }}
               >
+                {sale.latitude != null && sale.longitude != null && (
+                  <a
+                    href={streetViewUrl(sale.latitude, sale.longitude)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={styles.streetViewButton}
+                    title="View on Google Street View"
+                    aria-label="View on Google Street View"
+                  >
+                    <BinocularsIcon />
+                  </a>
+                )}
                 {sale.saleDate && (
                   <div className={styles.saleDate}>{sale.saleDate}</div>
                 )}
