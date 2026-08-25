@@ -43,6 +43,25 @@ and unmatched. Consequences:
   (`property_class_rule_version: current_roll_v1`); a parcel's class at sale
   time is not available historically.
 
+## Property
+
+| Field | Source column | Handling |
+| --- | --- | --- |
+| `living_area_sqft` | `TOTAL_LIVING_SQFT` (`RP_PROPERTY_INFO.csv`) | Direct mapping — heated/cooled living area |
+| `gross_area_sqft` | `TOTAL_GROSS_SQFT` (`RP_PROPERTY_INFO.csv`) | Direct mapping — total building gross area |
+| `parcel_area_sqft` | `ACREAGE` (`RP_PROPERTY_INFO.csv`) | **Derived/approximate**: `ACREAGE * 43560`. PCPAO's bulk export has no native sqft parcel-area column; their per-parcel web UI shows a computed "Land Area" in sqft that isn't exposed in bulk downloads. |
+
+**Bedrooms/bathrooms are explicitly out of scope.** PCPAO does not track bedroom
+counts at all — their mass-appraisal methodology values property from exterior
+measurements, not room counts (confirmed via PCPAO FAQ). Bathrooms have no
+clean count either; the only proxy is a per-building "Fixtures" tally (mixes
+toilets, sinks, tubs, water heaters) visible solely on PCPAO's individual
+per-parcel web pages, not present in any bulk export. Neither field should be
+re-proposed without a new paid data source (e.g. ATTOM, CoreLogic, an MLS-
+affiliated Zillow Bridge feed) — Zillow/Redfin have no viable free/bulk API
+and would only reflect present-day property state, not the state at each
+historical sale date.
+
 ## Mortgage rates
 
 | File | Coverage |

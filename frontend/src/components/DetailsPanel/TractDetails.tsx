@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { TractQuarterIndex, TractQuarterRecord, Metadata, ParcelSalesIndex, ParcelSale } from '../../data/types';
 import {
-  formatCurrency, formatRate, formatHpi, formatQuarterLabel,
+  formatCurrency, formatRate, formatHpi, formatQuarterLabel, formatAreaSqft,
   getTractRecord, getSortedQuarterIds, getEffectiveMedian,
 } from '../../data/formatters';
 import styles from './TractDetails.module.css';
@@ -256,6 +256,19 @@ export function TractDetails({
                 )}
                 {sale.parcelNumber && (
                   <div className={styles.saleParcelNumber}>Parcel: {sale.parcelNumber}</div>
+                )}
+                {(sale.livingAreaSqft != null || sale.grossAreaSqft != null || sale.parcelAreaSqft != null) && (
+                  <div className={styles.saleStats}>
+                    {sale.livingAreaSqft != null && (
+                      <span className={styles.saleStat}>Living: {formatAreaSqft(sale.livingAreaSqft)}</span>
+                    )}
+                    {sale.grossAreaSqft != null && (
+                      <span className={styles.saleStat}>Gross: {formatAreaSqft(sale.grossAreaSqft)}</span>
+                    )}
+                    {sale.parcelAreaSqft != null && (
+                      <span className={styles.saleStat}>Lot: {formatAreaSqft(sale.parcelAreaSqft)}</span>
+                    )}
+                  </div>
                 )}
               </div>
             ))}

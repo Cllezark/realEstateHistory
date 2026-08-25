@@ -247,3 +247,16 @@
   color: #999;
   font-family: monospace;
 }
+
+.saleStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: #777;
+}
+
+.saleStat {
+  white-space: nowrap;
+}
