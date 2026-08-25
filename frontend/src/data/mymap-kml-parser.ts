@@ -28,12 +28,14 @@ interface RawPoint {
   lat: number;
   price: number | null;
   url: string | null;
+  color: string | null;
 }
 
 interface RawPolygon {
   title: string;
   folder: string;
   outerRing: [number, number][];
+  color: string | null;
 }
 
 interface RawFolderMeta {
@@ -95,6 +97,59 @@ function cleanDescription(raw: string | null): string {
     .trim();
 }
 
+/** Build a style id → hex color map from KML <Style> elements. */
+function extractStyleColors(doc: Document): Record<string, string> {
+  const colors: Record<string, string> = {};
+  doc.querySelectorAll('Style').forEach((st) => {
+    const sid = st.getAttribute('id') || '';
+    let color: string | null = null;
+
+    const iconMatch = sid.match(/icon-1899-([0-9A-Fa-f]{6})/);
+    if (iconMatch) {
+      color = '#' + iconMatch[1].toUpperCase();
+    } else {
+      const colorEl = st.querySelector('LineStyle color') || st.querySelector('PolyStyle color');
+      const v = colorEl?.textContent?.trim();
+      // KML color is aabbggrr -> reverse to #rrggbb
+      if (v && /^[0-9A-Fa-f]{8}$/.test(v)) {
+        color = '#' + v.slice(6, 8).toUpperCase() + v.slice(4, 6).toUpperCase() + v.slice(2, 4).toUpperCase();
+      }
+    }
+
+    if (color) {
+      colors[sid] = color;
+      const base = sid.replace(/-(?:nodesc|normal|highlight)/g, '');
+      if (!(base in colors)) colors[base] = color;
+    }
+  });
+  return colors;
+}
+
+/** Resolve a placemark's <styleUrl> reference to a hex color. */
+function resolveStyleColor(pm: Element, styleColors: Record<string, string>): string | null {
+  const su = pm.querySelector('styleUrl')?.textContent?.trim();
+  if (!su) return null;
+  const ref = su.replace(/^#/, '');
+  if (ref in styleColors) return styleColors[ref];
+  const base = ref.replace(/-(?:nodesc|normal|highlight)/g, '');
+  return styleColors[base] ?? null;
+}
+
+function mostCommonColor(colors: string[]): string | null {
+  if (colors.length === 0) return null;
+  const counts = new Map<string, number>();
+  for (const c of colors) counts.set(c, (counts.get(c) ?? 0) + 1);
+  let best: string | null = null;
+  let bestCount = -1;
+  for (const [c, n] of counts) {
+    if (n > bestCount) {
+      best = c;
+      bestCount = n;
+    }
+  }
+  return best;
+}
+
 /** Parse a KML string into structured MyMap data. */
 export function parseMyMapKml(kmlText: string): {
   points: MyMapPointsGeoJSON | null;
@@ -115,6 +170,7 @@ export function parseMyMapKml(kmlText: string): {
     const rawPoints: RawPoint[] = [];
     const rawPolygons: RawPolygon[] = [];
     const rawFolders: RawFolderMeta[] = [];
+    const styleColors = extractStyleColors(doc);
 
     const folders = doc.querySelectorAll('Document > Folder');
     folders.forEach((folderEl) => {
@@ -142,6 +198,7 @@ export function parseMyMapKml(kmlText: string): {
               lat: coords[0][1],
               price: extractPrice(cleanDesc),
               url: extractUrl(cleanDesc),
+              color: resolveStyleColor(pm, styleColors),
             });
             meta.pointCount++;
           }
@@ -152,6 +209,7 @@ export function parseMyMapKml(kmlText: string): {
               title: pmName,
               folder: folderName,
               outerRing: parseCoordinates(outerBoundary.textContent),
+              color: resolveStyleColor(pm, styleColors),
             });
             meta.polygonCount++;
           }
@@ -174,7 +232,7 @@ export function parseMyMapKml(kmlText: string): {
         title: pt.title,
         description: pt.description,
         folder: pt.folder,
-        folderColor: colorMap[pt.folder] || '#999999',
+        folderColor: pt.color ?? colorMap[pt.folder] ?? '#999999',
         price: pt.price,
         priceFormatted: pt.price != null ? `$${pt.price.toLocaleString()}` : null,
         url: pt.url,
@@ -190,14 +248,17 @@ export function parseMyMapKml(kmlText: string): {
       properties: {
         title: poly.title,
         folder: poly.folder,
-        fillColor: POLYGON_COLORS[poly.title] || '#999999',
+        fillColor: poly.color ?? POLYGON_COLORS[poly.title] ?? '#999999',
         fillOpacity: 0.25,
       },
     }));
 
     const folderMetaList: MyMapFolderMeta[] = rawFolders.map((f) => ({
       name: f.name,
-      color: colorMap[f.name] || '#999999',
+      color:
+        mostCommonColor(rawPoints.filter(p => p.folder === f.name && p.color).map(p => p.color as string)) ??
+        colorMap[f.name] ??
+        '#999999',
       pointCount: f.pointCount,
       polygonCount: f.polygonCount,
     }));
