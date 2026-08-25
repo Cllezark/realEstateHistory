@@ -19,6 +19,43 @@ interface Props {
 
 type SortField = 'price' | 'date';
 type SortDirection = 'asc' | 'desc';
+type AreaFilterField = 'livingAreaSqft' | 'grossAreaSqft' | 'parcelAreaSqft';
+
+interface AreaRange {
+  min: string;
+  max: string;
+}
+
+type AreaFilters = Record<AreaFilterField, AreaRange>;
+
+const EMPTY_AREA_FILTERS: AreaFilters = {
+  livingAreaSqft: { min: '', max: '' },
+  grossAreaSqft: { min: '', max: '' },
+  parcelAreaSqft: { min: '', max: '' },
+};
+
+const AREA_FILTER_LABELS: Record<AreaFilterField, string> = {
+  livingAreaSqft: 'Living area (sq ft)',
+  grossAreaSqft: 'Gross area (sq ft)',
+  parcelAreaSqft: 'Lot area (sq ft)',
+};
+
+/** A sale with no value for a filtered field can't be confirmed in-range, so it's excluded. */
+function inRange(value: number | null, range: AreaRange): boolean {
+  if (range.min === '' && range.max === '') return true;
+  if (value == null) return false;
+  if (range.min !== '' && value < Number(range.min)) return false;
+  if (range.max !== '' && value > Number(range.max)) return false;
+  return true;
+}
+
+function passesAreaFilters(sale: ParcelSale, filters: AreaFilters): boolean {
+  return (
+    inRange(sale.livingAreaSqft, filters.livingAreaSqft) &&
+    inRange(sale.grossAreaSqft, filters.grossAreaSqft) &&
+    inRange(sale.parcelAreaSqft, filters.parcelAreaSqft)
+  );
+}
 
 export function TractDetails({
   tractGeoid,
@@ -32,6 +69,8 @@ export function TractDetails({
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('price');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [areaFilters, setAreaFilters] = useState<AreaFilters>(EMPTY_AREA_FILTERS);
 
   const rawSales: ParcelSale[] = useMemo(() => {
     if (!parcelSales || !tractGeoid) return [];
@@ -40,8 +79,19 @@ export function TractDetails({
     return quarterData[tractGeoid] ?? [];
   }, [parcelSales, tractGeoid, selectedQuarter]);
 
+  const filteredSales: ParcelSale[] = useMemo(() => {
+    return rawSales.filter(sale => passesAreaFilters(sale, areaFilters));
+  }, [rawSales, areaFilters]);
+
+  const activeFilterCount = (Object.keys(areaFilters) as AreaFilterField[])
+    .filter(field => areaFilters[field].min !== '' || areaFilters[field].max !== '').length;
+
+  const updateAreaFilter = (field: AreaFilterField, bound: 'min' | 'max', value: string) => {
+    setAreaFilters(prev => ({ ...prev, [field]: { ...prev[field], [bound]: value } }));
+  };
+
   const sales: ParcelSale[] = useMemo(() => {
-    const sorted = [...rawSales];
+    const sorted = [...filteredSales];
     sorted.sort((a, b) => {
       let aVal: number | string | null;
       let bVal: number | string | null;
@@ -60,7 +110,7 @@ export function TractDetails({
       return sortDirection === 'asc' ? comparison : -comparison;
     });
     return sorted;
-  }, [rawSales, sortField, sortDirection]);
+  }, [filteredSales, sortField, sortDirection]);
 
   const record: TractQuarterRecord | null = useMemo(() => {
     if (!marketData || !tractGeoid) return null;
@@ -209,7 +259,7 @@ export function TractDetails({
       )}
 
       {/* Individual parcel sales */}
-      {sales.length > 0 && (
+      {rawSales.length > 0 && (
         <div className={styles.chartSection}>
           <h3 className={styles.chartTitle}>Individual sales in {formatQuarterLabel(selectedQuarter)}</h3>
           <div className={styles.salesControls}>
@@ -237,6 +287,59 @@ export function TractDetails({
               {sortDirection === 'asc' ? '↑' : '↓'}
             </button>
           </div>
+
+          <div className={styles.filterAccordion}>
+            <button
+              className={styles.filterAccordionHeader}
+              onClick={() => setFiltersOpen(open => !open)}
+              aria-expanded={filtersOpen}
+            >
+              <span>Filter by size{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}</span>
+              <span className={styles.filterAccordionChevron}>{filtersOpen ? '▲' : '▼'}</span>
+            </button>
+            {filtersOpen && (
+              <div className={styles.filterAccordionBody}>
+                {(Object.keys(AREA_FILTER_LABELS) as AreaFilterField[]).map(field => (
+                  <div className={styles.filterRow} key={field}>
+                    <label className={styles.filterLabel}>{AREA_FILTER_LABELS[field]}</label>
+                    <div className={styles.filterInputs}>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Min"
+                        className={styles.filterInput}
+                        value={areaFilters[field].min}
+                        onChange={(e) => updateAreaFilter(field, 'min', e.target.value)}
+                        aria-label={`${AREA_FILTER_LABELS[field]} minimum`}
+                      />
+                      <span className={styles.filterDash}>–</span>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Max"
+                        className={styles.filterInput}
+                        value={areaFilters[field].max}
+                        onChange={(e) => updateAreaFilter(field, 'max', e.target.value)}
+                        aria-label={`${AREA_FILTER_LABELS[field]} maximum`}
+                      />
+                    </div>
+                  </div>
+                ))}
+                {activeFilterCount > 0 && (
+                  <button
+                    className={styles.filterResetButton}
+                    onClick={() => setAreaFilters(EMPTY_AREA_FILTERS)}
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {sales.length === 0 && (
+            <p className={styles.noFilterResults}>No sales match the current filters.</p>
+          )}
           <div className={styles.salesList}>
             {sales.map((sale, idx) => (
               <div
@@ -289,7 +392,7 @@ export function TractDetails({
           </div>
         </div>
       )}
-      {sales.length === 0 && parcelSales && tractGeoid && parcelSales[selectedQuarter]?.[tractGeoid] === undefined && (
+      {rawSales.length === 0 && parcelSales && tractGeoid && parcelSales[selectedQuarter]?.[tractGeoid] === undefined && (
         <div className={styles.chartSection} style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>
           <p>No individual sales data available for this quarter.</p>
         </div>
