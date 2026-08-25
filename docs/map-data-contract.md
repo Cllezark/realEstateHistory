@@ -173,6 +173,7 @@ Individual property sale records, indexed by quarter ID and tract GEOID, powerin
 | `livingAreaSqft` | number \| null | Heated/cooled living area (sq ft) |
 | `grossAreaSqft` | number \| null | Total building gross area (sq ft) |
 | `parcelAreaSqft` | number \| null | Parcel/lot area (sq ft). **Derived** from `ACREAGE * 43560` — not a native PCPAO measurement. Null for records missing acreage or with acreage of exactly 0 (e.g. condo units, which have no individually-assessed land). |
+| `pcpaoUrl` | string \| null | Deep link to the parcel's live record on the Pinellas County Property Appraiser site, built from its STRAP: `https://www.pcpao.gov/property-details?s={strap}` |
 
 Null occurs for vacant land (no living/gross area) or missing source data, and should be omitted from display rather than rendered as `0`.
 

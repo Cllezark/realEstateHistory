@@ -96,6 +96,7 @@ export interface ParcelSale {
   livingAreaSqft: number | null;
   grossAreaSqft: number | null;
   parcelAreaSqft: number | null;
+  pcpaoUrl: string | null;
 }
 
 /** Parcel sales indexed by quarter then tract: quarter_id → tract_geoid → sales[] */

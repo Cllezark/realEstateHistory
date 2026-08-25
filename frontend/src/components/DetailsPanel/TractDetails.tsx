@@ -255,7 +255,21 @@ export function TractDetails({
                   <div className={styles.salePrice}>{formatCurrency(sale.salePrice)}</div>
                 )}
                 {sale.parcelNumber && (
-                  <div className={styles.saleParcelNumber}>Parcel: {sale.parcelNumber}</div>
+                  <div className={styles.saleParcelNumber}>
+                    Parcel:{' '}
+                    {sale.pcpaoUrl ? (
+                      <a
+                        href={sale.pcpaoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {sale.parcelNumber}
+                      </a>
+                    ) : (
+                      sale.parcelNumber
+                    )}
+                  </div>
                 )}
                 {(sale.livingAreaSqft != null || sale.grossAreaSqft != null || sale.parcelAreaSqft != null) && (
                   <div className={styles.saleStats}>

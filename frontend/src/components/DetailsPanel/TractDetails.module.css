@@ -248,6 +248,15 @@
   font-family: monospace;
 }
 
+.saleParcelNumber a {
+  color: #4a7fc9;
+  text-decoration: underline;
+}
+
+.saleParcelNumber a:hover {
+  color: #2c5ba0;
+}
+
 .saleStats {
   display: flex;
   flex-wrap: wrap;
