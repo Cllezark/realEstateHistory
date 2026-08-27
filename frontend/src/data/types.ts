@@ -93,6 +93,10 @@ export interface ParcelSale {
   saleDate: string | null; // YYYY-MM-DD format
   latitude: number | null;
   longitude: number | null;
+  livingAreaSqft: number | null;
+  grossAreaSqft: number | null;
+  parcelAreaSqft: number | null;
+  pcpaoUrl: string | null;
 }
 
 /** Parcel sales indexed by quarter then tract: quarter_id → tract_geoid → sales[] */

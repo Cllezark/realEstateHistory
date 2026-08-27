@@ -20,6 +20,12 @@ export function formatInteger(value: number): string {
   return fmtInteger.format(value);
 }
 
+/** Format a square-footage value with thousands separators and a "sq ft" suffix. */
+export function formatAreaSqft(value: number | null): string | null {
+  if (value == null) return null;
+  return `${fmtInteger.format(value)} sq ft`;
+}
+
 /** Format a percentage rate to two decimal places. */
 export function formatRate(value: number | null): string {
   if (value == null) return 'Not available';

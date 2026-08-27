@@ -301,6 +301,10 @@ def _build_parcel_sales_json(
             "saleDate": sale_date_str,
             "latitude": float(row["latitude"]) if pd.notna(row["latitude"]) else None,
             "longitude": float(row["longitude"]) if pd.notna(row["longitude"]) else None,
+            "livingAreaSqft": int(row["living_area_sqft"]) if pd.notna(row.get("living_area_sqft")) else None,
+            "grossAreaSqft": int(row["gross_area_sqft"]) if pd.notna(row.get("gross_area_sqft")) else None,
+            "parcelAreaSqft": int(row["parcel_area_sqft"]) if pd.notna(row.get("parcel_area_sqft")) else None,
+            "pcpaoUrl": f"https://www.pcpao.gov/property-details?s={row['strap']}" if pd.notna(row.get("strap")) else None,
         }
 
         result[quarter_key][tract_key].append(sale_entry)

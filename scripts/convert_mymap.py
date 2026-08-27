@@ -15,6 +15,7 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 import zipfile
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -65,6 +66,7 @@ class PointFeature:
     latitude: float = 0.0
     price: Optional[int] = None
     url: Optional[str] = None
+    color: Optional[str] = None
 
 
 @dataclass
@@ -72,6 +74,7 @@ class PolygonFeature:
     title: str
     folder: str = ""
     coordinates: list[list[tuple[float, float]]] = field(default_factory=list)
+    color: Optional[str] = None
 
 
 @dataclass
@@ -151,12 +154,63 @@ def _clean_description(raw: Optional[str]) -> str:
     return text
 
 
+# ===========================================================================
+# KML style colors
+# ===========================================================================
+def _parse_style_colors(root: ET.Element) -> dict[str, str]:
+    """Map KML style IDs to hex colors.
+
+    Google My Maps encodes point icon colors in the style id itself
+    (``icon-1899-XXXXXX``), while polygon colors live in a ``<color>``
+    child in KML ``aabbggrr`` format. Both the exact style id and a base
+    id (with ``-normal``/``-highlight``/``-nodesc`` suffixes stripped) are
+    registered so a placemark's ``<styleUrl>`` reference resolves either way.
+    """
+    colors: dict[str, str] = {}
+    for st in root.iter(f"{{{KML_NS}}}Style"):
+        sid = st.get("id") or ""
+        color: Optional[str] = None
+
+        m = re.search(r"icon-1899-([0-9A-Fa-f]{6})", sid)
+        if m:
+            color = f"#{m.group(1).upper()}"
+        else:
+            color_el = st.find("kml:LineStyle/kml:color", NS)
+            if color_el is None:
+                color_el = st.find("kml:PolyStyle/kml:color", NS)
+            if color_el is not None and color_el.text:
+                v = color_el.text.strip()
+                if len(v) == 8 and all(c in "0123456789abcdefABCDEF" for c in v):
+                    # KML color is aabbggrr -> reverse to #rrggbb
+                    color = f"#{v[6:8].upper()}{v[4:6].upper()}{v[2:4].upper()}"
+
+        if color:
+            colors[sid] = color
+            base = re.sub(r"-(?:nodesc|normal|highlight)", "", sid)
+            colors.setdefault(base, color)
+    return colors
+
+
+def _resolve_style_color(pm: ET.Element, style_colors: dict[str, str]) -> Optional[str]:
+    """Resolve a placemark's <styleUrl> reference to a hex color."""
+    su = pm.find("kml:styleUrl", NS)
+    if su is None or not su.text:
+        return None
+    ref = su.text.strip().lstrip("#")
+    if ref in style_colors:
+        return style_colors[ref]
+    base = re.sub(r"-(?:nodesc|normal|highlight)", "", ref)
+    return style_colors.get(base)
+
+
 def parse_kml(kml_text: str) -> tuple[list[PointFeature], list[PolygonFeature], list[FolderMeta]]:
     """Parse KML document and extract point, polygon, and folder metadata."""
     root = ET.fromstring(kml_text)
     doc = root.find(f"{{{KML_NS}}}Document")
     if doc is None:
         raise ValueError("KML has no Document element")
+
+    style_colors = _parse_style_colors(root)
 
     points: list[PointFeature] = []
     polygons: list[PolygonFeature] = []
@@ -187,6 +241,7 @@ def parse_kml(kml_text: str) -> tuple[list[PointFeature], list[PolygonFeature], 
                         latitude=coords[0][1],
                         price=_extract_price(clean_desc),
                         url=_extract_url(clean_desc),
+                        color=_resolve_style_color(pm, style_colors),
                     )
                     points.append(pt)
                     meta.point_count += 1
@@ -205,11 +260,19 @@ def parse_kml(kml_text: str) -> tuple[list[PointFeature], list[PolygonFeature], 
                         title=pm_name,
                         folder=folder_name,
                         coordinates=poly_coords,
+                        color=_resolve_style_color(pm, style_colors),
                     )
                     polygons.append(poly)
                     meta.polygon_count += 1
 
         folders.append(meta)
+
+    # Pick a representative color per folder (the most common point color)
+    # so folder toggle dots stay consistent with the markers on the map.
+    for meta in folders:
+        folder_colors = [p.color for p in points if p.folder == meta.name and p.color]
+        if folder_colors:
+            meta.color = Counter(folder_colors).most_common(1)[0][0]
 
     return points, polygons, folders
 
@@ -231,7 +294,7 @@ def points_to_geojson(points: list[PointFeature], color_by_folder: dict[str, str
                 "title": pt.title,
                 "description": pt.description,
                 "folder": pt.folder,
-                "folderColor": color_by_folder.get(pt.folder, "#999999"),
+                "folderColor": pt.color or color_by_folder.get(pt.folder, "#999999"),
                 "price": pt.price,
                 "priceFormatted": f"${pt.price:,}" if pt.price is not None else None,
                 "url": pt.url,
@@ -256,7 +319,7 @@ def polygons_to_geojson(polygons: list[PolygonFeature]) -> dict:
         else:
             geom = {"type": "Polygon", "coordinates": rings}
 
-        fill_color = POLYGON_COLORS.get(poly.title, "#999999")
+        fill_color = poly.color or POLYGON_COLORS.get(poly.title, "#999999")
 
         features.append({
             "type": "Feature",

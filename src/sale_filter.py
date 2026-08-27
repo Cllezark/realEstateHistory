@@ -36,6 +36,7 @@ def apply_sale_filter(
         properties[["strap", "land_use_code", "parcel_type", "latitude", "longitude",
                      "site_city", "tax_district", "tax_district_description",
                      "pcpao_census_tract", "living_area_sqft", "living_units", "year_built",
+                     "gross_area_sqft", "parcel_area_sqft",
                      "site_address", "site_city_zip"]],
         on="strap", how="left", suffixes=("", "_prop")
     )
