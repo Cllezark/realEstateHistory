@@ -12,8 +12,13 @@ dist
 dist-ssr
 *.local
 
-# Generated data assets (produced by pipeline publish stage)
-public/data/
+# Generated data assets (produced by the pipeline publish stage).
+# The files the app fetches at runtime ARE committed so the Railway deploy has
+# data to serve - see the fetch calls in src/data/loaders.ts. Only these stale
+# chunked-loading directories stay out; nothing reads them any more.
+public/data/quarters/
+public/data/sales/
+public/data/tracts/
 
 # Editor directories and files
 .vscode/*

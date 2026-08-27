@@ -1,0 +1,20 @@
+# This repo is edited on Windows (core.autocrlf=true) but built and served on
+# Linux, so pin everything to LF in both the repo and the working tree. Without
+# this, checkouts rewrite the 54 MB parcel-sales.json with CRLF, and shell
+# scripts copied into a container would carry CRLF and fail to execute.
+* text=auto eol=lf
+
+# Pipeline-generated data — always LF, never treated as needing conversion
+*.json      text eol=lf
+*.geojson   text eol=lf
+
+# Executed on Linux
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+
+# Binary — never touch
+*.png       binary
+*.kmz       binary
+*.parquet   binary
+*.shp       binary
+*.dbf       binary

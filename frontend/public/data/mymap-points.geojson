@@ -1,0 +1,1012 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7179558,
+          27.7659246
+        ]
+      },
+      "properties": {
+        "title": "512 61st St S",
+        "description": "What a slam-dunk layout. Bedrooms could be larger, but the common spaces are all perfectly proportioned and flow into each other beautifully. Great backyard too. Squeezed between a church and an elementary school. $480,000 3/2 1,354 sq. ft. https://www.zillow.com/homedetails/512-61st-St-S-Saint-Petersburg-FL-33707/47132216_zpid/?",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 480000,
+        "priceFormatted": "$480,000",
+        "url": "https://www.zillow.com/homedetails/512-61st-St-S-Saint-Petersburg-FL-33707/47132216_zpid/?"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7017529,
+          27.7901729
+        ]
+      },
+      "properties": {
+        "title": "5015 20th Ave N",
+        "description": "This is the most masculine home we've seen so far. HUGE magazine cover kitchen, 100 inch TV in the living room, 14 year old roof. Less-awkward addition, but not our favorite. $475,000 3/2 1,511 sq. ft. https://www.zillow.com/homedetails/5015-20th-Ave-N-Saint-Petersburg-FL-33710/47093896_zpid/?",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 475000,
+        "priceFormatted": "$475,000",
+        "url": "https://www.zillow.com/homedetails/5015-20th-Ave-N-Saint-Petersburg-FL-33710/47093896_zpid/?"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7032176,
+          27.798374
+        ]
+      },
+      "properties": {
+        "title": "5119 29th Ave N",
+        "description": "This house has everything! Original Hardwood floors in the original structure, a built-in catio with pet door, and a fugly addition that just doesn't fit. Gorgeous backyard though - with hot tub, massive A/C shed, and outdoor shower! $462,000 3/2 1,331 sq. ft. https://www.zillow.com/homedetails/5119-29th-Ave-N-Saint-Petersburg-FL-33710/47036234_zpid/",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 462000,
+        "priceFormatted": "$462,000",
+        "url": "https://www.zillow.com/homedetails/5119-29th-Ave-N-Saint-Petersburg-FL-33710/47036234_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7338823,
+          27.800068
+        ]
+      },
+      "properties": {
+        "title": "6949 31st Ave N",
+        "description": "Cute big house, but not worth it. For Sale By Daughter. Not a full-size garage. Massive Addition begat no extra living space. $490,000 3/2 1,769 sq. ft. https://www.zillow.com/homedetails/6949-31st-Ave-N-Saint-Petersburg-FL-33710/47012173_zpid/",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 490000,
+        "priceFormatted": "$490,000",
+        "url": "https://www.zillow.com/homedetails/6949-31st-Ave-N-Saint-Petersburg-FL-33710/47012173_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7322888,
+          27.8021935
+        ]
+      },
+      "properties": {
+        "title": "6781 33rd Ave N",
+        "description": "This place was NOT good. $490,000 3/2 1,484 sq. ft. https://www.zillow.com/homedetails/6781-33rd-Ave-N-Saint-Petersburg-FL-33710/47012440_zpid/",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 490000,
+        "priceFormatted": "$490,000",
+        "url": "https://www.zillow.com/homedetails/6781-33rd-Ave-N-Saint-Petersburg-FL-33710/47012440_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7455785,
+          27.7868243
+        ]
+      },
+      "properties": {
+        "title": "1500 77th St N",
+        "description": "Cute Neighborhood, but possibly too-far west. The home itself was too small, and the layout of the home did it no favors. No garage, no living room, no dining room. It felt like an apartment. $469,000 3/2 1,270 sq. ft. https://www.zillow.com/homedetails/1500-77th-St-N-Saint-Petersburg-FL-33710/47110953_zpid/",
+        "folder": "August tours",
+        "folderColor": "#9C27B0",
+        "price": 469000,
+        "priceFormatted": "$469,000",
+        "url": "https://www.zillow.com/homedetails/1500-77th-St-N-Saint-Petersburg-FL-33710/47110953_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7273935,
+          27.8602301
+        ]
+      },
+      "properties": {
+        "title": "9772 65th Way",
+        "description": "I love this house because its directly behind my card shop! Sam hates this house because its directly behind my card shop! $485,000 3/2 1,700 sqft. https://portal.onehome.com/en-US/property/aotf~1178654616~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 485000,
+        "priceFormatted": "$485,000",
+        "url": "https://portal.onehome.com/en-US/property/aotf~1178654616~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6908888,
+          27.7981713
+        ]
+      },
+      "properties": {
+        "title": "4200 29th Ave N",
+        "description": "Huge house, every room had broken trim/walls/sills/flooring. Rough Roof, worse price. $450,000 4/2 2,351 sqft https://www.zillow.com/homedetails/4200-29th-Ave-N-Saint-Petersburg-FL-33713/47045264_zpid/",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/4200-29th-Ave-N-Saint-Petersburg-FL-33713/47045264_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7113408,
+          27.7820241
+        ]
+      },
+      "properties": {
+        "title": "5721 10th Ave N",
+        "description": "This house is half-baked. The home from the Kitchen to the Front Yard is a 10/10, but a 3/10 from the dining room to the back yard. $390,000 3/2 1,452 sqft. https://www.zillow.com/homedetails/5721-10th-Ave-N-Saint-Petersburg-FL-33710/47094563_zpid/",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 390000,
+        "priceFormatted": "$390,000",
+        "url": "https://www.zillow.com/homedetails/5721-10th-Ave-N-Saint-Petersburg-FL-33710/47094563_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6961245,
+          27.7874709
+        ]
+      },
+      "properties": {
+        "title": "4601 16th Ave N",
+        "description": "Gosh it was cute until we went into the kitchen. It was so, so small. Small pool area, small deck, small rooms, small kitchen. $430,000 3/2 1,130 sqft. https://www.zillow.com/homedetails/4601-16th-Ave-N-Saint-Petersburg-FL-33713/47093832_zpid/",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 430000,
+        "priceFormatted": "$430,000",
+        "url": "https://www.zillow.com/homedetails/4601-16th-Ave-N-Saint-Petersburg-FL-33713/47093832_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6893901,
+          27.7734773
+        ]
+      },
+      "properties": {
+        "title": "4120 Burlington Ave N",
+        "description": "Two beautiful kitchens in a house hack that's really hard to rent out. $450,000 3/2 1,500 sqft. https://www.zillow.com/homedetails/4120-Burlington-Ave-N-Saint-Petersburg-FL-33713/47151349_zpid/",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/4120-Burlington-Ave-N-Saint-Petersburg-FL-33713/47151349_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7232069,
+          27.7796816
+        ]
+      },
+      "properties": {
+        "title": "6356 8th Ave N",
+        "description": "This one, too, sold so quickly we didn't even have time to critique the disjointed addition to the kitchen! Great area, fun home styling. $500,000 3/2 1,638 sqft. https://www.zillow.com/homedetails/6356-8th-Ave-N-Saint-Petersburg-FL-33710/47101497_zpid/",
+        "folder": "August tours",
+        "folderColor": "#3949AB",
+        "price": 500000,
+        "priceFormatted": "$500,000",
+        "url": "https://www.zillow.com/homedetails/6356-8th-Ave-N-Saint-Petersburg-FL-33710/47101497_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7103314,
+          27.8131993
+        ]
+      },
+      "properties": {
+        "title": "5669 45th Ave N",
+        "description": "What a beautiful home! It is a 2/2, not a 3/2, and the bath tub is in the en-suite. Sadly, we passed. $450K 1,386 sqft. https://portal.onehome.com/en-US/property/aotf~1176994310~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": null,
+        "priceFormatted": null,
+        "url": "https://portal.onehome.com/en-US/property/aotf~1176994310~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7323587,
+          27.8182944
+        ]
+      },
+      "properties": {
+        "title": "5111 68th St N",
+        "description": "New Build, rough neighborhood. Not worth looking here. $499,000 3bed/2bath 1,744 sq ft https://www.zillow.com/homedetails/5111-68th-St-N-Saint-Petersburg-FL-33709/2146068327_zpid/",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": 499000,
+        "priceFormatted": "$499,000",
+        "url": "https://www.zillow.com/homedetails/5111-68th-St-N-Saint-Petersburg-FL-33709/2146068327_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7065378,
+          27.7739785
+        ]
+      },
+      "properties": {
+        "title": "249 54th St N",
+        "description": "I mean, its on the sunrunner's path so we could get to downtown or the beach without a car. $484K 1,588 sqft. https://portal.onehome.com/en-US/property/aotf~1176864071~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": null,
+        "priceFormatted": null,
+        "url": "https://portal.onehome.com/en-US/property/aotf~1176864071~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7236577,
+          27.7899854
+        ]
+      },
+      "properties": {
+        "title": "6350 Hampton Dr N",
+        "description": "Mid-century aesthetic, modern kitchen, Heart of Tyrone. Absolute Trainwreck of a flip, oh my word. What a heartbreaker. $457K 1,343 sqft. https://portal.onehome.com/en-US/property/aotf~1169102917~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": null,
+        "priceFormatted": null,
+        "url": "https://portal.onehome.com/en-US/property/aotf~1169102917~STELLAR?token=eyJPU04iOiJTVEVMTEFSIiwiY29udGFjdGlkIjoiMTQ4MTA3MDYiLCJlbWFpbCI6ImhvbGxhQGNsaWZmLmZpc2giLCJhZ2VudGlkIjoiNDYwOSJ9&searchId=f4f6ed2b-b4be-309c-b376-0314e63e9533"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6896354,
+          27.8361776
+        ]
+      },
+      "properties": {
+        "title": "4097 70th Terrace N",
+        "description": "So pretty, so rough living in Pinellas Park vs St. Pete. $350,000 3/3 1500 sqft. https://www.zillow.com/homedetails/4097-70th-Ter-N-Pinellas-Park-FL-33781/121350490_zpid/",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": 350000,
+        "priceFormatted": "$350,000",
+        "url": "https://www.zillow.com/homedetails/4097-70th-Ter-N-Pinellas-Park-FL-33781/121350490_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6402588,
+          27.8184521
+        ]
+      },
+      "properties": {
+        "title": "5118 5th Way N",
+        "description": "Gosh I love this townhouse but the flood insurance quote was obscene. $7,000! $450,000 3/2.5 1,480 sqft https://www.zillow.com/homedetails/5118-5th-Way-N-Saint-Petersburg-FL-33703/81389418_zpid/",
+        "folder": "August tours",
+        "folderColor": "#0288D1",
+        "price": 7000,
+        "priceFormatted": "$7,000",
+        "url": "https://www.zillow.com/homedetails/5118-5th-Way-N-Saint-Petersburg-FL-33703/81389418_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6640006,
+          27.7754376
+        ]
+      },
+      "properties": {
+        "title": "2244 4th Ave N",
+        "description": "Seller accepted a cash offer over the phone during our showing. I have never felt so broke in my life. $450,000 3/2 1,200 sq ft. https://www.zillow.com/homedetails/2244-4th-Ave-N-Saint-Petersburg-FL-33713/47160924_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#01579B",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/2244-4th-Ave-N-Saint-Petersburg-FL-33713/47160924_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6596484,
+          27.7981683
+        ]
+      },
+      "properties": {
+        "title": "1934 29th Ave N",
+        "description": "Lovely folks with awful DIY impulses. Too loud to stand being outside; a shame because the backyard was lovely. 3bed 2bath $450,000 1116 sqft, https://www.zillow.com/homedetails/1934-29th-Ave-N-Saint-Petersburg-FL-33713/54267552_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#01579B",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/1934-29th-Ave-N-Saint-Petersburg-FL-33713/54267552_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.720089,
+          27.817637
+        ]
+      },
+      "properties": {
+        "title": "5127 62nd St N",
+        "description": "A Funky way to do an addition. Addition the size of our apartment, a master fit for a king, and no backyard. Also, traffic will be a nightmare next to Hollins. $450,000 3/2 2,165 sqft https://www.zillow.com/homedetails/5127-62nd-St-N-Kenneth-City-FL-33709/46988772_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#01579B",
+        "price": 450000,
+        "priceFormatted": "$450,000",
+        "url": "https://www.zillow.com/homedetails/5127-62nd-St-N-Kenneth-City-FL-33709/46988772_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7144509,
+          27.81402
+        ]
+      },
+      "properties": {
+        "title": "5915 46th Ave N",
+        "description": "Cute House on a tree-lined street with solar, a pool, and a 2 car garage. Except its In Flood Zone AE, Solar costs $200/month to never own it, the master suite is on top of the dining space, and its next to the Police and Fire Stations. $440,000 3/2 1,356 sqft https://www.zillow.com/homedetails/5915-46th-Ave-N-Kenneth-City-FL-33709/46988867_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#01579B",
+        "price": 200,
+        "priceFormatted": "$200",
+        "url": "https://www.zillow.com/homedetails/5915-46th-Ave-N-Kenneth-City-FL-33709/46988867_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6421881,
+          27.7809788
+        ]
+      },
+      "properties": {
+        "title": "608 9th Ave N",
+        "description": "We went to schedule a showing of this home and we were told they already had offers above listing. We went to go look and it was SO CUTE and STILL SMALL INSIDE; I still think we could have made it work, but being on 9th Ave is a major reason why this home isn't appreciating the way it should for the location. $500,000 or more 3/2 1,200 sqft. https://www.zillow.com/homedetails/608-9th-Ave-N-Saint-Petersburg-FL-33701/66195060_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#01579B",
+        "price": 500000,
+        "priceFormatted": "$500,000",
+        "url": "https://www.zillow.com/homedetails/608-9th-Ave-N-Saint-Petersburg-FL-33701/66195060_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6559981,
+          27.8015321
+        ]
+      },
+      "properties": {
+        "title": "3222 Prescott St N",
+        "description": "Tiny Living room with no other place to move that sort of space. Funky upstairs bedrooms but not, like, terrible Just not big. For all that room, space is poorly distributed. Also the only view is of the neighbors' decaying homes. Oh! And the driveway is too small for our cars, so we'd have to park them in the backyard. $590,000 1672 sqft. 3 bed 3 bath https://www.zillow.com/homedetails/3222-Prescott-St-N-Saint-Petersburg-FL-33713/47059517_zpid/?",
+        "folder": "July Tours",
+        "folderColor": "#006064",
+        "price": 590000,
+        "priceFormatted": "$590,000",
+        "url": "https://www.zillow.com/homedetails/3222-Prescott-St-N-Saint-Petersburg-FL-33713/47059517_zpid/?"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6603506,
+          27.8000023
+        ]
+      },
+      "properties": {
+        "title": "3036 20th St N",
+        "description": "2 car garage was the best room in the house. Sam loved the kitchen cabinets. Tiny rooms though, and an obvious flip. It was green though 💚 sellers are in la la land if they think that garage is enough to sell the property for more than $350/sqft. 3bed 2 bath $570,000 1,235 sqft https://www.zillow.com/homedetails/3036-20th-St-N-Saint-Petersburg-FL-33713/47059621_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#006064",
+        "price": 350,
+        "priceFormatted": "$350",
+        "url": "https://www.zillow.com/homedetails/3036-20th-St-N-Saint-Petersburg-FL-33713/47059621_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6703344,
+          27.831256
+        ]
+      },
+      "properties": {
+        "title": "6556 27th St N",
+        "description": "WOW It was CUTE and BIG except for ONE BEDROOM made for, presumably, GNOMES. Yard is terrifyingly big. House 💪, but Area 👎 $485K 1,636 sqft 3/2 https://www.zillow.com/homedetails/6556-27th-St-N-Saint-Petersburg-FL-33702/47277162_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#006064",
+        "price": null,
+        "priceFormatted": null,
+        "url": "https://www.zillow.com/homedetails/6556-27th-St-N-Saint-Petersburg-FL-33702/47277162_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6542578,
+          27.800424
+        ]
+      },
+      "properties": {
+        "title": "3110 15th St N",
+        "description": "Turnkey house, HUGE rooms. $600,000 for 1,700 sq. ft. Basically perfect but it just isn't worth going broke for. https://www.zillow.com/homedetails/3110-15th-St-N-Saint-Petersburg-FL-33704/47060615_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#006064",
+        "price": 600000,
+        "priceFormatted": "$600,000",
+        "url": "https://www.zillow.com/homedetails/3110-15th-St-N-Saint-Petersburg-FL-33704/47060615_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6513843,
+          27.8227283
+        ]
+      },
+      "properties": {
+        "title": "1220 56th Ave N",
+        "description": "Listen, I'm not saying corvette guy has insecurities but I am saying his house certainly does. I'm pretty sure the roof (20 y/o btw) is rotting away, and the exterior walls are probably not far behind. $475,000 1,320 sqft. 4/3 No chance of converting to a 3/3 https://www.zillow.com/homedetails/1220-56th-Ave-N-Saint-Petersburg-FL-33703/47286195_zpid/?",
+        "folder": "July Tours",
+        "folderColor": "#006064",
+        "price": 475000,
+        "priceFormatted": "$475,000",
+        "url": "https://www.zillow.com/homedetails/1220-56th-Ave-N-Saint-Petersburg-FL-33703/47286195_zpid/?"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.66633,
+          27.7768654
+        ]
+      },
+      "properties": {
+        "title": "2419 Dartmouth Ave N",
+        "description": "Bottom-heavy, Outdated, and extremely charming. Needs new windows, possibly an insulation job. $600,000 for 1500ish sqft https://www.zillow.com/homedetails/2419-Dartmouth-Ave-N-Saint-Petersburg-FL-33713/47160883_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#0F9D58",
+        "price": 600000,
+        "priceFormatted": "$600,000",
+        "url": "https://www.zillow.com/homedetails/2419-Dartmouth-Ave-N-Saint-Petersburg-FL-33713/47160883_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.703939,
+          27.8012966
+        ]
+      },
+      "properties": {
+        "title": "5154 33rd Ave N",
+        "description": "Sweet house, but it looks like a grenade went off in every neighbors' home. Again, really nice house, but its surrounded by the trenches! $500,000 3/2 1,691 sqft. https://www.zillow.com/homedetails/5154-33rd-Ave-N-Saint-Petersburg-FL-33710/47035393_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#0F9D58",
+        "price": 500000,
+        "priceFormatted": "$500,000",
+        "url": "https://www.zillow.com/homedetails/5154-33rd-Ave-N-Saint-Petersburg-FL-33710/47035393_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.688784,
+          27.7788243
+        ]
+      },
+      "properties": {
+        "title": "695 41st St N",
+        "description": "Cracked foundation, fixer-upper. Bad Kitchen. Every room gets a walk in closet. $485,000 1,283 sqft. https://www.zillow.com/homedetails/695-41st-St-N-Saint-Petersburg-FL-33713/47088145_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#0F9D58",
+        "price": 485000,
+        "priceFormatted": "$485,000",
+        "url": "https://www.zillow.com/homedetails/695-41st-St-N-Saint-Petersburg-FL-33713/47088145_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7038968,
+          27.7928043
+        ]
+      },
+      "properties": {
+        "title": "5175 23rd Ave N",
+        "description": "This house looks boarded up. but its just an accent wall. Inside is much cuter! Built up off the ground with a huge mount of dirt. Master Bath is actually larger than the Master Bedroom, and the rest of the house suffers for it. $450,00 3/2 1,352 sqft https://www.zillow.com/homedetails/5175-23rd-Ave-N-Saint-Petersburg-FL-33710/47035933_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 45000,
+        "priceFormatted": "$45,000",
+        "url": "https://www.zillow.com/homedetails/5175-23rd-Ave-N-Saint-Petersburg-FL-33710/47035933_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6738713,
+          27.7971477
+        ]
+      },
+      "properties": {
+        "title": "2926 28th Ave N",
+        "description": "HUGE! CRAZY HUGE! $575,000 wasn't enough to seal the deal. :( 5bed/3bath 2,700 sqft. https://www.zillow.com/homedetails/2926-28th-Ave-N-Saint-Petersburg-FL-33713/47051567_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 575000,
+        "priceFormatted": "$575,000",
+        "url": "https://www.zillow.com/homedetails/2926-28th-Ave-N-Saint-Petersburg-FL-33713/47051567_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.656865,
+          27.8037111
+        ]
+      },
+      "properties": {
+        "title": "3440 17th St N",
+        "description": "The house that trapped us in the ADU! Weird layout, great kitchen, ADU kills people. $579,000. 1250 sqft. 3/2 main house, 475 sqft. 1/1 ADU. https://www.zillow.com/homedetails/3440-17th-St-N-Saint-Petersburg-FL-33713/47059226_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 579000,
+        "priceFormatted": "$579,000",
+        "url": "https://www.zillow.com/homedetails/3440-17th-St-N-Saint-Petersburg-FL-33713/47059226_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7050689,
+          27.7928402
+        ]
+      },
+      "properties": {
+        "title": "5237 23rd Ave N",
+        "description": "Already under contract by the time we got there! Listed for $585,000 as a 2/2 with 1,484 sqft. https://www.zillow.com/homedetails/5237-23rd-Ave-N-Saint-Petersburg-FL-33710/47035710_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 585000,
+        "priceFormatted": "$585,000",
+        "url": "https://www.zillow.com/homedetails/5237-23rd-Ave-N-Saint-Petersburg-FL-33710/47035710_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6935402,
+          27.7784911
+        ]
+      },
+      "properties": {
+        "title": "601 45th St N",
+        "description": "What a funky house. $550,000 for a bad master suite and a not-so-private attached rental suite. 4bed/3bath 1,583 sqft. https://www.zillow.com/homedetails/601-45th-St-N-Saint-Petersburg-FL-33713/47087836_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 550000,
+        "priceFormatted": "$550,000",
+        "url": "https://www.zillow.com/homedetails/601-45th-St-N-Saint-Petersburg-FL-33713/47087836_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6864701,
+          27.7866266
+        ]
+      },
+      "properties": {
+        "title": "1500 39th St N",
+        "description": "Good bones, bleh neighborhood. $429,000 for 1,170 sqft. Shown empty after a rain shower and water was all over the sun room. https://www.zillow.com/homedetails/1500-39th-St-N-Saint-Petersburg-FL-33713/47086722_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 429000,
+        "priceFormatted": "$429,000",
+        "url": "https://www.zillow.com/homedetails/1500-39th-St-N-Saint-Petersburg-FL-33713/47086722_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6435967,
+          27.8054313
+        ]
+      },
+      "properties": {
+        "title": "734 37th Ave N",
+        "description": "SO CUTE! SO EXPENSIVE! $700,000 AND I GOTTA WORK IN A SHED? GET OUTTA HEREEEE! https://www.zillow.com/homedetails/734-37th-Ave-N-Saint-Petersburg-FL-33704/47012864_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#FFEA00",
+        "price": 700000,
+        "priceFormatted": "$700,000",
+        "url": "https://www.zillow.com/homedetails/734-37th-Ave-N-Saint-Petersburg-FL-33704/47012864_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6450377,
+          27.8160403
+        ]
+      },
+      "properties": {
+        "title": "811 48th Ave N",
+        "description": "Big Pool, Cozy House. $474,500 1,400 sqft.; the land is worth more than the home, for sure. https://www.zillow.com/homedetails/811-48th-Ave-N-Saint-Petersburg-FL-33703/47000654_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#F9A825",
+        "price": 474500,
+        "priceFormatted": "$474,500",
+        "url": "https://www.zillow.com/homedetails/811-48th-Ave-N-Saint-Petersburg-FL-33703/47000654_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7045949,
+          27.8070845
+        ]
+      },
+      "properties": {
+        "title": "5220 39th Ave N",
+        "description": "Big Gay House, rough neighborhood, addition-heavy layout. Pool appears unwell. Wish we could meet the owners! $484,000 1,528 sqft. https://www.zillow.com/homedetails/5220-39th-Ave-N-Saint-Petersburg-FL-33709/46975995_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#F9A825",
+        "price": 484000,
+        "priceFormatted": "$484,000",
+        "url": "https://www.zillow.com/homedetails/5220-39th-Ave-N-Saint-Petersburg-FL-33709/46975995_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6703433,
+          27.787109
+        ]
+      },
+      "properties": {
+        "title": "2710 16th Ave N",
+        "description": "$550,000 with a weird layout and weird additions. Not high on the list. Felt smaller than its 1,432 sqft. https://www.zillow.com/homedetails/2710-16th-Ave-N-Saint-Petersburg-FL-33713/47076671_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#F9A825",
+        "price": 550000,
+        "priceFormatted": "$550,000",
+        "url": "https://www.zillow.com/homedetails/2710-16th-Ave-N-Saint-Petersburg-FL-33713/47076671_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6543669,
+          27.8272458
+        ]
+      },
+      "properties": {
+        "title": "6072 15th Way N",
+        "description": "Nope. Bad Flip, Bad Driveway. Bad rooms. Great pool. $457,400 1,190 sqft. https://www.zillow.com/homedetails/6072-15th-Way-N-Saint-Petersburg-FL-33703/47285167_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#F9A825",
+        "price": 457400,
+        "priceFormatted": "$457,400",
+        "url": "https://www.zillow.com/homedetails/6072-15th-Way-N-Saint-Petersburg-FL-33703/47285167_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7180769,
+          27.7801897
+        ]
+      },
+      "properties": {
+        "title": "801 61st St N",
+        "description": "Cute backyard, cute split room home, cute family. $500K-ish and too far west for us. 1,500 sqft. https://www.zillow.com/homedetails/801-61st-St-N-Saint-Petersburg-FL-33710/47101359_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": null,
+        "priceFormatted": null,
+        "url": "https://www.zillow.com/homedetails/801-61st-St-N-Saint-Petersburg-FL-33710/47101359_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6950366,
+          27.7949787
+        ]
+      },
+      "properties": {
+        "title": "4545 25th Ave N",
+        "description": "HUGE Master Suite behind former garage. Lots of weird space left over from garage remodel. $489,000 1,400 sq ft. https://www.zillow.com/homedetails/4545-25th-Ave-N-Saint-Petersburg-FL-33713/47045672_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": 489000,
+        "priceFormatted": "$489,000",
+        "url": "https://www.zillow.com/homedetails/4545-25th-Ave-N-Saint-Petersburg-FL-33713/47045672_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6925984,
+          27.787483
+        ]
+      },
+      "properties": {
+        "title": "4347 16th Ave N",
+        "description": "Not the worst flip. A little small. Bad garage remodel. $418,000 1,188 sqft. https://www.zillow.com/homedetails/4347-16th-Ave-N-Saint-Petersburg-FL-33713/47086972_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": 418000,
+        "priceFormatted": "$418,000",
+        "url": "https://www.zillow.com/homedetails/4347-16th-Ave-N-Saint-Petersburg-FL-33713/47086972_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6869182,
+          27.7848168
+        ]
+      },
+      "properties": {
+        "title": "3929 13th Ave N",
+        "description": "Bad Flip. Floor level changes, dangerous pool, bad utilities. $455,000 1,383 sqft. https://www.zillow.com/homedetails/3929-13th-Ave-N-Saint-Petersburg-FL-33713/47086636_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": 455000,
+        "priceFormatted": "$455,000",
+        "url": "https://www.zillow.com/homedetails/3929-13th-Ave-N-Saint-Petersburg-FL-33713/47086636_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6739409,
+          27.7841714
+        ]
+      },
+      "properties": {
+        "title": "1234 29th St N",
+        "description": "Bad. Do not. Termites? Floor grade changes everywhere, bad AC. $430,000 1,500 sqft. https://www.zillow.com/homedetails/1234-29th-St-N-Saint-Petersburg-FL-33713/47077083_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": 430000,
+        "priceFormatted": "$430,000",
+        "url": "https://www.zillow.com/homedetails/1234-29th-St-N-Saint-Petersburg-FL-33713/47077083_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6677982,
+          27.7862637
+        ]
+      },
+      "properties": {
+        "title": "2520 15th Ave N",
+        "description": "Every room was small. Nosy neighbors. Bad Parking. $475,000 1,200 sq ft. https://www.zillow.com/homedetails/2520-15th-Ave-N-Saint-Petersburg-FL-33713/47076741_zpid/",
+        "folder": "July Tours",
+        "folderColor": "#E65100",
+        "price": 475000,
+        "priceFormatted": "$475,000",
+        "url": "https://www.zillow.com/homedetails/2520-15th-Ave-N-Saint-Petersburg-FL-33713/47076741_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6525031,
+          27.7795291
+        ]
+      },
+      "properties": {
+        "title": "701 14th St N",
+        "description": "Just so darn cute! But way too cramped inside. $463,00 3bed 1.5 bath, 1,200 sq. ft. https://www.zillow.com/homedetails/701-14th-St-N-Saint-Petersburg-FL-33705/47067656_zpid/",
+        "folder": "June tours",
+        "folderColor": "#A52714",
+        "price": 46300,
+        "priceFormatted": "$46,300",
+        "url": "https://www.zillow.com/homedetails/701-14th-St-N-Saint-Petersburg-FL-33705/47067656_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6511059,
+          27.7919076
+        ]
+      },
+      "properties": {
+        "title": "1200 22nd Ave N",
+        "description": "Vintage, unflipped, unrentable ADU. Bones, perhaps not great, but bones nonetheless. $525,000 1,260 sqft. 3/2 main house 320 sqft. 1/1 ADU. https://www.zillow.com/homedetails/1200-22nd-Ave-N-Saint-Petersburg-FL-33704/47067915_zpid/?mmlb=g,13",
+        "folder": "June tours",
+        "folderColor": "#A52714",
+        "price": 525000,
+        "priceFormatted": "$525,000",
+        "url": "https://www.zillow.com/homedetails/1200-22nd-Ave-N-Saint-Petersburg-FL-33704/47067915_zpid/?mmlb=g,13"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.6639027,
+          27.7858064
+        ]
+      },
+      "properties": {
+        "title": "2237 14th Ave N",
+        "description": "Great use of space and free will, but not workable for a family setup with an office. $475,000 2bed/2bath 1,176 sqft. https://www.zillow.com/homedetails/2237-14th-Ave-N-Saint-Petersburg-FL-33713/47077212_zpid/",
+        "folder": "June tours",
+        "folderColor": "#A52714",
+        "price": 475000,
+        "priceFormatted": "$475,000",
+        "url": "https://www.zillow.com/homedetails/2237-14th-Ave-N-Saint-Petersburg-FL-33713/47077212_zpid/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7295371,
+          27.9328699
+        ]
+      },
+      "properties": {
+        "title": "Work",
+        "description": "",
+        "folder": "June tours",
+        "folderColor": "#880E4F",
+        "price": null,
+        "priceFormatted": null,
+        "url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.7528418,
+          27.9744453
+        ]
+      },
+      "properties": {
+        "title": "Work",
+        "description": "",
+        "folder": "June tours",
+        "folderColor": "#880E4F",
+        "price": null,
+        "priceFormatted": null,
+        "url": null
+      }
+    }
+  ]
+}

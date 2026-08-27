@@ -1,0 +1,33 @@
+# Keep the build context small. frontend/public/data IS needed (Vite copies it
+# into dist), so it is deliberately not excluded here.
+
+.git/
+.github/
+
+# Raw pipeline inputs (~640 MB of CSVs and shapefiles) — only needed to *re-run*
+# the pipeline, never to serve it. The published JSON under frontend/public/data
+# is what the app reads.
+data/
+output/
+reports/
+
+# Rebuilt inside the image
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Local Python env (a WSL venv — its symlinks are meaningless in the image)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# MyMap source exports; the converted GeoJSON under public/data is what ships
+*.kmz
+*.kml
+
+# Test output and scratch
+.playwright-output/
+frontend/test-results/
+*.png
+*.bak

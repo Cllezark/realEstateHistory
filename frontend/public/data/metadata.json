@@ -1,0 +1,148 @@
+{
+  "attributions": {
+    "hpi": "FHFA Tract HPI",
+    "mortgageRate": "FRED / Freddie Mac 30-Year Fixed Rate Mortgage Average",
+    "salesAndProperty": "Pinellas County Property Appraiser (PCPAO)"
+  },
+  "boundaryDescription": "2020 TIGER/Line Census tracts (effective January 1, 2020)",
+  "boundaryVintage": "2020",
+  "buildDate": "2026-08-27T17:12:01.306490-04:00",
+  "dataSource": "pcpao",
+  "dateCoverageEnd": "2026-Q2",
+  "dateCoverageStart": "2011-Q1",
+  "historical": {
+    "cityBoundaryMethod": "fixed_2020_place_boundary",
+    "completeCoverageStartQuarter": "2011-Q1",
+    "earliestSupportedQuarter": "2011-Q1",
+    "historicalCutover": {
+      "before": "RP_OS_SALES.csv (historical schema)",
+      "date": "2021-01-01",
+      "onOrAfter": "RP_SALES.csv (current schema)"
+    },
+    "historicalGeographyMethod": "direct_point_to_2020_tract",
+    "knownBreaks": [
+      {
+        "date": "2022-11-17",
+        "description": "Freddie Mac survey methodology change on November 17, 2022",
+        "series": "mortgageRate"
+      },
+      {
+        "date": "2021-01-01",
+        "description": "Source file cutover: historical official-record extract to current PCPAO sales extract; multi-parcel flag derived (not observed) before this date at 99.6% validated agreement",
+        "series": "sales"
+      }
+    ],
+    "latestSupportedQuarter": "2026-Q2",
+    "regionBoundaryMethod": "fixed_2020_place_boundary",
+    "ruleVersions": {
+      "multiParcelHistorical": "derived_book_page_v1",
+      "propertyClassHistorical": "current_roll_v1",
+      "sourceSchemaCurrent": "pcpao_current_v1",
+      "sourceSchemaHistorical": "pcpao_os_v1"
+    },
+    "sourceFiles": [
+      {
+        "file": "RP_SALES.csv",
+        "sha256": "564f7b95d5a1c92856629435bdc01740523298eb1cb2d57884ccb88fc1bb915c"
+      },
+      {
+        "file": "RP_OS_SALES.csv",
+        "sha256": "135c23f5970d50a17a7f478a5f7ca3c3e29fe0b5b18555330f9dc3a69e11ea9a"
+      },
+      {
+        "file": "RP_PROPERTY_INFO.csv",
+        "sha256": "fa80868cd195eab5602617f4175ba5e8969a8c0d0a2efb3a5f349bf9da373408"
+      },
+      {
+        "file": "hpi_at_tract.csv",
+        "sha256": "7675da97c942f6ab2949aa58a733675a681ca69cb28cbb192cf84ef5ee1502cf"
+      },
+      {
+        "file": "MORTGAGE30US.csv",
+        "sha256": "3daf95d574a13bbb0f4d7c955263bd55c5c890bb0568105fd4cdd451af348a0b"
+      },
+      {
+        "file": "MORTGAGE30US_2010s.csv",
+        "sha256": "0564e03214d01eb4eb4a04501c6aa5101f62d95c2af7e62442a9d521b9ed6250"
+      },
+      {
+        "file": "tl_2020_12_tract.shp",
+        "sha256": "4dbed21171debeceeec1085f29edcdef105183b30c75a57c10621e6a9adecea2"
+      },
+      {
+        "file": "tl_2010_12_tract10/tl_2010_12_tract10.shp",
+        "sha256": "e83d07ed73b5fd787c355fc4d9b9e475ba4ef715357f1bd83ad1a70155f153b8"
+      },
+      {
+        "file": "tl_2020_12_place.shp",
+        "sha256": "3c0021e17269d1e8253346b8dcaf26f840018a702de62dcd345772aade8b375c"
+      },
+      {
+        "file": "tab20_tract20_tract10_natl.txt",
+        "sha256": "3c2ea8e13bf359349cc6ee042980e539d0a8032328ce8c5ae10679b9000e3d17"
+      }
+    ],
+    "tractDisplayVintage": "2020"
+  },
+  "metrics": [
+    "qualified_sale_count",
+    "median_sale_price",
+    "mean_sale_price",
+    "p25_sale_price",
+    "p75_sale_price",
+    "min_sale_price",
+    "max_sale_price",
+    "average_rate_percent",
+    "estimated_pi_payment",
+    "hpi",
+    "annual_change",
+    "small_sample_flag",
+    "suppress_median",
+    "is_current_partial_quarter",
+    "partial_quarter_flag"
+  ],
+  "mortgageAssumptions": {
+    "downPaymentPercent": 20.0,
+    "loanTermYears": 30,
+    "paymentComponents": "principal_and_interest"
+  },
+  "pipelineVersion": "1.0.0",
+  "region": {
+    "clearwaterBeach": {
+      "lat_max": 28.02,
+      "lat_min": 27.88,
+      "lon_max": -82.79,
+      "lon_min": -82.85
+    },
+    "cutoffLatitude": 27.9,
+    "displayName": "South Pinellas & Gulf Beaches",
+    "map": {
+      "center": [
+        -82.74,
+        27.85
+      ],
+      "zoom": 11
+    },
+    "municipalities": [
+      "05075",
+      "05100",
+      "05125",
+      "05150",
+      "28175",
+      "36175",
+      "56975",
+      "33625",
+      "33675",
+      "42400",
+      "49725",
+      "59725",
+      "59750",
+      "62885",
+      "67675",
+      "71825",
+      "72325"
+    ]
+  },
+  "smallSampleThreshold": 5,
+  "suppressionThreshold": 5
+}
