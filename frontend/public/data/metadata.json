@@ -6,9 +6,9 @@
   },
   "boundaryDescription": "2020 TIGER/Line Census tracts (effective January 1, 2020)",
   "boundaryVintage": "2020",
-  "buildDate": "2026-08-27T17:12:01.306490-04:00",
+  "buildDate": "2026-08-31T14:30:34.269945-04:00",
   "dataSource": "pcpao",
-  "dateCoverageEnd": "2026-Q2",
+  "dateCoverageEnd": "2026-Q3",
   "dateCoverageStart": "2011-Q1",
   "historical": {
     "cityBoundaryMethod": "fixed_2020_place_boundary",
@@ -32,7 +32,7 @@
         "series": "sales"
       }
     ],
-    "latestSupportedQuarter": "2026-Q2",
+    "latestSupportedQuarter": "2026-Q3",
     "regionBoundaryMethod": "fixed_2020_place_boundary",
     "ruleVersions": {
       "multiParcelHistorical": "derived_book_page_v1",
@@ -43,7 +43,7 @@
     "sourceFiles": [
       {
         "file": "RP_SALES.csv",
-        "sha256": "564f7b95d5a1c92856629435bdc01740523298eb1cb2d57884ccb88fc1bb915c"
+        "sha256": "d6f260d7fd634a64d2fdd935d32d0b14c39c62e86011e94d28468d611ace9ba3"
       },
       {
         "file": "RP_OS_SALES.csv",
