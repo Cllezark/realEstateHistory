@@ -63,15 +63,21 @@ describe('calculateQuantileBreaks', () => {
 });
 
 describe('calculateAppreciationBreaks', () => {
-  it('returns diverging breaks centered on zero', () => {
+  it('returns diverging breaks split at zero with independent class counts per side', () => {
     const values = new Map<string, number | null>([
       ['t1', -20], ['t2', -10], ['t3', 0], ['t4', 10], ['t5', 20],
     ]);
-    const breaks = calculateAppreciationBreaks(values, 9);
-    expect(breaks).toHaveLength(9);
-    // Center break should contain zero
-    const containsZero = breaks.some(b => 0 >= b.minValue && 0 <= b.maxValue);
-    expect(containsZero).toBe(true);
+    const breaks = calculateAppreciationBreaks(values, 6, 4);
+    expect(breaks).toHaveLength(10);
+    // Zero must be a break boundary, not the interior of a shared bin.
+    const boundaryAtZero = breaks.some(b => b.maxValue === 0) && breaks.some(b => b.minValue === 0);
+    expect(boundaryAtZero).toBe(true);
+    // No single bin should span both negative and positive values.
+    const straddlesZero = breaks.some(b => b.minValue < 0 && b.maxValue > 0);
+    expect(straddlesZero).toBe(false);
+    // 6 depreciation bins, 4 appreciation bins.
+    expect(breaks.filter(b => b.maxValue <= 0)).toHaveLength(6);
+    expect(breaks.filter(b => b.minValue >= 0)).toHaveLength(4);
   });
 
   it('handles all-null values', () => {
