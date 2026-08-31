@@ -58,7 +58,7 @@ def stage_sales_raw(data_dir: Path, output_dir: Path, run_id: str, manifest_sha:
     if not filepath.exists():
         raise FileNotFoundError(f"Sales source not found: {filepath}")
 
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath, encoding="latin-1")
     df["_source_file"] = "RP_SALES.csv"
     df["_source_row_number"] = range(1, len(df) + 1)
     df["_source_sha256"] = manifest_sha
