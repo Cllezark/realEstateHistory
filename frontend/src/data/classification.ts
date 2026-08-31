@@ -27,6 +27,31 @@ const DIVERGING_PALETTE = [
   '#1a9850',
 ];
 
+/**
+ * Depreciation shades (red), darkest at the extreme, lightening toward 0%.
+ * 6 steps — more gradation than the appreciation side, since declines in
+ * this market are less common and worth distinguishing more finely.
+ */
+const DEPRECIATION_SHADES = [
+  '#67001f',
+  '#a50026',
+  '#d73027',
+  '#f46d43',
+  '#fdae61',
+  '#fee08b',
+];
+
+/**
+ * Appreciation shades (green), lightest just above 0%, darkening toward the extreme.
+ * 4 steps.
+ */
+const APPRECIATION_SHADES = [
+  '#d9ef8b',
+  '#a6d96a',
+  '#66bd63',
+  '#1a9850',
+];
+
 /** Fallback color for missing data. */
 export const MISSING_COLOR = '#d9d9d9';
 
@@ -264,40 +289,68 @@ export function getTractColor(
   return getColorForValue(value, breaks);
 }
 
-/** Calculate appreciation-based diverging breaks. */
+/**
+ * Calculate appreciation-based diverging breaks with a hard color boundary at 0%.
+ * Depreciation (< 0%) and appreciation (> 0%) each get their own independent
+ * range (based on the actual min/max of the data) split into their own number
+ * of bins, so no bin straddles zero and each side can have a different
+ * resolution — e.g. more, finer steps on the depreciation side.
+ */
 export function calculateAppreciationBreaks(
   appreciationValues: Map<string, number | null>,
-  numClasses: number = 9,
+  depreciationClasses: number = 6,
+  appreciationClasses: number = 4,
 ): LegendBreak[] {
   const valid = Array.from(appreciationValues.values()).filter((v): v is number => v != null);
   if (valid.length === 0) return [];
 
-  const maxAbs = Math.max(Math.abs(Math.min(...valid)), Math.abs(Math.max(...valid)));
-  if (maxAbs === 0) {
+  const minValueOverall = Math.min(...valid);
+  const maxValueOverall = Math.max(...valid);
+  const minMagnitude = Math.abs(Math.min(minValueOverall, 0));
+  const maxMagnitude = Math.max(maxValueOverall, 0);
+
+  if (minMagnitude === 0 && maxMagnitude === 0) {
     return [{
       label: '0.0% (no change)',
       minValue: 0,
       maxValue: 0,
-      color: DIVERGING_PALETTE[4],
+      color: APPRECIATION_SHADES[0],
     }];
   }
 
-  const step = (maxAbs * 2) / numClasses;
   const breaks: LegendBreak[] = [];
 
-  for (let i = 0; i < numClasses; i++) {
-    const minValue = -maxAbs + i * step;
-    const maxValue = -maxAbs + (i + 1) * step;
-    const color = DIVERGING_PALETTE[i % DIVERGING_PALETTE.length];
-    const crossesZero = minValue <= 0 && maxValue >= 0;
-    breaks.push({
-      label: crossesZero
-        ? `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}% (≈ no change)`
-        : `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
-      minValue,
-      maxValue,
-      color,
-    });
+  // Depreciation side: darkest red at the extreme, lightening toward 0.
+  if (minMagnitude > 0) {
+    const step = minMagnitude / depreciationClasses;
+    for (let i = 0; i < depreciationClasses; i++) {
+      const minValue = -minMagnitude + i * step;
+      const maxValue = i === depreciationClasses - 1 ? 0 : -minMagnitude + (i + 1) * step;
+      const shadeIdx = Math.round((i / Math.max(depreciationClasses - 1, 1)) * (DEPRECIATION_SHADES.length - 1));
+      breaks.push({
+        label: `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
+        minValue,
+        maxValue,
+        color: DEPRECIATION_SHADES[shadeIdx],
+      });
+    }
   }
+
+  // Appreciation side: lightest green just above 0, darkening toward the extreme.
+  if (maxMagnitude > 0) {
+    const step = maxMagnitude / appreciationClasses;
+    for (let i = 0; i < appreciationClasses; i++) {
+      const minValue = i === 0 ? 0 : i * step;
+      const maxValue = (i + 1) * step;
+      const shadeIdx = Math.round((i / Math.max(appreciationClasses - 1, 1)) * (APPRECIATION_SHADES.length - 1));
+      breaks.push({
+        label: `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
+        minValue,
+        maxValue,
+        color: APPRECIATION_SHADES[shadeIdx],
+      });
+    }
+  }
+
   return breaks;
 }
