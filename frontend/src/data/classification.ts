@@ -27,6 +27,46 @@ const DIVERGING_PALETTE = [
   '#1a9850',
 ];
 
+/**
+ * Appreciation ramps, anchored at zero. Depreciation always reads red,
+ * appreciation always reads green — no yellow/orange leaking into the
+ * positive side, and no green leaking into the negative side.
+ * Both ramps run light (near zero) → dark (far from zero).
+ */
+const DEPRECIATION_RAMP = [
+  '#fee0d2',
+  '#fcbba1',
+  '#fc9272',
+  '#fb6a4a',
+  '#ef3b2c',
+  '#cb181d',
+  '#a50f15',
+  '#67000d',
+];
+
+const APPRECIATION_RAMP = [
+  '#e5f5e0',
+  '#c7e9c0',
+  '#a1d99b',
+  '#74c476',
+  '#41ab5d',
+  '#238b45',
+  '#006d2c',
+  '#00441b',
+];
+
+/** Pick `count` evenly spaced colors from a ramp, light end first. */
+function sampleRamp(ramp: string[], count: number): string[] {
+  if (count <= 0) return [];
+  if (count === 1) return [ramp[Math.floor(ramp.length / 2)]];
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    out.push(ramp[Math.round(t * (ramp.length - 1))]);
+  }
+  return out;
+}
+
 /** Fallback color for missing data. */
 export const MISSING_COLOR = '#d9d9d9';
 
@@ -264,7 +304,7 @@ export function getTractColor(
   return getColorForValue(value, breaks);
 }
 
-/** Calculate appreciation-based diverging breaks. */
+/** Calculate appreciation-based diverging breaks over the actual data range. */
 export function calculateAppreciationBreaks(
   appreciationValues: Map<string, number | null>,
   numClasses: number = 9,
@@ -272,32 +312,61 @@ export function calculateAppreciationBreaks(
   const valid = Array.from(appreciationValues.values()).filter((v): v is number => v != null);
   if (valid.length === 0) return [];
 
-  const maxAbs = Math.max(Math.abs(Math.min(...valid)), Math.abs(Math.max(...valid)));
-  if (maxAbs === 0) {
+  const minValue = Math.min(...valid);
+  const maxValue = Math.max(...valid);
+
+  if (minValue === maxValue) {
+    // Every tract moved by the same amount — a single class, colored by sign.
     return [{
-      label: '0.0% (no change)',
-      minValue: 0,
-      maxValue: 0,
-      color: DIVERGING_PALETTE[4],
+      label: `${formatPercentBound(minValue)}`,
+      minValue,
+      maxValue,
+      color: minValue < 0
+        ? DEPRECIATION_RAMP[4]
+        : minValue > 0 ? APPRECIATION_RAMP[4] : DIVERGING_PALETTE[4],
     }];
   }
 
-  const step = (maxAbs * 2) / numClasses;
-  const breaks: LegendBreak[] = [];
+  // Calculate ideal step size and round to a nice number
+  const rawStep = (maxValue - minValue) / numClasses;
+  const stepMagnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const roundedStep = Math.ceil(rawStep / stepMagnitude) * stepMagnitude;
 
-  for (let i = 0; i < numClasses; i++) {
-    const minValue = -maxAbs + i * step;
-    const maxValue = -maxAbs + (i + 1) * step;
-    const color = DIVERGING_PALETTE[i % DIVERGING_PALETTE.length];
-    const crossesZero = minValue <= 0 && maxValue >= 0;
-    breaks.push({
-      label: crossesZero
-        ? `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}% (≈ no change)`
-        : `${minValue.toFixed(1)}% – ${maxValue.toFixed(1)}%`,
-      minValue,
-      maxValue,
-      color,
-    });
+  // Adjust min/max to align with step boundaries
+  const alignedMin = Math.floor(minValue / roundedStep) * roundedStep;
+  const alignedMax = Math.ceil(maxValue / roundedStep) * roundedStep;
+  const range = alignedMax - alignedMin;
+
+  // Recalculate number of steps to fit the aligned range
+  const actualSteps = Math.round(range / roundedStep);
+
+  // Build the step ranges first. Because alignedMin/alignedMax are multiples of
+  // roundedStep, zero always lands on a boundary — no step can span both signs.
+  const ranges: Array<{ min: number; max: number }> = [];
+  for (let i = 0; i < actualSteps; i++) {
+    const stepMin = alignedMin + i * roundedStep;
+    ranges.push({ min: stepMin, max: stepMin + roundedStep });
   }
-  return breaks;
+
+  // Colors are anchored at zero, not at the ends of the range: everything below
+  // zero draws from the red ramp, everything at or above zero from the green ramp,
+  // each scaled to how many steps actually fall on that side.
+  const negativeCount = ranges.filter(r => r.max <= 0).length;
+  const positiveCount = ranges.length - negativeCount;
+  // Most negative step gets the darkest red, so walk the sampled ramp backwards.
+  const negativeColors = sampleRamp(DEPRECIATION_RAMP, negativeCount).reverse();
+  const positiveColors = sampleRamp(APPRECIATION_RAMP, positiveCount);
+
+  return ranges.map((r, i) => ({
+    label: `${formatPercentBound(r.min)} – ${formatPercentBound(r.max)}`,
+    minValue: r.min,
+    maxValue: r.max,
+    color: i < negativeCount ? negativeColors[i] : positiveColors[i - negativeCount],
+  }));
+}
+
+/** Format a legend bound, dropping the decimal when the step lands on a whole number. */
+function formatPercentBound(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? `${rounded}%` : `${rounded.toFixed(1)}%`;
 }
