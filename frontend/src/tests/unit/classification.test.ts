@@ -63,15 +63,50 @@ describe('calculateQuantileBreaks', () => {
 });
 
 describe('calculateAppreciationBreaks', () => {
-  it('returns diverging breaks centered on zero', () => {
+  it('returns diverging breaks with zero on a class boundary', () => {
     const values = new Map<string, number | null>([
       ['t1', -20], ['t2', -10], ['t3', 0], ['t4', 10], ['t5', 20],
     ]);
     const breaks = calculateAppreciationBreaks(values, 9);
-    expect(breaks).toHaveLength(9);
-    // Center break should contain zero
-    const containsZero = breaks.some(b => 0 >= b.minValue && 0 <= b.maxValue);
-    expect(containsZero).toBe(true);
+    expect(breaks.length).toBeGreaterThan(0);
+    // Zero is a boundary, not the interior of a class
+    expect(breaks.some(b => b.maxValue === 0)).toBe(true);
+    expect(breaks.some(b => b.minValue === 0)).toBe(true);
+  });
+
+  it('never lets a single class span negative and positive values', () => {
+    const values = new Map<string, number | null>([
+      ['t1', -71.3], ['t2', -12], ['t3', 4], ['t4', 88], ['t5', 140],
+    ]);
+    const breaks = calculateAppreciationBreaks(values, 9);
+    for (const b of breaks) {
+      expect(b.minValue < 0 && b.maxValue > 0).toBe(false);
+    }
+  });
+
+  it('uses a uniform, round step and covers the full data span', () => {
+    const values = new Map<string, number | null>([
+      ['t1', -71.3], ['t2', 140],
+    ]);
+    const breaks = calculateAppreciationBreaks(values, 9);
+    const step = breaks[0].maxValue - breaks[0].minValue;
+    // Every class is the same width, and that width is a round number
+    for (const b of breaks) {
+      expect(b.maxValue - b.minValue).toBeCloseTo(step, 6);
+    }
+    expect(Number.isInteger(step)).toBe(true);
+    // The span is over-fitted so it encloses every observed value
+    expect(breaks[0].minValue).toBeLessThanOrEqual(-71.3);
+    expect(breaks[breaks.length - 1].maxValue).toBeGreaterThanOrEqual(140);
+  });
+
+  it('starts at zero when no tract depreciated', () => {
+    const values = new Map<string, number | null>([
+      ['t1', 12], ['t2', 45], ['t3', 130],
+    ]);
+    const breaks = calculateAppreciationBreaks(values, 9);
+    expect(breaks[0].minValue).toBe(0);
+    expect(breaks.every(b => b.minValue >= 0)).toBe(true);
   });
 
   it('handles all-null values', () => {
