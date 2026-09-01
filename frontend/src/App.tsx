@@ -332,6 +332,9 @@ export default function App() {
                 metadata={metadata}
                 parcelSales={parcelSales}
                 onSaleClick={handleSaleClick}
+                comparisonMode={state.comparisonMode}
+                comparisonStartQuarter={state.comparisonStartQuarter}
+                comparisonEndQuarter={state.comparisonEndQuarter}
               />
             </div>
           </div>

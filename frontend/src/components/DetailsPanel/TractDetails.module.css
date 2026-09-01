@@ -135,6 +135,11 @@
   color: #444;
 }
 
+.chartSubtitle {
+  font-weight: 400;
+  color: #888;
+}
+
 .disclosures {
   margin-top: auto;
   padding: 1rem;

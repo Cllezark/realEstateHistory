@@ -15,6 +15,9 @@ interface Props {
   metadata: Metadata | null;
   parcelSales: ParcelSalesIndex | null;
   onSaleClick?: (sale: ParcelSale) => void;
+  comparisonMode?: boolean;
+  comparisonStartQuarter?: string | null;
+  comparisonEndQuarter?: string | null;
 }
 
 type SortField = 'price' | 'date';
@@ -81,6 +84,9 @@ export function TractDetails({
   metadata,
   parcelSales,
   onSaleClick,
+  comparisonMode,
+  comparisonStartQuarter,
+  comparisonEndQuarter,
 }: Props) {
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('price');
@@ -137,6 +143,19 @@ export function TractDetails({
     if (!marketData) return [];
     return getSortedQuarterIds(marketData);
   }, [marketData]);
+
+  // In appreciation (comparison) mode, zoom the chart's viewport to the
+  // quarters spanning the comparison range instead of the full history.
+  const chartQuarters = useMemo(() => {
+    if (!comparisonMode || !comparisonStartQuarter || !comparisonEndQuarter) {
+      return sortedQuarters;
+    }
+    const startIdx = sortedQuarters.indexOf(comparisonStartQuarter);
+    const endIdx = sortedQuarters.indexOf(comparisonEndQuarter);
+    if (startIdx === -1 || endIdx === -1) return sortedQuarters;
+    const [lo, hi] = startIdx <= endIdx ? [startIdx, endIdx] : [endIdx, startIdx];
+    return sortedQuarters.slice(lo, hi + 1);
+  }, [sortedQuarters, comparisonMode, comparisonStartQuarter, comparisonEndQuarter]);
 
   // No tract selected: show instructions
   if (!tractGeoid || !tractName) {
@@ -260,13 +279,20 @@ export function TractDetails({
       )}
 
       {/* Historical trend chart */}
-      {marketData && sortedQuarters.length > 0 && (
+      {marketData && chartQuarters.length > 0 && (
         <div className={styles.chartSection}>
-          <h3 className={styles.chartTitle}>Historical median sale price</h3>
+          <h3 className={styles.chartTitle}>
+            Historical median sale price
+            {comparisonMode && comparisonStartQuarter && comparisonEndQuarter && (
+              <span className={styles.chartSubtitle}>
+                {' '}({formatQuarterLabel(comparisonStartQuarter)} – {formatQuarterLabel(comparisonEndQuarter)})
+              </span>
+            )}
+          </h3>
           <TrendChart
             marketData={marketData}
             tractGeoid={tractGeoid}
-            quarters={sortedQuarters}
+            quarters={chartQuarters}
             highlightedQuarter={highlightedQuarter}
             onHighlightQuarter={setHighlightedQuarter}
             showExpandButton
