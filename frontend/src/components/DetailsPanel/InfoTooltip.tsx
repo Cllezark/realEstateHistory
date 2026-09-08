@@ -44,7 +44,7 @@ export function InfoTooltip({ label, children }: Props) {
         onFocus={show}
         onBlur={hide}
       >
-        ⓘ
+        i
       </span>
       {open && createPortal(
         <span

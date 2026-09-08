@@ -93,11 +93,21 @@
 
 .tooltipTrigger {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  border: 1px solid #888;
+  border-radius: 50%;
   cursor: help;
   font-style: normal;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
   color: #888;
-  margin-left: 2px;
+  vertical-align: middle;
 }
 
 .tooltipFloating {

@@ -250,7 +250,7 @@ export function TractDetails({
           {!record.suppressMedian && record.estimatedMonthlyPrincipalInterest != null && (
             <div className={styles.metricItem}>
               <dt>
-                Est. monthly P&amp;I
+                Est. monthly {'P&I'}
                 <InfoTooltip label="Estimated monthly principal and interest payment">
                   Based on median sale price and {metadata?.mortgageAssumptions?.downPaymentPercent ?? 20}% down payment.
                   {' '}{metadata?.mortgageAssumptions?.loanTermYears ?? 30}-year loan at the quarterly average 30-year fixed rate.
