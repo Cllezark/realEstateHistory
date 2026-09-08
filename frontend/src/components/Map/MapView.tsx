@@ -75,6 +75,14 @@ const BASEMAP_STYLE: maplibregl.StyleSpecification = {
   ],
 };
 
+/** Filter the tour-point layer down to folders the user has toggled on. */
+function myMapFolderFilter(visibility: MyMapLayerVisibility): maplibregl.FilterSpecification {
+  const folders = Object.entries(visibility.folderPoints)
+    .filter(([, visible]) => visible)
+    .map(([name]) => name);
+  return ['in', ['get', 'folder'], ['literal', folders]] as unknown as maplibregl.FilterSpecification;
+}
+
 function formatMetricValue(record: TractQuarterRecord, metric: MapMetric): string {
   const val = record[metric];
   if (val == null) return 'No data';
@@ -407,6 +415,7 @@ export function MapView({
             'circle-stroke-color': '#fff',
             'circle-opacity': 0.85,
           },
+          ...(myMapVisibility ? { filter: myMapFolderFilter(myMapVisibility) } : {}),
         });
       }
     }
@@ -501,7 +510,7 @@ export function MapView({
         map.getCanvas().style.cursor = '';
       });
     }
-  }, [myMapPoints, myMapPolygons, mapReady, onSelectMyMapPoint]);
+  }, [myMapPoints, myMapPolygons, mapReady, onSelectMyMapPoint, myMapVisibility]);
 
   // Update MyMap layer visibility based on toggle state
   useEffect(() => {
@@ -509,11 +518,12 @@ export function MapView({
     if (!map || !mapReady) return;
     if (!myMapVisibility) return;
 
-    // Point layer visibility
+    // Point layer visibility + per-folder filter (June / July / August tours)
     const ptLayer = map.getLayer('mymap-points-circle');
     if (ptLayer) {
       const show = !!(myMapVisibility.points && myMapPoints?.features?.length);
       map.setLayoutProperty('mymap-points-circle', 'visibility', show ? 'visible' : 'none');
+      map.setFilter('mymap-points-circle', myMapFolderFilter(myMapVisibility));
     }
 
     // Polygon layer visibility
