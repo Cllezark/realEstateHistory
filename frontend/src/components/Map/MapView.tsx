@@ -6,6 +6,7 @@ import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuar
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
 import { getTractRecord, formatCurrency, formatHpi, formatTractLabel } from '../../data/formatters';
 import styles from './MapView.module.css';
+import { TourPointModal, type TourPointNotes } from './TourPointModal';
 
 interface Props {
   geometry: TractGeoJSON | null;
@@ -143,6 +144,7 @@ export function MapView({
   const myMapEventsBoundRef = useRef(false);
   const [hoveredTract, setHoveredTract] = useState<HoveredTract | null>(null);
   const [hoveredMyMap, setHoveredMyMap] = useState<HoveredMyMap | null>(null);
+  const [notesPoint, setNotesPoint] = useState<TourPointNotes | null>(null);
 
   // Initialize map — defer to next frame to avoid WebGL context loss
   // caused by React StrictMode double-mounting in development
@@ -629,6 +631,42 @@ export function MapView({
     return () => { map.off('click', onMapClick); };
   }, [mapReady, onSelectMyMapPoint]);
 
+  // Right-click a tour point to read its notes in a centered modal
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const openNotes = (point: maplibregl.Point, nativeEvent?: Event) => {
+      if (!map.getLayer('mymap-points-circle')) return false;
+      const features = map.queryRenderedFeatures(point, { layers: ['mymap-points-circle'] });
+      if (features.length === 0) return false;
+      nativeEvent?.preventDefault();
+      const props = features[0].properties;
+      setNotesPoint({
+        title: (props?.title ?? '') as string,
+        description: (props?.description ?? '') as string,
+        folder: (props?.folder ?? '') as string,
+      });
+      return true;
+    };
+
+    const onMapContextMenu = (e: maplibregl.MapMouseEvent) => {
+      if (openNotes(e.point, e.originalEvent)) e.preventDefault();
+    };
+
+    const onNativeContextMenu = (ev: MouseEvent) => {
+      const rect = map.getCanvas().getBoundingClientRect();
+      openNotes(new maplibregl.Point(ev.clientX - rect.left, ev.clientY - rect.top), ev);
+    };
+
+    map.on('contextmenu', onMapContextMenu);
+    map.getCanvas().addEventListener('contextmenu', onNativeContextMenu);
+    return () => {
+      map.off('contextmenu', onMapContextMenu);
+      map.getCanvas().removeEventListener('contextmenu', onNativeContextMenu);
+    };
+  }, [mapReady, myMapPoints]);
+
   const tooltipValue = hoveredTract?.record
     ? formatMetricValue(hoveredTract.record, activeMetric)
     : null;
@@ -746,6 +784,9 @@ export function MapView({
             </>
           )}
         </div>
+      )}
+      {notesPoint && (
+        <TourPointModal point={notesPoint} onClose={() => setNotesPoint(null)} />
       )}
     </div>
   );
