@@ -1,7 +1,7 @@
 {
   "buildDate": "2026-08-27T21:29:44Z",
-  "sourceDescription": "Cliff & Sam's Slice of St. Pete — Google MyMap",
-  "totalPoints": 53,
+  "sourceDescription": "Cliff & Sam's Slice of St. Pete \u2014 Google MyMap",
+  "totalPoints": 51,
   "totalPolygons": 3,
   "folders": [
     {
@@ -19,7 +19,7 @@
     {
       "name": "June tours",
       "color": "#A52714",
-      "pointCount": 5,
+      "pointCount": 3,
       "polygonCount": 3
     }
   ]

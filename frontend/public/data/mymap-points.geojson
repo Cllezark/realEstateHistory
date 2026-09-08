@@ -468,7 +468,7 @@
       },
       "properties": {
         "title": "3036 20th St N",
-        "description": "2 car garage was the best room in the house. Sam loved the kitchen cabinets. Tiny rooms though, and an obvious flip. It was green though 💚 sellers are in la la land if they think that garage is enough to sell the property for more than $350/sqft. 3bed 2 bath $570,000 1,235 sqft https://www.zillow.com/homedetails/3036-20th-St-N-Saint-Petersburg-FL-33713/47059621_zpid/",
+        "description": "2 car garage was the best room in the house. Sam loved the kitchen cabinets. Tiny rooms though, and an obvious flip. It was green though \ud83d\udc9a sellers are in la la land if they think that garage is enough to sell the property for more than $350/sqft. 3bed 2 bath $570,000 1,235 sqft https://www.zillow.com/homedetails/3036-20th-St-N-Saint-Petersburg-FL-33713/47059621_zpid/",
         "folder": "July Tours",
         "folderColor": "#006064",
         "price": 350,
@@ -487,7 +487,7 @@
       },
       "properties": {
         "title": "6556 27th St N",
-        "description": "WOW It was CUTE and BIG except for ONE BEDROOM made for, presumably, GNOMES. Yard is terrifyingly big. House 💪, but Area 👎 $485K 1,636 sqft 3/2 https://www.zillow.com/homedetails/6556-27th-St-N-Saint-Petersburg-FL-33702/47277162_zpid/",
+        "description": "WOW It was CUTE and BIG except for ONE BEDROOM made for, presumably, GNOMES. Yard is terrifyingly big. House \ud83d\udcaa, but Area \ud83d\udc4e $485K 1,636 sqft 3/2 https://www.zillow.com/homedetails/6556-27th-St-N-Saint-Petersburg-FL-33702/47277162_zpid/",
         "folder": "July Tours",
         "folderColor": "#006064",
         "price": null,
@@ -968,44 +968,6 @@
         "price": 475000,
         "priceFormatted": "$475,000",
         "url": "https://www.zillow.com/homedetails/2237-14th-Ave-N-Saint-Petersburg-FL-33713/47077212_zpid/"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -82.7295371,
-          27.9328699
-        ]
-      },
-      "properties": {
-        "title": "Work",
-        "description": "",
-        "folder": "June tours",
-        "folderColor": "#880E4F",
-        "price": null,
-        "priceFormatted": null,
-        "url": null
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -82.7528418,
-          27.9744453
-        ]
-      },
-      "properties": {
-        "title": "Work",
-        "description": "",
-        "folder": "June tours",
-        "folderColor": "#880E4F",
-        "price": null,
-        "priceFormatted": null,
-        "url": null
       }
     }
   ]
