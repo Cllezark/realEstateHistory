@@ -3,6 +3,7 @@ import {
   formatCurrency,
   formatRate,
   formatHpi,
+  formatTractLabel,
   formatPercentageChange,
   parseQuarterId,
   formatQuarterLabel,
@@ -44,6 +45,19 @@ describe('formatHpi', () => {
   });
   it('returns "Not available" for null', () => {
     expect(formatHpi(null)).toBe('Not available');
+  });
+});
+
+describe('formatTractLabel', () => {
+  it('prefixes a bare tract number', () => {
+    expect(formatTractLabel('246.01')).toBe('Census Tract 246.01');
+  });
+  it('leaves an existing Census Tract prefix in place', () => {
+    expect(formatTractLabel('Census Tract 246.01')).toBe('Census Tract 246.01');
+  });
+  it('returns a generic label for empty input', () => {
+    expect(formatTractLabel(null)).toBe('Census Tract');
+    expect(formatTractLabel('')).toBe('Census Tract');
   });
 });
 

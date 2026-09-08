@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { TractQuarterIndex, TractQuarterRecord, Metadata, ParcelSalesIndex, ParcelSale } from '../../data/types';
 import {
   formatCurrency, formatRate, formatHpi, formatQuarterLabel, formatAreaSqft,
-  getTractRecord, getSortedQuarterIds, getEffectiveMedian,
+  formatTractLabel, getTractRecord, getSortedQuarterIds, getEffectiveMedian,
 } from '../../data/formatters';
 import styles from './TractDetails.module.css';
 import { TrendChart } from './TrendChart';
@@ -190,7 +190,7 @@ export function TractDetails({
   return (
     <div className={styles.panel}>
       <header className={styles.header}>
-        <h2 className={styles.tractName}>{tractName}</h2>
+        <h2 className={styles.tractName}>{formatTractLabel(tractName)}</h2>
         <span className={styles.geoid}>GEOID: {tractGeoid}</span>
       </header>
 

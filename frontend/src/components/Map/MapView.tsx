@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
 import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord, Metadata, MyMapPointsGeoJSON, MyMapPolygonsGeoJSON, MyMapMetadata, MyMapLayerVisibility } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
-import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
+import { getTractRecord, formatCurrency, formatHpi, formatTractLabel } from '../../data/formatters';
 import styles from './MapView.module.css';
 
 interface Props {
@@ -712,7 +712,7 @@ export function MapView({
       )}
       {!hoveredMyMap && hoveredTract && (
         <div className={styles.hoverTooltip}>
-          <div className={styles.tooltipName}>{hoveredTract.name}</div>
+          <div className={styles.tooltipName}>{formatTractLabel(hoveredTract.name)}</div>
           <div className={styles.tooltipGeoid}>GEOID: {hoveredTract.geoid}</div>
           {comparisonMode ? (
             <div className={styles.tooltipMetric}>

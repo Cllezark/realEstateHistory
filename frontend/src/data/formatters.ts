@@ -38,6 +38,14 @@ export function formatHpi(value: number | null): string {
   return `Index: ${value.toFixed(1)}`;
 }
 
+/** Prefix a tract identifier so it reads as "Census Tract 246.01". */
+export function formatTractLabel(name: string | null | undefined): string {
+  const trimmed = name?.trim() ?? '';
+  if (!trimmed) return 'Census Tract';
+  if (/^census tract\b/i.test(trimmed)) return trimmed;
+  return `Census Tract ${trimmed}`;
+}
+
 /** Format a percentage change (e.g., appreciation). */
 export function formatPercentageChange(value: number | null): string {
   if (value == null) return 'Not available';
