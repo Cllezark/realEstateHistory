@@ -455,11 +455,23 @@ export function TractDetails({
 
       {/* Disclosures footer */}
       <footer className={styles.disclosures}>
-        <p>Data: PCPAO, FHFA, FRED/Freddie Mac</p>
-        <p>2020 Census tract boundaries</p>
-        {metadata && (
-          <p>Coverage: {metadata.dateCoverageStart} – {metadata.dateCoverageEnd}</p>
-        )}
+        <p>
+          Data:{' '}
+          <a href="https://www.pcpao.org/" target="_blank" rel="noopener noreferrer">PCPAO</a>
+          {', '}
+          <a href="https://www.fhfa.gov/data/hpi" target="_blank" rel="noopener noreferrer">FHFA</a>
+          {', '}
+          <a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" rel="noopener noreferrer">FRED/Freddie Mac</a>
+        </p>
+        <p>
+          <a
+            href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            2020 Census tract boundaries
+          </a>
+        </p>
       </footer>
     </div>
   );

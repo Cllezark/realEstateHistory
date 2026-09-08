@@ -152,6 +152,15 @@
   margin: 2px 0;
 }
 
+.disclosures a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.disclosures a:hover {
+  color: #2b8cbe;
+}
+
 .salesControls {
   display: flex;
   gap: 8px;

@@ -278,7 +278,7 @@ export default function App() {
             </div>
             <div style={{ padding: '0.5rem 0.5rem 0', borderBottom: '1px solid #e0e0e0', fontSize: '0.8rem' }}>
               <label style={{ display: 'block', marginBottom: '3px', color: '#555', fontWeight: 500 }}>
-                Price filter (hatch tracts above):
+                Price filter:
               </label>
               <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                 <span style={{ color: '#555' }}>$</span>
