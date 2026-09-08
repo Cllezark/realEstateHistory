@@ -6,6 +6,7 @@ import {
 } from '../../data/formatters';
 import styles from './TractDetails.module.css';
 import { TrendChart } from './TrendChart';
+import { InfoTooltip } from './InfoTooltip';
 
 interface Props {
   tractGeoid: string | null;
@@ -250,15 +251,12 @@ export function TractDetails({
             <div className={styles.metricItem}>
               <dt>
                 Est. monthly P&amp;I
-                <span className={styles.tooltipTrigger} tabIndex={0} role="tooltip" aria-label="Estimated monthly principal and interest payment">
-                  ⓘ
-                  <span className={styles.tooltip}>
-                    Based on median sale price and {metadata?.mortgageAssumptions?.downPaymentPercent ?? 20}% down payment.
-                    {metadata?.mortgageAssumptions?.loanTermYears ?? 30}-year loan at the quarterly average 30-year fixed rate.
-                    Excludes taxes, insurance, HOA, PMI, closing costs, and maintenance.
-                    This is an estimate, not an observed borrower payment.
-                  </span>
-                </span>
+                <InfoTooltip label="Estimated monthly principal and interest payment">
+                  Based on median sale price and {metadata?.mortgageAssumptions?.downPaymentPercent ?? 20}% down payment.
+                  {' '}{metadata?.mortgageAssumptions?.loanTermYears ?? 30}-year loan at the quarterly average 30-year fixed rate.
+                  Excludes taxes, insurance, HOA, PMI, closing costs, and maintenance.
+                  This is an estimate, not an observed borrower payment.
+                </InfoTooltip>
               </dt>
               <dd>{formatCurrency(record.estimatedMonthlyPrincipalInterest)}</dd>
             </div>

@@ -100,11 +100,9 @@
   margin-left: 2px;
 }
 
-.tooltipTrigger .tooltip {
-  display: none;
-  position: absolute;
-  right: 0;
-  bottom: 100%;
+.tooltipFloating {
+  position: fixed;
+  transform: translate(-100%, calc(-100% - 8px));
   width: 260px;
   background: #333;
   color: #fff;
@@ -112,14 +110,11 @@
   padding: 8px 10px;
   border-radius: 4px;
   line-height: 1.4;
-  z-index: 20;
+  z-index: 10000;
   font-weight: 400;
   text-align: left;
-}
-
-.tooltipTrigger:hover .tooltip,
-.tooltipTrigger:focus .tooltip {
-  display: block;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .chartSection {
