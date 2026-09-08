@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import type { TractQuarterIndex, TractQuarterRecord, Metadata, ParcelSalesIndex, ParcelSale } from '../../data/types';
 import {
   formatCurrency, formatRate, formatHpi, formatQuarterLabel, formatAreaSqft,
-  getTractRecord, getSortedQuarterIds, getEffectiveMedian,
+  formatTractLabel, getTractRecord, getSortedQuarterIds, getEffectiveMedian,
 } from '../../data/formatters';
 import styles from './TractDetails.module.css';
 import { TrendChart } from './TrendChart';
+import { InfoTooltip } from './InfoTooltip';
 
 interface Props {
   tractGeoid: string | null;
@@ -15,6 +16,9 @@ interface Props {
   metadata: Metadata | null;
   parcelSales: ParcelSalesIndex | null;
   onSaleClick?: (sale: ParcelSale) => void;
+  comparisonMode?: boolean;
+  comparisonStartQuarter?: string | null;
+  comparisonEndQuarter?: string | null;
 }
 
 type SortField = 'price' | 'date';
@@ -81,6 +85,9 @@ export function TractDetails({
   metadata,
   parcelSales,
   onSaleClick,
+  comparisonMode,
+  comparisonStartQuarter,
+  comparisonEndQuarter,
 }: Props) {
   const [highlightedQuarter, setHighlightedQuarter] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('price');
@@ -138,6 +145,19 @@ export function TractDetails({
     return getSortedQuarterIds(marketData);
   }, [marketData]);
 
+  // In appreciation (comparison) mode, zoom the chart's viewport to the
+  // quarters spanning the comparison range instead of the full history.
+  const chartQuarters = useMemo(() => {
+    if (!comparisonMode || !comparisonStartQuarter || !comparisonEndQuarter) {
+      return sortedQuarters;
+    }
+    const startIdx = sortedQuarters.indexOf(comparisonStartQuarter);
+    const endIdx = sortedQuarters.indexOf(comparisonEndQuarter);
+    if (startIdx === -1 || endIdx === -1) return sortedQuarters;
+    const [lo, hi] = startIdx <= endIdx ? [startIdx, endIdx] : [endIdx, startIdx];
+    return sortedQuarters.slice(lo, hi + 1);
+  }, [sortedQuarters, comparisonMode, comparisonStartQuarter, comparisonEndQuarter]);
+
   // No tract selected: show instructions
   if (!tractGeoid || !tractName) {
     return (
@@ -171,7 +191,7 @@ export function TractDetails({
   return (
     <div className={styles.panel}>
       <header className={styles.header}>
-        <h2 className={styles.tractName}>{tractName}</h2>
+        <h2 className={styles.tractName}>{formatTractLabel(tractName)}</h2>
         <span className={styles.geoid}>GEOID: {tractGeoid}</span>
       </header>
 
@@ -230,16 +250,13 @@ export function TractDetails({
           {!record.suppressMedian && record.estimatedMonthlyPrincipalInterest != null && (
             <div className={styles.metricItem}>
               <dt>
-                Est. monthly P&amp;I
-                <span className={styles.tooltipTrigger} tabIndex={0} role="tooltip" aria-label="Estimated monthly principal and interest payment">
-                  ⓘ
-                  <span className={styles.tooltip}>
-                    Based on median sale price and {metadata?.mortgageAssumptions?.downPaymentPercent ?? 20}% down payment.
-                    {metadata?.mortgageAssumptions?.loanTermYears ?? 30}-year loan at the quarterly average 30-year fixed rate.
-                    Excludes taxes, insurance, HOA, PMI, closing costs, and maintenance.
-                    This is an estimate, not an observed borrower payment.
-                  </span>
-                </span>
+                Est. monthly {'P&I'}
+                <InfoTooltip label="Estimated monthly principal and interest payment">
+                  Based on median sale price and {metadata?.mortgageAssumptions?.downPaymentPercent ?? 20}% down payment.
+                  {' '}{metadata?.mortgageAssumptions?.loanTermYears ?? 30}-year loan at the quarterly average 30-year fixed rate.
+                  Excludes taxes, insurance, HOA, PMI, closing costs, and maintenance.
+                  This is an estimate, not an observed borrower payment.
+                </InfoTooltip>
               </dt>
               <dd>{formatCurrency(record.estimatedMonthlyPrincipalInterest)}</dd>
             </div>
@@ -260,13 +277,20 @@ export function TractDetails({
       )}
 
       {/* Historical trend chart */}
-      {marketData && sortedQuarters.length > 0 && (
+      {marketData && chartQuarters.length > 0 && (
         <div className={styles.chartSection}>
-          <h3 className={styles.chartTitle}>Historical median sale price</h3>
+          <h3 className={styles.chartTitle}>
+            Historical median sale price
+            {comparisonMode && comparisonStartQuarter && comparisonEndQuarter && (
+              <span className={styles.chartSubtitle}>
+                {' '}({formatQuarterLabel(comparisonStartQuarter)} – {formatQuarterLabel(comparisonEndQuarter)})
+              </span>
+            )}
+          </h3>
           <TrendChart
             marketData={marketData}
             tractGeoid={tractGeoid}
-            quarters={sortedQuarters}
+            quarters={chartQuarters}
             highlightedQuarter={highlightedQuarter}
             onHighlightQuarter={setHighlightedQuarter}
             showExpandButton
@@ -429,11 +453,23 @@ export function TractDetails({
 
       {/* Disclosures footer */}
       <footer className={styles.disclosures}>
-        <p>Data: PCPAO, FHFA, FRED/Freddie Mac</p>
-        <p>2020 Census tract boundaries</p>
-        {metadata && (
-          <p>Coverage: {metadata.dateCoverageStart} – {metadata.dateCoverageEnd}</p>
-        )}
+        <p>
+          Data:{' '}
+          <a href="https://www.pcpao.org/" target="_blank" rel="noopener noreferrer">PCPAO</a>
+          {', '}
+          <a href="https://www.fhfa.gov/data/hpi" target="_blank" rel="noopener noreferrer">FHFA</a>
+          {', '}
+          <a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" rel="noopener noreferrer">FRED/Freddie Mac</a>
+        </p>
+        <p>
+          <a
+            href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            2020 Census tract boundaries
+          </a>
+        </p>
       </footer>
     </div>
   );

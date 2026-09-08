@@ -50,6 +50,11 @@ SAMPLE_KML = """<?xml version="1.0" encoding="UTF-8"?>
         <Point><coordinates>-82.66,27.76,0</coordinates></Point>
       </Placemark>
       <Placemark>
+        <name>Depot</name>
+        <styleUrl>#icon-1899-880E4F-nodesc-normal</styleUrl>
+        <Point><coordinates>-82.65,27.75,0</coordinates></Point>
+      </Placemark>
+      <Placemark>
         <name>Where we spend our time</name>
         <styleUrl>#poly-F57C00-1200-77-nodesc-normal</styleUrl>
         <Polygon>
@@ -101,7 +106,8 @@ class TestParseAndSerialize:
 
         by_title = {p.title: p for p in points}
         assert by_title["512 61st St S"].color == "#9C27B0"
-        assert by_title["Work"].color == "#880E4F"
+        assert by_title["Depot"].color == "#880E4F"
+        assert "Work" not in by_title
         assert len(polygons) == 1
 
         # Folder representative color = most common point color
@@ -115,4 +121,5 @@ class TestParseAndSerialize:
 
         props = {f["properties"]["title"]: f["properties"] for f in geojson["features"]}
         assert props["512 61st St S"]["folderColor"] == "#9C27B0"
-        assert props["Work"]["folderColor"] == "#880E4F"
+        assert props["Depot"]["folderColor"] == "#880E4F"
+        assert "Work" not in props

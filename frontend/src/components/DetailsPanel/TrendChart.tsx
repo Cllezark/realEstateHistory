@@ -259,9 +259,7 @@ export function TrendChart({
               <em style={{ marginLeft: 4, color: '#888' }}>(partial)</em>
             )}
           </>
-        ) : (
-          <span style={{ color: '#aaa' }}>Hover chart to see values, click dots to highlight</span>
-        )}
+        ) : null}
       </div>
     </div>
   );

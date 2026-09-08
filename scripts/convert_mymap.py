@@ -50,6 +50,9 @@ POLYGON_COLORS = {
     "Work": "#756bb1",
 }
 
+# Personal-map markers we never want on the dashboard (office pins, etc.).
+SKIP_POINT_TITLES = {"Work"}
+
 KML_NS = "http://www.opengis.net/kml/2.2"
 NS = {"kml": KML_NS}
 
@@ -229,6 +232,8 @@ def parse_kml(kml_text: str) -> tuple[list[PointFeature], list[PolygonFeature], 
 
             # Determine geometry type
             if pm.find("kml:Point", NS) is not None:
+                if pm_name.strip() in SKIP_POINT_TITLES:
+                    continue
                 coord_el = pm.find(".//kml:coordinates", NS)
                 coords = _parse_coordinates(coord_el.text) if coord_el is not None and coord_el.text else []
                 if coords:

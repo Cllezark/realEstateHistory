@@ -4,8 +4,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { FeatureCollection } from 'geojson';
 import type { TractGeoJSON, TractQuarterIndex, MapMetric, LegendBreak, TractQuarterRecord, Metadata, MyMapPointsGeoJSON, MyMapPolygonsGeoJSON, MyMapMetadata, MyMapLayerVisibility } from '../../data/types';
 import { getTractColor, MISSING_COLOR, getMetricLabel } from '../../data/classification';
-import { getTractRecord, formatCurrency, formatHpi } from '../../data/formatters';
+import { getTractRecord, formatCurrency, formatHpi, formatTractLabel } from '../../data/formatters';
 import styles from './MapView.module.css';
+import { TourPointModal, type TourPointNotes } from './TourPointModal';
 
 interface Props {
   geometry: TractGeoJSON | null;
@@ -75,6 +76,14 @@ const BASEMAP_STYLE: maplibregl.StyleSpecification = {
   ],
 };
 
+/** Filter the tour-point layer down to folders the user has toggled on. */
+function myMapFolderFilter(visibility: MyMapLayerVisibility): maplibregl.FilterSpecification {
+  const folders = Object.entries(visibility.folderPoints)
+    .filter(([, visible]) => visible)
+    .map(([name]) => name);
+  return ['in', ['get', 'folder'], ['literal', folders]] as unknown as maplibregl.FilterSpecification;
+}
+
 function formatMetricValue(record: TractQuarterRecord, metric: MapMetric): string {
   const val = record[metric];
   if (val == null) return 'No data';
@@ -135,6 +144,7 @@ export function MapView({
   const myMapEventsBoundRef = useRef(false);
   const [hoveredTract, setHoveredTract] = useState<HoveredTract | null>(null);
   const [hoveredMyMap, setHoveredMyMap] = useState<HoveredMyMap | null>(null);
+  const [notesPoint, setNotesPoint] = useState<TourPointNotes | null>(null);
 
   // Initialize map — defer to next frame to avoid WebGL context loss
   // caused by React StrictMode double-mounting in development
@@ -407,6 +417,7 @@ export function MapView({
             'circle-stroke-color': '#fff',
             'circle-opacity': 0.85,
           },
+          ...(myMapVisibility ? { filter: myMapFolderFilter(myMapVisibility) } : {}),
         });
       }
     }
@@ -501,7 +512,7 @@ export function MapView({
         map.getCanvas().style.cursor = '';
       });
     }
-  }, [myMapPoints, myMapPolygons, mapReady, onSelectMyMapPoint]);
+  }, [myMapPoints, myMapPolygons, mapReady, onSelectMyMapPoint, myMapVisibility]);
 
   // Update MyMap layer visibility based on toggle state
   useEffect(() => {
@@ -509,11 +520,12 @@ export function MapView({
     if (!map || !mapReady) return;
     if (!myMapVisibility) return;
 
-    // Point layer visibility
+    // Point layer visibility + per-folder filter (June / July / August tours)
     const ptLayer = map.getLayer('mymap-points-circle');
     if (ptLayer) {
       const show = !!(myMapVisibility.points && myMapPoints?.features?.length);
       map.setLayoutProperty('mymap-points-circle', 'visibility', show ? 'visible' : 'none');
+      map.setFilter('mymap-points-circle', myMapFolderFilter(myMapVisibility));
     }
 
     // Polygon layer visibility
@@ -619,6 +631,42 @@ export function MapView({
     return () => { map.off('click', onMapClick); };
   }, [mapReady, onSelectMyMapPoint]);
 
+  // Right-click a tour point to read its notes in a centered modal
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const openNotes = (point: maplibregl.Point, nativeEvent?: Event) => {
+      if (!map.getLayer('mymap-points-circle')) return false;
+      const features = map.queryRenderedFeatures(point, { layers: ['mymap-points-circle'] });
+      if (features.length === 0) return false;
+      nativeEvent?.preventDefault();
+      const props = features[0].properties;
+      setNotesPoint({
+        title: (props?.title ?? '') as string,
+        description: (props?.description ?? '') as string,
+        folder: (props?.folder ?? '') as string,
+      });
+      return true;
+    };
+
+    const onMapContextMenu = (e: maplibregl.MapMouseEvent) => {
+      if (openNotes(e.point, e.originalEvent)) e.preventDefault();
+    };
+
+    const onNativeContextMenu = (ev: MouseEvent) => {
+      const rect = map.getCanvas().getBoundingClientRect();
+      openNotes(new maplibregl.Point(ev.clientX - rect.left, ev.clientY - rect.top), ev);
+    };
+
+    map.on('contextmenu', onMapContextMenu);
+    map.getCanvas().addEventListener('contextmenu', onNativeContextMenu);
+    return () => {
+      map.off('contextmenu', onMapContextMenu);
+      map.getCanvas().removeEventListener('contextmenu', onNativeContextMenu);
+    };
+  }, [mapReady, myMapPoints]);
+
   const tooltipValue = hoveredTract?.record
     ? formatMetricValue(hoveredTract.record, activeMetric)
     : null;
@@ -712,7 +760,7 @@ export function MapView({
       )}
       {!hoveredMyMap && hoveredTract && (
         <div className={styles.hoverTooltip}>
-          <div className={styles.tooltipName}>{hoveredTract.name}</div>
+          <div className={styles.tooltipName}>{formatTractLabel(hoveredTract.name)}</div>
           <div className={styles.tooltipGeoid}>GEOID: {hoveredTract.geoid}</div>
           {comparisonMode ? (
             <div className={styles.tooltipMetric}>
@@ -736,6 +784,9 @@ export function MapView({
             </>
           )}
         </div>
+      )}
+      {notesPoint && (
+        <TourPointModal point={notesPoint} onClose={() => setNotesPoint(null)} />
       )}
     </div>
   );

@@ -57,6 +57,9 @@ const POLYGON_COLORS: Record<string, string> = {
   'Work': '#756bb1',
 };
 
+/** Personal-map markers we never want on the dashboard (office pins, etc.). */
+const SKIP_POINT_TITLES = new Set(['Work']);
+
 function parseCoordinates(text: string): [number, number][] {
   const pairs: [number, number][] = [];
   for (const token of text.trim().split(/\s+/)) {
@@ -186,6 +189,7 @@ export function parseMyMapKml(kmlText: string): {
         const polygonEl = pm.querySelector('Polygon');
 
         if (pointEl) {
+          if (SKIP_POINT_TITLES.has(pmName.trim())) return;
           const coordEl = pointEl.querySelector('coordinates');
           const coords = coordEl?.textContent ? parseCoordinates(coordEl.textContent) : [];
           if (coords.length > 0) {
