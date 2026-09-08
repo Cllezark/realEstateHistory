@@ -46,7 +46,7 @@ export function MyMapLayerToggles({
   if (!metadata) return null;
 
   return (
-    <div className={styles.toggles} role="complementary" aria-label="MyMap layer toggles">
+    <div className={styles.toggles} role="complementary" aria-label="Layers">
       <div
         className={styles.togglesTitle}
         onClick={() => setExpanded(e => !e)}
@@ -56,7 +56,7 @@ export function MyMapLayerToggles({
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(e => !e); }}
         aria-expanded={expanded}
       >
-        {expanded ? '▼' : '▶'} MyMap Layers
+        {expanded ? '▼' : '▶'} Layers
       </div>
 
       {expanded && (
