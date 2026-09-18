@@ -12,6 +12,7 @@ import { MetricSelector } from './components/MetricSelector/MetricSelector';
 import { useMapData } from './hooks/useMapData';
 import { useMyMapData } from './hooks/useMyMapData';
 import { useAppState } from './hooks/useAppState';
+import { useMediaQuery } from './hooks/useMediaQuery';
 import {
   calculateQuantileBreaks,
   calculateMedianPriceBreaks,
@@ -39,10 +40,23 @@ export default function App() {
     disableComparison,
   } = useAppState(metadata?.dateCoverageEnd ?? '');
 
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom?: number } | null>(null);
   const [myMapRefreshStatus, setMyMapRefreshStatus] = useState<string | null>(null);
   const [selectedMyMapPoint, setSelectedMyMapPoint] = useState<HoveredMyMap | null>(null);
+
+  const handleSelectTract = useCallback((tract: string | null) => {
+    setSelectedTract(tract);
+    if (isMobile) setDetailsOpen(!!tract);
+  }, [isMobile, setSelectedTract]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    if (state.selectedTract) setDetailsOpen(true);
+    else setDetailsOpen(false);
+  }, [isMobile, state.selectedTract]);
 
   const handleMyMapRefresh = useCallback(() => {
     const url = window.prompt(
@@ -226,6 +240,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AppShell
+        detailsOpen={detailsOpen}
+        onDetailsOpenChange={setDetailsOpen}
+        isMobile={isMobile}
         mapPanel={
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <MapView
@@ -239,7 +256,7 @@ export default function App() {
               comparisonMode={state.comparisonMode}
               comparisonColors={comparisonColors}
               appreciationMap={appreciationMap}
-              onSelectTract={setSelectedTract}
+              onSelectTract={handleSelectTract}
               priceFilterThreshold={state.priceFilterThreshold}
               flyToTarget={flyToTarget}
               myMapPoints={myMapData.points}

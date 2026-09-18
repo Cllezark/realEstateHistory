@@ -14,21 +14,111 @@
   display: flex;
   flex: 1;
   min-height: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .mapPanel {
   flex: 1;
   min-width: 0;
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
 .detailsPanel {
   width: 320px;
   min-width: 280px;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   border-left: 1px solid #ddd;
   background: #fff;
   padding: 0;
+}
+
+.detailsBody {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile-only chrome is not mounted on desktop (see AppShell isMobile). */
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 0 4px 0 12px;
+  min-height: 48px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+.drawerTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #555;
+  cursor: pointer;
+}
+
+.closeBtn:hover {
+  color: #222;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 19;
+}
+
+.handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 22;
+  width: 40px;
+  min-height: 72px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.12);
+  color: #333;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  /* Transform-only: animating `right` reflows the map and makes MapLibre pan tiles. */
+  transition: transform 0.25s ease;
+}
+
+.handleOpen {
+  transform: translate(-90vw, -50%);
 }
 
 .timelineArea {
@@ -40,22 +130,43 @@
   align-items: center;
 }
 
-/* Small screens: stack */
+/* Small screens: full-height map with a 90vw overlay drawer */
 @media (max-width: 768px) {
-  .mainArea {
-    flex-direction: column;
+  .shell {
+    height: 100vh;
+    height: 100dvh;
   }
+
   .mapPanel {
-    flex: none;
-    height: 50vh;
-  }
-  .detailsPanel {
-    width: 100%;
-    min-width: 0;
     flex: 1;
-    border-left: none;
-    border-top: 1px solid #ddd;
+    width: 100%;
+    min-height: 0;
   }
+
+  .detailsPanel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 90vw;
+    max-width: 90vw;
+    min-width: 0;
+    z-index: 20;
+    transform: translate3d(100%, 0, 0);
+    visibility: hidden;
+    pointer-events: none;
+    border-left: 1px solid #ddd;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+    transition: transform 0.25s ease, visibility 0s 0.25s;
+  }
+
+  .detailsPanel.open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.25s ease, visibility 0s;
+  }
+
   .timelineArea {
     height: 72px;
   }
